@@ -7,5 +7,7 @@ namespace RPD_API.Models
         [Key]
         public Guid egID { get; set; }
         public string egName { get; set; }
+
+        public ICollection<PokemonEggGroup> PokemonEggGroup { get; set; }
     }
 }

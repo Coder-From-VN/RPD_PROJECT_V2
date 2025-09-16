@@ -1,12 +1,15 @@
-﻿namespace RPD_API.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace RPD_API.Models
 {
     public class EffortValues
     {
-        public Guid pokeID { get; set; }
-        public Guid stID { get; set; }
+        [Key]
+        public Guid evID { get; set; }
+        public string evStatName { get; set; }
         public int eValues { get; set; }
 
-        public Pokemons pokemon { get; set; }
-        public StatType statType { get; set; }
+        public Guid pokeID { get; set; }
+        public Pokemons Pokemons { get; set; }
     }
 }

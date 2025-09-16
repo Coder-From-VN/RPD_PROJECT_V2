@@ -9,6 +9,6 @@
         public int MaxValue { get; set; }
 
         public Pokemons Pokemons { get; set; }
-        public StatType Type { get; set; }
+        public StatType StatType { get; set; }
     }
 }
