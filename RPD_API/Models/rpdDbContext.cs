@@ -53,14 +53,18 @@ namespace RPD_API.Models
                 .HasForeignKey(p => p.pokeID);
             //One Pokémon can evolve into many others
             modelBuilder.Entity<EvolutionChart>()
+                .HasKey(ec => new { ec.pokeID, ec.prePokeID });
+
+            modelBuilder.Entity<EvolutionChart>()
                 .HasOne(ec => ec.Pokemons)
                 .WithMany(p => p.EvolutionChart)
-                .HasForeignKey(p => p.pokeID);
-            //One evolved Pokémon can have multiple pre-evolutions
+                .HasForeignKey(ec => ec.pokeID)
+                .OnDelete(DeleteBehavior.NoAction);
             modelBuilder.Entity<EvolutionChart>()
                 .HasOne(ec => ec.PrePokemons)
                 .WithMany(p => p.PreEvolutionChart)
-                .HasForeignKey(p => p.prePokeID);
+                .HasForeignKey(ec => ec.prePokeID)
+                .OnDelete(DeleteBehavior.NoAction);
             //Pokemon many to many Abilities join table PokemonAbilities
             // set FK
             modelBuilder.Entity<PokemonAbilities>()
@@ -86,7 +90,7 @@ namespace RPD_API.Models
                 .HasOne(pe => pe.EggGroup)
                 .WithMany(eg => eg.PokemonEggGroup)
                 .HasForeignKey(pe => pe.egID);
-            //Pokemon many to mnay Stats
+            //Pokemon many to many Stats
             modelBuilder.Entity<PokemonStats>()
                 .HasKey(ps => new { ps.pokeID, ps.stID });
             modelBuilder.Entity<PokemonStats>()
@@ -130,6 +134,7 @@ namespace RPD_API.Models
                 .HasOne(pm => pm.Move)
                 .WithMany(m => m.PokemonMove)
                 .HasForeignKey(pm => pm.moveID);
+
         }
 
     }

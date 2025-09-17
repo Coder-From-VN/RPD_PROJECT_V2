@@ -1,10 +1,12 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace RPD_API.Models
 {
     public class Move
     {
         [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid moveID { get; set; }
         public string moveName { get; set; }
         public string moveDamageClass { get; set; }

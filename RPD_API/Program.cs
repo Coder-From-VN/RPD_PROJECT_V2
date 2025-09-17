@@ -1,3 +1,6 @@
+using RPD_API.Models;
+using Microsoft.EntityFrameworkCore;
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -6,6 +9,11 @@ builder.Services.AddControllers();
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+
+builder.Services.AddDbContext<rpdDbContext>(op =>
+{
+    op.UseSqlServer(builder.Configuration.GetConnectionString("RPD_API_DB_CS"));
+});
 
 var app = builder.Build();
 

@@ -8,13 +8,9 @@ namespace RPD_API.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid pokeID { get; set; }
-        [Required]
         public int pokeNationalNumber { get; set; }
-        [Required, MaxLength(100)]
         public string pokeName { get; set; }
-        [Required, MaxLength(500)]
         public string pokeDescription { get; set; }
-        [Required, MaxLength(100)]
         public string pokeSpecies { get; set; }
         public decimal pokeHeight { get; set; }
         public decimal pokeWidth { get; set; }
