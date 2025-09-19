@@ -53,7 +53,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{growthRateID}")]
-        public async Task<IActionResult> UpdateBook(Guid growthRateID, [FromBody] GrowthRateDTO model)
+        public async Task<IActionResult> UpdateGrowthRate(Guid growthRateID, [FromBody] GrowthRateDTO model)
         {
             if (growthRateID != model.growthRateID)
             {
@@ -64,7 +64,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpDelete("{growthRateID}")]
-        public async Task<IActionResult> DeleteBook([FromRoute] Guid growthRateID)
+        public async Task<IActionResult> DeleteGrowthRate([FromRoute] Guid growthRateID)
         {
             await _grRepo.DeleteGrowthRate(growthRateID);
             return Ok();

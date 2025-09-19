@@ -11,6 +11,9 @@ namespace RPD_API.Helper
             CreateMap<GrowthRate, GrowthRateDTO>();
             CreateMap<GrowthRateDTO, GrowthRate>();
 
+            CreateMap<Models.Type, TypeDTO>();
+            CreateMap<TypeDTO, Models.Type>();
+
         }
     }
 }
