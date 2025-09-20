@@ -14,6 +14,9 @@ namespace RPD_API.Helper
             CreateMap<Models.Type, TypeDTO>();
             CreateMap<TypeDTO, Models.Type>();
 
+            CreateMap<StatType, StatTypeDTO>();
+            CreateMap<StatTypeDTO, StatType>();
+
         }
     }
 }
