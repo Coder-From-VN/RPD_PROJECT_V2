@@ -19,6 +19,7 @@ builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 builder.Services.AddScoped<IGrowthRateRepo, GrowthRateRepo>();
 builder.Services.AddScoped<ITypeRepo, TypeRepo>();
 builder.Services.AddScoped<IStatTypeRepo, StatTypeRepo>();
+builder.Services.AddScoped<IAbilitiesRepo, AbilitiesRepo>();
 //dependeci injection
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

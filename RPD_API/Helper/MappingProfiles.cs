@@ -17,6 +17,9 @@ namespace RPD_API.Helper
             CreateMap<StatType, StatTypeDTO>();
             CreateMap<StatTypeDTO, StatType>();
 
+            CreateMap<Abilities, AbilitiesDTO>();
+            CreateMap<AbilitiesDTO, Abilities>();
+
         }
     }
 }
