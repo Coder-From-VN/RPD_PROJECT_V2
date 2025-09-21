@@ -20,6 +20,9 @@ namespace RPD_API.Helper
             CreateMap<Abilities, AbilitiesDTO>();
             CreateMap<AbilitiesDTO, Abilities>();
 
+            CreateMap<EggGroup, EggGroupDTO>();
+            CreateMap<EggGroupDTO, EggGroup>();
+
         }
     }
 }
