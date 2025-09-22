@@ -23,6 +23,15 @@ namespace RPD_API.Helper
             CreateMap<EggGroup, EggGroupDTO>();
             CreateMap<EggGroupDTO, EggGroup>();
 
+            CreateMap<EffortValues, EffortValuesDTO>();
+            CreateMap<EffortValuesDTO, EffortValues>();
+
+            CreateMap<GameVersion, GameVersionDTO>();
+            CreateMap<GameVersionDTO, GameVersion>();
+
+            CreateMap<ImageLink, ImageLinkDTO>();
+            CreateMap<ImageLinkDTO, ImageLink>();
+
         }
     }
 }
