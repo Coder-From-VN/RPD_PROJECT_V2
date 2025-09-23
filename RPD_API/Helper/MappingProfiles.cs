@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using RPD_API.DTO;
+using RPD_API.DTO.Move;
 using RPD_API.Models;
 
 namespace RPD_API.Helper
@@ -31,6 +32,11 @@ namespace RPD_API.Helper
 
             CreateMap<ImageLink, ImageLinkDTO>();
             CreateMap<ImageLinkDTO, ImageLink>();
+
+            CreateMap<MoveDTO, Move>();
+            CreateMap<Move, MoveDTO>()
+            .ForMember(dest => dest.TypeName,
+                       opt => opt.MapFrom(src => src.Type.typeName));
 
         }
     }
