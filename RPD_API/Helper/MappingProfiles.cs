@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using RPD_API.DTO;
 using RPD_API.DTO.Abilities;
+using RPD_API.DTO.EffortValues;
 using RPD_API.DTO.Move;
 using RPD_API.Models;
 
@@ -28,6 +29,7 @@ namespace RPD_API.Helper
 
             CreateMap<EffortValues, EffortValuesDTO>();
             CreateMap<EffortValuesDTO, EffortValues>();
+            CreateMap<PostEffortValuesDTO, EffortValues>();
 
             CreateMap<GameVersion, GameVersionDTO>();
             CreateMap<GameVersionDTO, GameVersion>();

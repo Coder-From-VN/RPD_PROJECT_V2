@@ -1,4 +1,4 @@
-﻿using RPD_API.DTO;
+﻿using RPD_API.DTO.EffortValues;
 
 namespace RPD_API.Repo.IRepo
 {

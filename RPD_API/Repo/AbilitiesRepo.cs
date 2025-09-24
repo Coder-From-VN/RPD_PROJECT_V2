@@ -19,7 +19,7 @@ namespace RPD_API.Repo
 
         public async Task<(bool, AbilitiesDTO)> PostAbilities(PostAbilitiesDTO model)
         {
-            var checkName = await _context.Abilities!.FindAsync(model.abName);
+            var checkName = await _context.Abilities!.SingleOrDefaultAsync(ab => ab.abName == model.abName);
             if (checkName == null)
             {
                 var newAbilities = _mapper.Map<Abilities>(model);
