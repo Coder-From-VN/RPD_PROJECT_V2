@@ -1,8 +1,7 @@
-﻿namespace RPD_API.DTO
+﻿namespace RPD_API.DTO.Abilities
 {
-    public class AbilitiesDTO
+    public class PostAbilitiesDTO
     {
-        public Guid abID { get; set; }
         public string abName { get; set; }
         public string abDescription { get; set; }
         public string abEffect { get; set; }

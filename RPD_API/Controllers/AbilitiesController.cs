@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using RPD_API.DTO;
-using RPD_API.Repo;
+﻿using Microsoft.AspNetCore.Mvc;
+using RPD_API.DTO.Abilities;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Controllers
@@ -38,13 +36,13 @@ namespace RPD_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostType(AbilitiesDTO model)
+        public async Task<IActionResult> PostAbilities(PostAbilitiesDTO model)
         {
             try
             {
-                var newAbID = await _abRepo.AddAbilities(model);
-                var Abilities = await _abRepo.GetAbilitiesById(newAbID);
-                return Abilities == null ? NotFound() : Ok(Abilities);
+                var newAbID = await _abRepo.PostAbilities(model);
+
+                return newAbID.Item2 == null ? NotFound() : Ok(newAbID.Item2);
             }
             catch
             {
@@ -53,18 +51,18 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{abID}")]
-        public async Task<IActionResult> UpdateType(Guid abID, [FromBody] AbilitiesDTO model)
+        public async Task<IActionResult> PutAbilities(Guid abID, [FromBody] AbilitiesDTO model)
         {
             if (abID != model.abID)
             {
                 return NotFound();
             }
-            await _abRepo.UpdateAbilities(abID, model);
+            await _abRepo.PutAbilities(abID, model);
             return Ok();
         }
 
         [HttpDelete("{abID}")]
-        public async Task<IActionResult> DeleteType([FromRoute] Guid abID)
+        public async Task<IActionResult> DeleteAbilities([FromRoute] Guid abID)
         {
             await _abRepo.DeleteAbilities(abID);
             return Ok();

@@ -1,4 +1,5 @@
-﻿using RPD_API.DTO;
+﻿using RPD_API.DTO.Abilities;
+using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
@@ -6,8 +7,8 @@ namespace RPD_API.Repo.IRepo
     {
         public Task<List<AbilitiesDTO>> GetAllAbilities();
         public Task<AbilitiesDTO> GetAbilitiesById(Guid abID);
-        public Task<Guid> AddAbilities(AbilitiesDTO model);
-        public Task UpdateAbilities(Guid abID, AbilitiesDTO model);
-        public Task DeleteAbilities(Guid abID);
+        public Task<(bool, AbilitiesDTO)> PostAbilities(PostAbilitiesDTO model);
+        public Task<bool> PutAbilities(Guid abID, AbilitiesDTO model);
+        public Task<bool> DeleteAbilities(Guid abID);
     }
 }

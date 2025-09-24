@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using RPD_API.DTO;
+using RPD_API.DTO.Abilities;
 using RPD_API.DTO.Move;
 using RPD_API.Models;
 
@@ -20,6 +21,7 @@ namespace RPD_API.Helper
 
             CreateMap<Abilities, AbilitiesDTO>();
             CreateMap<AbilitiesDTO, Abilities>();
+            CreateMap<PostAbilitiesDTO, Abilities>();
 
             CreateMap<EggGroup, EggGroupDTO>();
             CreateMap<EggGroupDTO, EggGroup>();

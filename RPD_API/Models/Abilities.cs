@@ -11,7 +11,6 @@ namespace RPD_API.Models
         public string abName { get; set; }
         public string abDescription { get; set; }
         public string abEffect { get; set; }
-
         public ICollection<PokemonAbilities> PokemonAbilities { get; set; }
     }
 }

@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
+using RPD_API.DTO.Abilities;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 
@@ -17,23 +17,30 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<Guid> AddAbilities(AbilitiesDTO model)
+        public async Task<(bool, AbilitiesDTO)> PostAbilities(PostAbilitiesDTO model)
         {
-            var newAbilities = _mapper.Map<Abilities>(model);
-            _context.Abilities!.Add(newAbilities);
-            await _context.SaveChangesAsync();
+            var checkName = await _context.Abilities!.FindAsync(model.abName);
+            if (checkName == null)
+            {
+                var newAbilities = _mapper.Map<Abilities>(model);
+                _context.Abilities!.Add(newAbilities);
+                await _context.SaveChangesAsync();
 
-            return newAbilities.abID;
+                return (true, _mapper.Map<AbilitiesDTO>(newAbilities));
+            }
+            return (false, null);
         }
 
-        public async Task DeleteAbilities(Guid abID)
+        public async Task<bool> DeleteAbilities(Guid abID)
         {
             var abilities = _context.Abilities!.SingleOrDefault(b => b.abID == abID);
             if (abilities != null)
             {
                 _context.Abilities!.Remove(abilities);
-                await _context.SaveChangesAsync();
+                var check = await _context.SaveChangesAsync();
+                return check > 0 ? true : false;
             }
+            return false;
         }
 
         public async Task<AbilitiesDTO> GetAbilitiesById(Guid abID)
@@ -48,14 +55,17 @@ namespace RPD_API.Repo
             return _mapper.Map<List<AbilitiesDTO>>(abilities);
         }
 
-        public async Task UpdateAbilities(Guid abID, AbilitiesDTO model)
+
+        public async Task<bool> PutAbilities(Guid abID, AbilitiesDTO model)
         {
             if (abID == model.abID)
             {
                 var updateAbilities = _mapper.Map<Abilities>(model);
                 _context.Abilities!.Update(updateAbilities);
-                await _context.SaveChangesAsync();
+                var check = await _context.SaveChangesAsync();
+                return check > 0 ? true : false;
             }
+            return false;
         }
     }
 }
