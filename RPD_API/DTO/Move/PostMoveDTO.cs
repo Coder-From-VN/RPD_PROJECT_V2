@@ -9,6 +9,6 @@
         public int movePP { get; set; }
         public int movePriority { get; set; }
         public string moveDescription { get; set; }
-        public Guid typeID { get; set; }
+        public Guid typesID { get; set; }
     }
 }

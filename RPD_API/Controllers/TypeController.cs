@@ -1,6 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
-using RPD_API.DTO;
+﻿using Microsoft.AspNetCore.Mvc;
+using RPD_API.DTO.Types;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Controllers
@@ -9,19 +8,19 @@ namespace RPD_API.Controllers
     [ApiController]
     public class TypeController : ControllerBase
     {
-        private readonly ITypeRepo _typeRepo;
+        private readonly ITypesRepo _typesRepo;
 
-        public TypeController(ITypeRepo typeRepo)
+        public TypeController(ITypesRepo typesRepo)
         {
-            _typeRepo = typeRepo;
+            _typesRepo = typesRepo;
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetType()
+        public async Task<IActionResult> GetTypes()
         {
             try
             {
-                return Ok(await _typeRepo.GetAllType());
+                return Ok(await _typesRepo.GetAllTypes());
             }
             catch
             {
@@ -29,44 +28,43 @@ namespace RPD_API.Controllers
             }
         }
 
-        [HttpGet("{typeID}")]
-        public async Task<IActionResult> GetType(Guid typeID)
+        [HttpGet("{typesID}")]
+        public async Task<IActionResult> GetTypes(Guid typesID)
         {
-            var type = await _typeRepo.GetTypeById(typeID);
-            return type == null ? NotFound() : Ok(type);
+            var types = await _typesRepo.GetTypesById(typesID);
+            return types == null ? NotFound() : Ok(types);
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostType(TypeDTO model)
+        public async Task<IActionResult> PostTypes(PostTypesDTO model)
         {
             try
             {
-                var newTypeID = await _typeRepo.AddType(model);
-                var Type = await _typeRepo.GetTypeById(newTypeID);
-                return Type == null ? NotFound() : Ok(Type);
+                var newTypes = await _typesRepo.AddTypes(model);
+                return newTypes == null ? NotFound("Types existing") : Ok(newTypes);
             }
             catch
             {
-                return BadRequest();
+                return BadRequest("Some thing wrong at Types Controller");
             }
         }
 
-        [HttpPut("{typeID}")]
-        public async Task<IActionResult> UpdateType(Guid typeID, [FromBody] TypeDTO model)
+        [HttpPut("{typesID}")]
+        public async Task<IActionResult> UpdateTypes(Guid typesID, [FromBody] TypesDTO model)
         {
-            if (typeID != model.typeID)
+            if (typesID != model.typesID)
             {
                 return NotFound();
             }
-            await _typeRepo.UpdateType(typeID, model);
-            return Ok();
+            var result = await _typesRepo.UpdateTypes(typesID, model);
+            return Ok(result);
         }
 
-        [HttpDelete("{typeID}")]
-        public async Task<IActionResult> DeleteType([FromRoute] Guid typeID)
+        [HttpDelete("{typesID}")]
+        public async Task<IActionResult> DeleteTypes([FromRoute] Guid typesID)
         {
-            await _typeRepo.DeleteType(typeID);
-            return Ok();
+            var result = await _typesRepo.DeleteTypes(typesID);
+            return Ok(result);
         }
 
     }

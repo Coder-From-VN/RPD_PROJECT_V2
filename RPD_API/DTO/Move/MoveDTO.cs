@@ -1,4 +1,4 @@
-﻿using Type = RPD_API.Models.Type;
+﻿using Type = RPD_API.Models.Types;
 
 namespace RPD_API.DTO.Move
 {
@@ -12,7 +12,7 @@ namespace RPD_API.DTO.Move
         public int movePP { get; set; }
         public int movePriority { get; set; }
         public string moveDescription { get; set; }
-        public Guid typeID { get; set; }
-        public string TypeName { get; set; }
+        public Guid typesID { get; set; }
+        public string TypesName { get; set; }
     }
 }

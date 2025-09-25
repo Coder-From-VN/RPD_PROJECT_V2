@@ -17,7 +17,7 @@ builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.Re
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 //repo
 builder.Services.AddScoped<IGrowthRateRepo, GrowthRateRepo>();
-builder.Services.AddScoped<ITypeRepo, TypeRepo>();
+builder.Services.AddScoped<ITypesRepo, TypesRepo>();
 builder.Services.AddScoped<IStatTypeRepo, StatTypeRepo>();
 builder.Services.AddScoped<IAbilitiesRepo, AbilitiesRepo>();
 builder.Services.AddScoped<IEggGroupRepo, EggGroupRepo>();

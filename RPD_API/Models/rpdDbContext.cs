@@ -26,14 +26,14 @@ namespace RPD_API.Models
         public DbSet<PokemonStats> PokemonStats { get; set; }
         public DbSet<PokemonType> PokemonType { get; set; }
         public DbSet<StatType> StatType { get; set; }
-        public DbSet<Type> Type { get; set; }
+        public DbSet<Types> Types { get; set; }
 
         //khai bao lien ket data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             //Type 1 to Many Move
             modelBuilder.Entity<Move>()
-                .HasOne(m => m.Type)
+                .HasOne(m => m.Types)
                 .WithMany(t => t.Move)
                 .HasForeignKey(m => m.typeID);
             //GrowthRate 1 to Many Pokemons
@@ -120,7 +120,7 @@ namespace RPD_API.Models
                 .WithMany(p => p.PokemonType)
                 .HasForeignKey(pt => pt.pokeID);
             modelBuilder.Entity<PokemonType>()
-                .HasOne(pt => pt.Type)
+                .HasOne(pt => pt.Types)
                 .WithMany(t => t.PokemonType)
                 .HasForeignKey(pt => pt.typeID);
             //Pokemon many to many Move

@@ -6,6 +6,8 @@ using RPD_API.DTO.EggGroup;
 using RPD_API.DTO.GameVersion;
 using RPD_API.DTO.GrowthRate;
 using RPD_API.DTO.Move;
+using RPD_API.DTO.StatType;
+using RPD_API.DTO.Types;
 using RPD_API.Models;
 
 namespace RPD_API.Helper
@@ -18,11 +20,13 @@ namespace RPD_API.Helper
             CreateMap<GrowthRateDTO, GrowthRate>();
             CreateMap<PostGrowthRateDTO, GrowthRate>();
 
-            CreateMap<Models.Type, TypeDTO>();
-            CreateMap<TypeDTO, Models.Type>();
+            CreateMap<Types, TypesDTO>();
+            CreateMap<TypesDTO, Types>();
+            CreateMap<PostTypesDTO, Types>();
 
             CreateMap<StatType, StatTypeDTO>();
             CreateMap<StatTypeDTO, StatType>();
+            CreateMap<PostStatTypeDTO, StatType>();
 
             CreateMap<Abilities, AbilitiesDTO>();
             CreateMap<AbilitiesDTO, Abilities>();
@@ -45,8 +49,8 @@ namespace RPD_API.Helper
 
             CreateMap<MoveDTO, Move>();
             CreateMap<Move, MoveDTO>()
-            .ForMember(dest => dest.TypeName,
-                       opt => opt.MapFrom(src => src.Type.typeName));
+            .ForMember(dest => dest.TypesName,
+                       opt => opt.MapFrom(src => src.Types.typesName));
 
         }
     }

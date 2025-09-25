@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RPD_API.DTO;
+using RPD_API.DTO.StatType;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Controllers
@@ -37,17 +37,16 @@ namespace RPD_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostStatType(StatTypeDTO model)
+        public async Task<IActionResult> PostStatType(PostStatTypeDTO model)
         {
             try
             {
                 var newStatTypeID = await _stRepo.AddStatType(model);
-                var statType = await _stRepo.GetStatTypeById(newStatTypeID);
-                return statType == null ? NotFound() : Ok(statType);
+                return newStatTypeID == null ? NotFound("StatType Exit") : Ok(newStatTypeID);
             }
             catch
             {
-                return BadRequest();
+                return BadRequest("Some thing worng at StatType controller");
             }
         }
 
@@ -58,15 +57,15 @@ namespace RPD_API.Controllers
             {
                 return NotFound();
             }
-            await _stRepo.UpdateStatType(statTypeID, model);
-            return Ok();
+            var result = await _stRepo.UpdateStatType(statTypeID, model);
+            return Ok(result);
         }
 
         [HttpDelete("{statTypeID}")]
         public async Task<IActionResult> DeleteGrowthRate([FromRoute] Guid statTypeID)
         {
-            await _stRepo.DeleteStatType(statTypeID);
-            return Ok();
+            var result = await _stRepo.DeleteStatType(statTypeID);
+            return Ok(result);
         }
     }
 }

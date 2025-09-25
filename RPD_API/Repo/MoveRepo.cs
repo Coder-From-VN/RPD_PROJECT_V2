@@ -27,7 +27,7 @@ namespace RPD_API.Repo
             await _context.SaveChangesAsync();
 
             var saved = await _context.Move
-                .Include(m => m.Type)
+                .Include(m => m.Types)
                 .FirstAsync(m => m.moveID == newMove.moveID);
 
             return saved.moveID;

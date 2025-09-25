@@ -3,12 +3,12 @@ using System.ComponentModel.DataAnnotations;
 
 namespace RPD_API.Models
 {
-    public class Type
+    public class Types
     {
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public Guid typeID { get; set; }
-        public string typeName { get; set; }
+        public Guid typesID { get; set; }
+        public string typesName { get; set; }
 
         public ICollection<PokemonType> PokemonType { get; set; }
 

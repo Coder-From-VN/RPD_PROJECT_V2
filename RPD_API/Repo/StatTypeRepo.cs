@@ -1,8 +1,10 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
+using RPD_API.DTO.StatType;
+using RPD_API.DTO.Types;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
+using System.Drawing.Drawing2D;
 
 namespace RPD_API.Repo
 {
@@ -18,23 +20,29 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<Guid> AddStatType(StatTypeDTO model)
+        public async Task<StatTypeDTO> AddStatType(PostStatTypeDTO model)
         {
+            var existing = await _context.StatType!.SingleOrDefaultAsync(st => st.stName == model.stName);
+            if (existing != null)
+                return null;
+
             var newStatType = _mapper.Map<StatType>(model);
             _context.StatType!.Add(newStatType);
-            await _context.SaveChangesAsync();
 
-            return newStatType.stID;
+            var saved = await _context.SaveChangesAsync();
+            return saved > 0 ? _mapper.Map<StatTypeDTO>(newStatType) : null;
         }
 
-        public async Task DeleteStatType(Guid statTypeID)
+        public async Task<bool> DeleteStatType(Guid statTypeID)
         {
             var statType = _context.StatType!.SingleOrDefault(b => b.stID == statTypeID);
             if (statType != null)
             {
                 _context.StatType!.Remove(statType);
-                await _context.SaveChangesAsync();
+                var saved = await _context.SaveChangesAsync();
+                return saved > 0 ? true : false;
             }
+            return false;
         }
 
         public async Task<List<StatTypeDTO>> GetAllStatType()
@@ -49,14 +57,17 @@ namespace RPD_API.Repo
             return _mapper.Map<StatTypeDTO>(statType);
         }
 
-        public async Task UpdateStatType(Guid statTypeID, StatTypeDTO model)
+        public async Task<bool> UpdateStatType(Guid statTypeID, StatTypeDTO model)
         {
             if (statTypeID == model.stID)
             {
                 var updateType = _mapper.Map<StatType>(model);
                 _context.StatType!.Update(updateType);
-                await _context.SaveChangesAsync();
+                var saved = await _context.SaveChangesAsync();
+                return saved > 0 ? true : false;
             }
+
+            return false;
         }
     }
 }

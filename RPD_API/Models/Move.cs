@@ -19,6 +19,6 @@ namespace RPD_API.Models
         public ICollection<PokemonMove> PokemonMove { get; set; }
 
         public Guid typeID { get; set; }
-        public Type Type { get; set; }
+        public Types Types { get; set; }
     }
 }
