@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RPD_API.DTO;
+using RPD_API.DTO.EggGroup;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Controllers
@@ -37,17 +37,17 @@ namespace RPD_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostType(EggGroupDTO model)
+        public async Task<IActionResult> PostType(PostEggGroupDTO model)
         {
             try
             {
                 var newEgID = await _egRepo.AddEggGroup(model);
-                var Abilities = await _egRepo.GetEggGroupById(newEgID);
-                return Abilities == null ? NotFound() : Ok(Abilities);
+
+                return newEgID.Item1 ? Ok(newEgID.Item2) : NotFound("Egg Group already exists.");
             }
             catch
             {
-                return BadRequest();
+                return BadRequest(new { message = "Something off at Egg Group controller" });
             }
         }
 
@@ -58,15 +58,15 @@ namespace RPD_API.Controllers
             {
                 return NotFound();
             }
-            await _egRepo.UpdateEggGroup(egID, model);
-            return Ok();
+            var output = await _egRepo.UpdateEggGroup(egID, model);
+            return Ok(output);
         }
 
         [HttpDelete("{egID}")]
         public async Task<IActionResult> DeleteType([FromRoute] Guid egID)
         {
-            await _egRepo.DeleteEggGroup(egID);
-            return Ok();
+            var output = await _egRepo.DeleteEggGroup(egID);
+            return Ok(output);
         }
     }
 }

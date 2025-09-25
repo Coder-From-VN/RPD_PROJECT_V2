@@ -2,6 +2,7 @@
 using RPD_API.DTO;
 using RPD_API.DTO.Abilities;
 using RPD_API.DTO.EffortValues;
+using RPD_API.DTO.EggGroup;
 using RPD_API.DTO.Move;
 using RPD_API.Models;
 
@@ -26,6 +27,7 @@ namespace RPD_API.Helper
 
             CreateMap<EggGroup, EggGroupDTO>();
             CreateMap<EggGroupDTO, EggGroup>();
+            CreateMap<PostEggGroupDTO, EggGroup>();
 
             CreateMap<EffortValues, EffortValuesDTO>();
             CreateMap<EffortValuesDTO, EffortValues>();

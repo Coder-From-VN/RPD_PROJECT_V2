@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO.Abilities;
+using RPD_API.DTO.EggGroup;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 
@@ -17,17 +18,20 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<(bool, AbilitiesDTO)> PostAbilities(PostAbilitiesDTO model)
+        public async Task<(bool, AbilitiesDTO?)> PostAbilities(PostAbilitiesDTO model)
         {
-            var checkName = await _context.Abilities!.SingleOrDefaultAsync(ab => ab.abName == model.abName);
-            if (checkName == null)
-            {
-                var newAbilities = _mapper.Map<Abilities>(model);
-                _context.Abilities!.Add(newAbilities);
-                await _context.SaveChangesAsync();
+            var existing = await _context.Abilities!.SingleOrDefaultAsync(b => b.abName == model.abName);
 
-                return (true, _mapper.Map<AbilitiesDTO>(newAbilities));
-            }
+            if (existing != null)
+                return (false, null);
+
+            var newAbilities = _mapper.Map<Abilities>(model);
+            _context.Abilities!.Add(newAbilities);
+
+            var saved = await _context.SaveChangesAsync();
+            if (saved > 0)
+                return (true, _mapper.Map<AbilitiesDTO?>(newAbilities));
+
             return (false, null);
         }
 

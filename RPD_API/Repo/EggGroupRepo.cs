@@ -1,8 +1,9 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
+using RPD_API.DTO.EggGroup;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
+using System.Xml.Linq;
 
 namespace RPD_API.Repo
 {
@@ -17,23 +18,33 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<Guid> AddEggGroup(EggGroupDTO model)
+        public async Task<(bool, EggGroupDTO?)> AddEggGroup(PostEggGroupDTO model)
         {
+            var existing = await _context.EggGroup!.SingleOrDefaultAsync(b => b.egName == model.egName);
+
+            if (existing != null)
+                return (false, null);
+
             var newEggGroup = _mapper.Map<EggGroup>(model);
             _context.EggGroup!.Add(newEggGroup);
-            await _context.SaveChangesAsync();
 
-            return newEggGroup.egID;
+            var saved = await _context.SaveChangesAsync();
+            if (saved > 0)
+                return (true, _mapper.Map<EggGroupDTO?>(newEggGroup));
+
+            return (false, null);
         }
 
-        public async Task DeleteEggGroup(Guid egID)
+        public async Task<bool> DeleteEggGroup(Guid egID)
         {
             var eggGroup = _context.EggGroup!.SingleOrDefault(b => b.egID == egID);
             if (eggGroup != null)
             {
                 _context.EggGroup!.Remove(eggGroup);
-                await _context.SaveChangesAsync();
+                var check = await _context.SaveChangesAsync();
+                return check > 0 ? true : false;
             }
+            return false;
         }
 
         public async Task<List<EggGroupDTO>> GetAllEggGroup()
@@ -48,14 +59,16 @@ namespace RPD_API.Repo
             return _mapper.Map<EggGroupDTO>(eggGroup);
         }
 
-        public async Task UpdateEggGroup(Guid egID, EggGroupDTO model)
+        public async Task<bool> UpdateEggGroup(Guid egID, EggGroupDTO model)
         {
             if (egID == model.egID)
             {
                 var updateEggGroup = _mapper.Map<EggGroup>(model);
                 _context.EggGroup!.Update(updateEggGroup);
-                await _context.SaveChangesAsync();
+                var check = await _context.SaveChangesAsync();
+                return check > 0 ? true : false;
             }
+            return false;
         }
     }
 }
