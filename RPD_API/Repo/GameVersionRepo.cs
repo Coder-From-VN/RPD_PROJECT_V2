@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
+using RPD_API.DTO.GameVersion;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 
@@ -17,23 +17,30 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<Guid> AddGameVersion(GameVersionDTO model)
+        public async Task<GameVersionDTO?> AddGameVersion(PostGameVersionDTO model)
         {
+            var existing = await _context.GameVersion!.SingleOrDefaultAsync(gv => gv.gvName == model.gvName);
+
+            if (existing != null)
+                return null;
+
             var newGameVersion = _mapper.Map<GameVersion>(model);
             _context.GameVersion!.Add(newGameVersion);
-            await _context.SaveChangesAsync();
+            var saved = await _context.SaveChangesAsync();
 
-            return newGameVersion.gvID;
+            return saved > 0 ? _mapper.Map<GameVersionDTO>(newGameVersion) : null;
         }
 
-        public async Task DeleteGameVersion(Guid gvID)
+        public async Task<bool> DeleteGameVersion(Guid gvID)
         {
             var gameVersion = _context.GameVersion!.SingleOrDefault(b => b.gvID == gvID);
             if (gameVersion != null)
             {
                 _context.GameVersion!.Remove(gameVersion);
-                await _context.SaveChangesAsync();
+                var saved = await _context.SaveChangesAsync();
+                return saved > 0 ? true : false;
             }
+            return false;
         }
 
         public async Task<List<GameVersionDTO>> GetAllGameVersion()
@@ -48,14 +55,16 @@ namespace RPD_API.Repo
             return _mapper.Map<GameVersionDTO>(gameVersion);
         }
 
-        public async Task UpdateGameVersion(Guid gvID, GameVersionDTO model)
+        public async Task<bool> UpdateGameVersion(Guid gvID, GameVersionDTO model)
         {
             if (gvID == model.gvID)
             {
                 var updateGameVersion = _mapper.Map<GameVersion>(model);
                 _context.GameVersion!.Update(updateGameVersion);
-                await _context.SaveChangesAsync();
+                var saved = await _context.SaveChangesAsync();
+                return saved > 0 ? true : false;
             }
+            return false;
         }
     }
 }

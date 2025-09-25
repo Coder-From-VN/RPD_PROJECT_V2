@@ -42,7 +42,7 @@ namespace RPD_API.Controllers
             {
                 var newAbID = await _abRepo.PostAbilities(model);
 
-                return newAbID.Item2 == null ? NotFound("Ability already exists.") : Ok(newAbID.Item2);
+                return newAbID == null ? NotFound("Ability already exists.") : Ok(newAbID);
             }
             catch
             {

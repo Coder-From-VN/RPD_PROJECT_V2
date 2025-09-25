@@ -18,21 +18,21 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<(bool, AbilitiesDTO?)> PostAbilities(PostAbilitiesDTO model)
+        public async Task<AbilitiesDTO?> PostAbilities(PostAbilitiesDTO model)
         {
             var existing = await _context.Abilities!.SingleOrDefaultAsync(b => b.abName == model.abName);
 
             if (existing != null)
-                return (false, null);
+                return null;
 
             var newAbilities = _mapper.Map<Abilities>(model);
             _context.Abilities!.Add(newAbilities);
 
             var saved = await _context.SaveChangesAsync();
             if (saved > 0)
-                return (true, _mapper.Map<AbilitiesDTO?>(newAbilities));
+                return _mapper.Map<AbilitiesDTO?>(newAbilities);
 
-            return (false, null);
+            return null;
         }
 
         public async Task<bool> DeleteAbilities(Guid abID)

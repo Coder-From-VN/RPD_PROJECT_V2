@@ -18,21 +18,21 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<(bool, EggGroupDTO?)> AddEggGroup(PostEggGroupDTO model)
+        public async Task<EggGroupDTO?> AddEggGroup(PostEggGroupDTO model)
         {
             var existing = await _context.EggGroup!.SingleOrDefaultAsync(b => b.egName == model.egName);
 
             if (existing != null)
-                return (false, null);
+                return null;
 
             var newEggGroup = _mapper.Map<EggGroup>(model);
             _context.EggGroup!.Add(newEggGroup);
 
             var saved = await _context.SaveChangesAsync();
             if (saved > 0)
-                return (true, _mapper.Map<EggGroupDTO?>(newEggGroup));
+                return _mapper.Map<EggGroupDTO?>(newEggGroup);
 
-            return (false, null);
+            return null;
         }
 
         public async Task<bool> DeleteEggGroup(Guid egID)

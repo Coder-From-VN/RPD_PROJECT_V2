@@ -43,7 +43,7 @@ namespace RPD_API.Controllers
             {
                 var newEgID = await _egRepo.AddEggGroup(model);
 
-                return newEgID.Item1 ? Ok(newEgID.Item2) : NotFound("Egg Group already exists.");
+                return newEgID == null ? NotFound("Egg Group already exists.") : Ok(newEgID);
             }
             catch
             {

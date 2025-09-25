@@ -3,6 +3,8 @@ using RPD_API.DTO;
 using RPD_API.DTO.Abilities;
 using RPD_API.DTO.EffortValues;
 using RPD_API.DTO.EggGroup;
+using RPD_API.DTO.GameVersion;
+using RPD_API.DTO.GrowthRate;
 using RPD_API.DTO.Move;
 using RPD_API.Models;
 
@@ -14,6 +16,7 @@ namespace RPD_API.Helper
         {
             CreateMap<GrowthRate, GrowthRateDTO>();
             CreateMap<GrowthRateDTO, GrowthRate>();
+            CreateMap<PostGrowthRateDTO, GrowthRate>();
 
             CreateMap<Models.Type, TypeDTO>();
             CreateMap<TypeDTO, Models.Type>();
@@ -35,6 +38,7 @@ namespace RPD_API.Helper
 
             CreateMap<GameVersion, GameVersionDTO>();
             CreateMap<GameVersionDTO, GameVersion>();
+            CreateMap<PostGameVersionDTO, GameVersion>();
 
             CreateMap<ImageLink, ImageLinkDTO>();
             CreateMap<ImageLinkDTO, ImageLink>();

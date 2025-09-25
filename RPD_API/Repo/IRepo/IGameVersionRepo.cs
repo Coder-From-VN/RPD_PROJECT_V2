@@ -1,4 +1,4 @@
-﻿using RPD_API.DTO;
+﻿using RPD_API.DTO.GameVersion;
 
 namespace RPD_API.Repo.IRepo
 {
@@ -6,8 +6,8 @@ namespace RPD_API.Repo.IRepo
     {
         public Task<List<GameVersionDTO>> GetAllGameVersion();
         public Task<GameVersionDTO> GetGameVersionById(Guid gvID);
-        public Task<Guid> AddGameVersion(GameVersionDTO model);
-        public Task UpdateGameVersion(Guid gvID, GameVersionDTO model);
-        public Task DeleteGameVersion(Guid gvID);
+        public Task<GameVersionDTO?> AddGameVersion(PostGameVersionDTO model);
+        public Task<bool> UpdateGameVersion(Guid gvID, GameVersionDTO model);
+        public Task<bool> DeleteGameVersion(Guid gvID);
     }
 }

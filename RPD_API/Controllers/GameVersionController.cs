@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RPD_API.DTO;
+using RPD_API.DTO.GameVersion;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Controllers
@@ -37,17 +37,16 @@ namespace RPD_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostGameVersion(GameVersionDTO model)
+        public async Task<IActionResult> PostGameVersion(PostGameVersionDTO model)
         {
             try
             {
                 var newGvID = await _gvRepo.AddGameVersion(model);
-                var gameVersion = await _gvRepo.GetGameVersionById(newGvID);
-                return gameVersion == null ? NotFound() : Ok(gameVersion);
+                return newGvID == null ? NotFound("Game Version existing") : Ok(newGvID);
             }
             catch
             {
-                return BadRequest();
+                return BadRequest("Some thing wrong at Game version Controller");
             }
         }
 
@@ -58,15 +57,15 @@ namespace RPD_API.Controllers
             {
                 return NotFound();
             }
-            await _gvRepo.UpdateGameVersion(gvID, model);
-            return Ok();
+            var output = await _gvRepo.UpdateGameVersion(gvID, model);
+            return Ok(output);
         }
 
         [HttpDelete("{gvID}")]
         public async Task<IActionResult> DeleteType([FromRoute] Guid gvID)
         {
-            await _gvRepo.DeleteGameVersion(gvID);
-            return Ok();
+            var output = await _gvRepo.DeleteGameVersion(gvID);
+            return Ok(output);
         }
     }
 }

@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RPD_API.DTO;
+using RPD_API.DTO.GrowthRate;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Controllers
@@ -38,17 +38,16 @@ namespace RPD_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostGrowthRate(GrowthRateDTO model)
+        public async Task<IActionResult> PostGrowthRate(PostGrowthRateDTO model)
         {
             try
             {
                 var newGrowthRateID = await _grRepo.AddGrowthRate(model);
-                var growthRate = await _grRepo.GetGrowthRateById(newGrowthRateID);
-                return growthRate == null ? NotFound() : Ok(growthRate);
+                return newGrowthRateID == null ? NotFound("Growth Rate already exists.") : Ok(newGrowthRateID);
             }
             catch
             {
-                return BadRequest();
+                return BadRequest(new { message = "Something off at Growth Rate controller" });
             }
         }
 
@@ -59,15 +58,15 @@ namespace RPD_API.Controllers
             {
                 return NotFound();
             }
-            await _grRepo.UpdateGrowthRate(growthRateID, model);
-            return Ok();
+            var output = await _grRepo.UpdateGrowthRate(growthRateID, model);
+            return Ok(output);
         }
 
         [HttpDelete("{growthRateID}")]
         public async Task<IActionResult> DeleteGrowthRate([FromRoute] Guid growthRateID)
         {
-            await _grRepo.DeleteGrowthRate(growthRateID);
-            return Ok();
+            var output = await _grRepo.DeleteGrowthRate(growthRateID);
+            return Ok(output);
         }
     }
 }
