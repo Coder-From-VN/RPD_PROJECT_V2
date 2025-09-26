@@ -42,9 +42,8 @@ namespace RPD_API.Controllers
         {
             try
             {
-                var newMoveID = await _mRepo.AddMove(model);
-                var move = await _mRepo.GetMoveById(newMoveID);
-                return move == null ? NotFound() : Ok(move);
+                var newMove = await _mRepo.AddMove(model);
+                return newMove == null ? NotFound("move existed") : Ok(newMove);
             }
             catch
             {
@@ -59,15 +58,15 @@ namespace RPD_API.Controllers
             {
                 return NotFound();
             }
-            await _mRepo.UpdateMove(moveID, model);
-            return Ok();
+            var result = await _mRepo.UpdateMove(moveID, model);
+            return Ok(result);
         }
 
         [HttpDelete("{moveID}")]
         public async Task<IActionResult> DeleteImageLink([FromRoute] Guid moveID)
         {
-            await _mRepo.DeleteMove(moveID);
-            return Ok();
+            var result = await _mRepo.DeleteMove(moveID);
+            return Ok(result);
         }
     }
 }

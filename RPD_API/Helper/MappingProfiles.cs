@@ -49,9 +49,8 @@ namespace RPD_API.Helper
 
             CreateMap<MoveDTO, Move>();
             CreateMap<Move, MoveDTO>()
-            .ForMember(dest => dest.TypesName,
-                       opt => opt.MapFrom(src => src.Types.typesName));
-
+                .ForMember(dest => dest.TypesName, opt => opt.MapFrom(src => src.Types.typesName));
+            CreateMap<PostMoveDTO, Move>();
         }
     }
 }

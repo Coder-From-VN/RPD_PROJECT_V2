@@ -12,8 +12,8 @@ using RPD_API.Models;
 namespace RPD_API.Migrations
 {
     [DbContext(typeof(rpdDbContext))]
-    [Migration("20250926154932_newmg")]
-    partial class newmg
+    [Migration("20250926155701_updatedatabasenew")]
+    partial class updatedatabasenew
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
