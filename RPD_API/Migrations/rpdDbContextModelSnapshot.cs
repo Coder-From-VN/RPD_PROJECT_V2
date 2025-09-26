@@ -168,8 +168,8 @@ namespace RPD_API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("moveAccuracy")
-                        .HasColumnType("float");
+                    b.Property<int>("moveAccuracy")
+                        .HasColumnType("int");
 
                     b.Property<string>("moveDamageClass")
                         .IsRequired()
@@ -192,12 +192,12 @@ namespace RPD_API.Migrations
                     b.Property<int>("movePriority")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("typeID")
+                    b.Property<Guid>("typesID")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("moveID");
 
-                    b.HasIndex("typeID");
+                    b.HasIndex("typesID");
 
                     b.ToTable("Move");
                 });
@@ -366,12 +366,12 @@ namespace RPD_API.Migrations
                     b.Property<Guid>("pokeID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("typeID")
+                    b.Property<Guid>("typesID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("pokeID", "typeID");
+                    b.HasKey("pokeID", "typesID");
 
-                    b.HasIndex("typeID");
+                    b.HasIndex("typesID");
 
                     b.ToTable("PokemonType");
                 });
@@ -393,15 +393,15 @@ namespace RPD_API.Migrations
 
             modelBuilder.Entity("RPD_API.Models.Types", b =>
                 {
-                    b.Property<Guid>("typeID")
+                    b.Property<Guid>("typesID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("typeName")
+                    b.Property<string>("typesName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("typeID");
+                    b.HasKey("typesID");
 
                     b.ToTable("Types");
                 });
@@ -451,7 +451,7 @@ namespace RPD_API.Migrations
                 {
                     b.HasOne("RPD_API.Models.Types", "Types")
                         .WithMany("Move")
-                        .HasForeignKey("typeID")
+                        .HasForeignKey("typesID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
@@ -574,7 +574,7 @@ namespace RPD_API.Migrations
 
                     b.HasOne("RPD_API.Models.Types", "Types")
                         .WithMany("PokemonType")
-                        .HasForeignKey("typeID")
+                        .HasForeignKey("typesID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 

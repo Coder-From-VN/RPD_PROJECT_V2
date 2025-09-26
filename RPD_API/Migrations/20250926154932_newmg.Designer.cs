@@ -12,8 +12,8 @@ using RPD_API.Models;
 namespace RPD_API.Migrations
 {
     [DbContext(typeof(rpdDbContext))]
-    [Migration("20250925120056_updateexptype")]
-    partial class updateexptype
+    [Migration("20250926154932_newmg")]
+    partial class newmg
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -170,8 +170,8 @@ namespace RPD_API.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<double>("moveAccuracy")
-                        .HasColumnType("float");
+                    b.Property<int>("moveAccuracy")
+                        .HasColumnType("int");
 
                     b.Property<string>("moveDamageClass")
                         .IsRequired()
@@ -194,12 +194,12 @@ namespace RPD_API.Migrations
                     b.Property<int>("movePriority")
                         .HasColumnType("int");
 
-                    b.Property<Guid>("typeID")
+                    b.Property<Guid>("typesID")
                         .HasColumnType("uniqueidentifier");
 
                     b.HasKey("moveID");
 
-                    b.HasIndex("typeID");
+                    b.HasIndex("typesID");
 
                     b.ToTable("Move");
                 });
@@ -368,12 +368,12 @@ namespace RPD_API.Migrations
                     b.Property<Guid>("pokeID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<Guid>("typeID")
+                    b.Property<Guid>("typesID")
                         .HasColumnType("uniqueidentifier");
 
-                    b.HasKey("pokeID", "typeID");
+                    b.HasKey("pokeID", "typesID");
 
-                    b.HasIndex("typeID");
+                    b.HasIndex("typesID");
 
                     b.ToTable("PokemonType");
                 });
@@ -393,19 +393,19 @@ namespace RPD_API.Migrations
                     b.ToTable("StatType");
                 });
 
-            modelBuilder.Entity("RPD_API.Models.Type", b =>
+            modelBuilder.Entity("RPD_API.Models.Types", b =>
                 {
-                    b.Property<Guid>("typeID")
+                    b.Property<Guid>("typesID")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("uniqueidentifier");
 
-                    b.Property<string>("typeName")
+                    b.Property<string>("typesName")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.HasKey("typeID");
+                    b.HasKey("typesID");
 
-                    b.ToTable("Type");
+                    b.ToTable("Types");
                 });
 
             modelBuilder.Entity("RPD_API.Models.EffortValues", b =>
@@ -451,13 +451,13 @@ namespace RPD_API.Migrations
 
             modelBuilder.Entity("RPD_API.Models.Move", b =>
                 {
-                    b.HasOne("RPD_API.Models.Type", "Type")
+                    b.HasOne("RPD_API.Models.Types", "Types")
                         .WithMany("Move")
-                        .HasForeignKey("typeID")
+                        .HasForeignKey("typesID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("Type");
+                    b.Navigation("Types");
                 });
 
             modelBuilder.Entity("RPD_API.Models.PokemonAbilities", b =>
@@ -574,15 +574,15 @@ namespace RPD_API.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("RPD_API.Models.Type", "Type")
+                    b.HasOne("RPD_API.Models.Types", "Types")
                         .WithMany("PokemonType")
-                        .HasForeignKey("typeID")
+                        .HasForeignKey("typesID")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.Navigation("Pokemons");
 
-                    b.Navigation("Type");
+                    b.Navigation("Types");
                 });
 
             modelBuilder.Entity("RPD_API.Models.Abilities", b =>
@@ -638,7 +638,7 @@ namespace RPD_API.Migrations
                     b.Navigation("PokemonStats");
                 });
 
-            modelBuilder.Entity("RPD_API.Models.Type", b =>
+            modelBuilder.Entity("RPD_API.Models.Types", b =>
                 {
                     b.Navigation("Move");
 

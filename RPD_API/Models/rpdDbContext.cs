@@ -35,7 +35,7 @@ namespace RPD_API.Models
             modelBuilder.Entity<Move>()
                 .HasOne(m => m.Types)
                 .WithMany(t => t.Move)
-                .HasForeignKey(m => m.typeID);
+                .HasForeignKey(m => m.typesID);
             //GrowthRate 1 to Many Pokemons
             modelBuilder.Entity<Pokemons>()
                 .HasOne(p => p.GrowthRate)
@@ -114,7 +114,7 @@ namespace RPD_API.Models
                 .HasForeignKey(pgv => pgv.gvID);
             //Pokemon many to many Type
             modelBuilder.Entity<PokemonType>()
-                .HasKey(pt => new { pt.pokeID, pt.typeID });
+                .HasKey(pt => new { pt.pokeID, pt.typesID });
             modelBuilder.Entity<PokemonType>()
                 .HasOne(pt => pt.Pokemons)
                 .WithMany(p => p.PokemonType)
@@ -122,7 +122,7 @@ namespace RPD_API.Models
             modelBuilder.Entity<PokemonType>()
                 .HasOne(pt => pt.Types)
                 .WithMany(t => t.PokemonType)
-                .HasForeignKey(pt => pt.typeID);
+                .HasForeignKey(pt => pt.typesID);
             //Pokemon many to many Move
             modelBuilder.Entity<PokemonMove>()
                 .HasKey(pm => new { pm.pokeID, pm.moveID });
