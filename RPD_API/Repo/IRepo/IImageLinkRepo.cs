@@ -1,4 +1,4 @@
-﻿using RPD_API.DTO;
+﻿using RPD_API.DTO.ImageLink;
 
 namespace RPD_API.Repo.IRepo
 {
@@ -6,8 +6,8 @@ namespace RPD_API.Repo.IRepo
     {
         public Task<List<ImageLinkDTO>> GetAllImageLink();
         public Task<ImageLinkDTO> GetImageLinkById(Guid imgID);
-        public Task<Guid> AddImageLink(ImageLinkDTO model);
-        public Task UpdateImageLink(Guid imgID, ImageLinkDTO model);
-        public Task DeleteImageLink(Guid imgID);
+        public Task<ImageLinkDTO> AddImageLink(PostImageLinkDTO model);
+        public Task<bool> UpdateImageLink(Guid imgID, ImageLinkDTO model);
+        public Task<bool> DeleteImageLink(Guid imgID);
     }
 }

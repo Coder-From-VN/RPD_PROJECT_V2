@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RPD_API.DTO;
+using RPD_API.DTO.ImageLink;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Controllers
@@ -37,13 +37,12 @@ namespace RPD_API.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostImageLink(ImageLinkDTO model)
+        public async Task<IActionResult> PostImageLink(PostImageLinkDTO model)
         {
             try
             {
                 var newImgID = await _imgRepo.AddImageLink(model);
-                var imageLink = await _imgRepo.GetImageLinkById(newImgID);
-                return imageLink == null ? NotFound() : Ok(imageLink);
+                return newImgID == null ? NotFound() : Ok(newImgID);
             }
             catch
             {
@@ -58,15 +57,15 @@ namespace RPD_API.Controllers
             {
                 return NotFound();
             }
-            await _imgRepo.UpdateImageLink(imgID, model);
-            return Ok();
+            var result = await _imgRepo.UpdateImageLink(imgID, model);
+            return Ok(result);
         }
 
         [HttpDelete("{imgID}")]
         public async Task<IActionResult> DeleteImageLink([FromRoute] Guid imgID)
         {
-            await _imgRepo.DeleteImageLink(imgID);
-            return Ok();
+            var result = await _imgRepo.DeleteImageLink(imgID);
+            return Ok(result);
         }
     }
 }

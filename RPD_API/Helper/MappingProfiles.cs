@@ -1,10 +1,10 @@
 ﻿using AutoMapper;
-using RPD_API.DTO;
 using RPD_API.DTO.Abilities;
 using RPD_API.DTO.EffortValues;
 using RPD_API.DTO.EggGroup;
 using RPD_API.DTO.GameVersion;
 using RPD_API.DTO.GrowthRate;
+using RPD_API.DTO.ImageLink;
 using RPD_API.DTO.Move;
 using RPD_API.DTO.StatType;
 using RPD_API.DTO.Types;
@@ -46,6 +46,7 @@ namespace RPD_API.Helper
 
             CreateMap<ImageLink, ImageLinkDTO>();
             CreateMap<ImageLinkDTO, ImageLink>();
+            CreateMap<ImageLink, ImageLinkDTO>().ForMember(dest => dest.pokeName, opt => opt.MapFrom(src => src.Pokemons.pokeName));
 
             CreateMap<MoveDTO, Move>();
             CreateMap<Move, MoveDTO>()
