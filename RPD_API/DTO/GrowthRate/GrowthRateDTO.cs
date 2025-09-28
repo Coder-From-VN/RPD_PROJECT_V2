@@ -1,4 +1,4 @@
-﻿namespace RPD_API.DTO.GrowthRate
+﻿namespace RPD_API.DTO
 {
     public class GrowthRateDTO
     {

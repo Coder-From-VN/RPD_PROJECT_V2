@@ -1,4 +1,4 @@
-﻿namespace RPD_API.DTO.Move
+﻿namespace RPD_API.DTO
 {
     public class PostMoveDTO
     {

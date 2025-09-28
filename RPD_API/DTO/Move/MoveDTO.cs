@@ -1,6 +1,6 @@
-﻿using Type = RPD_API.Models.Types;
+﻿
 
-namespace RPD_API.DTO.Move
+namespace RPD_API.DTO
 {
     public class MoveDTO
     {

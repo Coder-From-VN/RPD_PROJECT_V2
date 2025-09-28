@@ -1,4 +1,4 @@
-﻿namespace RPD_API.DTO.ImageLink
+﻿namespace RPD_API.DTO
 {
     public class PostImageLinkDTO
     {

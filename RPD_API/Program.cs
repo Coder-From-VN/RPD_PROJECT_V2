@@ -25,6 +25,7 @@ builder.Services.AddScoped<IEffortValuesRepo, EffortValuesRepo>();
 builder.Services.AddScoped<IGameVersionRepo, GameVersionRepo>();
 builder.Services.AddScoped<IImageLinkRepo, ImageLinkRepo>();
 builder.Services.AddScoped<IMoveRepo, MoveRepo>();
+builder.Services.AddScoped<IPokemonsRepo, PokemonsRepo>();
 //dependeci injection
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

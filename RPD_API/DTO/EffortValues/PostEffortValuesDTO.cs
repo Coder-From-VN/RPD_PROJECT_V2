@@ -1,4 +1,4 @@
-﻿namespace RPD_API.DTO.EffortValues
+﻿namespace RPD_API.DTO
 {
     public class PostEffortValuesDTO
     {

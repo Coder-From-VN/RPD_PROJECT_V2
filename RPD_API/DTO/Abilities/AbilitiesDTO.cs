@@ -1,4 +1,4 @@
-﻿namespace RPD_API.DTO.Abilities
+﻿namespace RPD_API.DTO
 {
     public class AbilitiesDTO
     {

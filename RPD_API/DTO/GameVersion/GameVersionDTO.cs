@@ -1,4 +1,4 @@
-﻿namespace RPD_API.DTO.GameVersion
+﻿namespace RPD_API.DTO
 {
     public class GameVersionDTO
     {
