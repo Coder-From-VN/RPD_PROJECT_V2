@@ -1,4 +1,4 @@
-﻿using RPD_API.DTO.Types;
+﻿using RPD_API.DTO;
 
 namespace RPD_API.Repo.IRepo
 {

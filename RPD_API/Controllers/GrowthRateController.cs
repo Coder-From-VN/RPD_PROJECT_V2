@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
-using RPD_API.DTO.GrowthRate;
+using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Controllers

@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO.Abilities;
-using RPD_API.DTO.EggGroup;
+using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 

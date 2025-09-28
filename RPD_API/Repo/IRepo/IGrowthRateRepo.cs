@@ -1,4 +1,4 @@
-﻿using RPD_API.DTO.GrowthRate;
+﻿using RPD_API.DTO;
 using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo

@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO.ImageLink;
-using RPD_API.DTO.Move;
+using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
-using System;
 
 namespace RPD_API.Repo
 {

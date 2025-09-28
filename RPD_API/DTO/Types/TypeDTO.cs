@@ -1,4 +1,4 @@
-﻿namespace RPD_API.DTO.Types
+﻿namespace RPD_API.DTO
 {
     public class TypesDTO
     {

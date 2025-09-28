@@ -1,8 +1,78 @@
-﻿using RPD_API.Repo.IRepo;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore;
+using RPD_API.DTO;
+using RPD_API.Models;
+using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
 {
     public class PokemonsRepo : IPokemonsRepo
     {
+        private readonly rpdDbContext _context;
+        private readonly IMapper _mapper;
+
+        public PokemonsRepo(rpdDbContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
+
+        public async Task<PokemonsDTO> AddPokemons(PostPokemonDTO model)
+        {
+            var existing = await _context.Pokemons!.SingleOrDefaultAsync(m => m.pokeNationalNumber == model.pokeNationalNumber);
+
+            if (existing != null)
+                return null;
+
+            var newPokemons = _mapper.Map<Pokemons>(model);
+            _context.Pokemons.Add(newPokemons);
+            var saved = await _context.SaveChangesAsync();
+
+            if (saved > 0)
+            {
+                //var moveWithType = await _context.Move
+                //    .Include(m => m.Types)
+                //    .FirstOrDefaultAsync(m => m.moveID == newMove.moveID);
+                return _mapper.Map<PokemonsDTO>(newPokemons);
+            }
+            return null;
+        }
+
+        public async Task<bool> DeletePokemons(Guid pokeID)
+        {
+            var pokemons = _context.Pokemons!.SingleOrDefault(b => b.pokeID == pokeID);
+            if (pokemons != null)
+            {
+                _context.Pokemons!.Remove(pokemons);
+                var saved = await _context.SaveChangesAsync();
+                return saved > 0 ? true : false;
+            }
+            return false;
+        }
+
+        public async Task<List<PokemonsDTO>> GetAllPokemons()
+        {
+            //add include
+            var pokemons = await _context.Pokemons.ToListAsync();
+            return _mapper.Map<List<PokemonsDTO>>(pokemons);
+        }
+
+        public async Task<PokemonsDTO> GetPokemonsById(Guid pokeID)
+        {
+            var pokemons = await _context.Pokemons.FirstOrDefaultAsync(p => p.pokeID == pokeID);
+            return _mapper.Map<PokemonsDTO>(pokemons);
+        }
+
+        public async Task<bool> UpdatePokemons(Guid pokeID, PokemonsDTO model)
+        {
+            if (pokeID == model.pokeID)
+            {
+                var updatePokemons = _mapper.Map<Pokemons>(model);
+                _context.Pokemons!.Update(updatePokemons);
+                var saved = await _context.SaveChangesAsync();
+                return saved > 0 ? true : false;
+            }
+            return false;
+        }
     }
 }

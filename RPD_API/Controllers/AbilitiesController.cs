@@ -1,5 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using RPD_API.DTO.Abilities;
+using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Controllers

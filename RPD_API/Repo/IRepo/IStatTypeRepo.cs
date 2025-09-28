@@ -1,4 +1,5 @@
-﻿using RPD_API.DTO.StatType;
+﻿using RPD_API.DTO;
+using RPD_API.DTO.StatType;
 
 namespace RPD_API.Repo.IRepo
 {
