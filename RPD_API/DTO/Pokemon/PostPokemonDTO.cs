@@ -1,4 +1,8 @@
-﻿using RPD_API.Models;
+﻿using RPD_API.DTO.Abilities;
+using RPD_API.DTO.EggGroup;
+using RPD_API.DTO.GameVersion;
+using RPD_API.DTO.StatType;
+using RPD_API.Models;
 
 namespace RPD_API.DTO
 {
@@ -17,21 +21,21 @@ namespace RPD_API.DTO
         public double pokeFemaleRate { get; set; }
         public int pokeEggCycles { get; set; }
         public int pokeState { get; set; }
-        //growthRate
+
         public Guid growthRateID { get; set; }
-        //Image 
+
         public ICollection<PostImageLinkDTO> ImageLink { get; set; }
-        //EffortValues
-        public ICollection<EffortValues> EffortValues { get; set; }
-        //PokemonStats
-        public ICollection<PokemonStats> PokemonStats { get; set; }
-        //PokemonAbilities
-        public ICollection<PokemonAbilities> PokemonAbilities { get; set; }
-        //PokemonGameVersion 
-        public ICollection<PokemonGameVersion> PokemonGameVersion { get; set; }
-        //PokemonEggGroup 
-        public ICollection<PokemonEggGroup> PokemonEggGroup { get; set; }
-        //PokemonType 
-        public ICollection<PokemonType> PokemonType { get; set; }
+
+        public ICollection<PostEffortValuesDTO> EffortValues { get; set; }
+
+        public ICollection<PostPokemonStatsDTO> PokemonStats { get; set; }
+
+        public ICollection<PostPokemonAbilitiesDTO> PokemonAbilities { get; set; }
+
+        public ICollection<PostPokemonGameVersionDTO> PokemonGameVersion { get; set; }
+
+        public ICollection<PostPokemonEggGroupDTO> PokemonEggGroup { get; set; }
+
+        public ICollection<PostPokemonTypeDTO> PokemonType { get; set; }
     }
 }
