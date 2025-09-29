@@ -30,9 +30,6 @@ namespace RPD_API.Repo
 
             if (saved > 0)
             {
-                //var moveWithType = await _context.Move
-                //    .Include(m => m.Types)
-                //    .FirstOrDefaultAsync(m => m.moveID == newMove.moveID);
                 return _mapper.Map<PokemonsDTO>(newPokemons);
             }
             return null;

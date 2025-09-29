@@ -3,6 +3,5 @@
     public class PostImageLinkDTO
     {
         public string imgLink { get; set; }
-        public Guid pokeID { get; set; }
     }
 }
