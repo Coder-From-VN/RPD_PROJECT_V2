@@ -1,4 +1,5 @@
-﻿using RPD_API.Models;
+﻿using RPD_API.DTO.Abilities;
+using RPD_API.Models;
 
 namespace RPD_API.DTO
 {
@@ -27,8 +28,8 @@ namespace RPD_API.DTO
         public ICollection<EffortValues> EffortValues { get; set; }
         //PokemonStats
         public ICollection<PokemonStats> PokemonStats { get; set; }
-        //PokemonAbilities
-        public ICollection<PokemonAbilities> PokemonAbilities { get; set; }
+
+        public ICollection<PokemonAbilitiesDTO> PokemonAbilities { get; set; }
         //PokemonGameVersion 
         public ICollection<PokemonGameVersion> PokemonGameVersion { get; set; }
         //PokemonEggGroup 
