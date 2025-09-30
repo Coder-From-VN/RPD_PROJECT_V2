@@ -1,4 +1,4 @@
-﻿namespace RPD_API.DTO.EggGroup
+﻿namespace RPD_API.DTO
 {
     public class PostPokemonEggGroupDTO
     {

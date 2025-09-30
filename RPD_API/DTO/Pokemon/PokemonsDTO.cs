@@ -1,4 +1,4 @@
-﻿using RPD_API.DTO.Abilities;
+﻿using RPD_API.DTO;
 using RPD_API.Models;
 
 namespace RPD_API.DTO

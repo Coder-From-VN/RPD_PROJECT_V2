@@ -1,11 +1,12 @@
-﻿namespace RPD_API.DTO.Abilities
+﻿using RPD_API.Models;
+
+namespace RPD_API.DTO
 {
     public class PokemonAbilitiesDTO
     {
+        public Guid pokeID { get; set; }
         public Guid abID { get; set; }
-        public string abName { get; set; }
-        public string abDescription { get; set; }
-        public string abEffect { get; set; }
+
         public bool paHiddenCheck { get; set; }
     }
 }
