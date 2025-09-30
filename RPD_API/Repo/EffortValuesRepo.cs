@@ -17,23 +17,33 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<Guid> AddEffortValues(EffortValuesDTO model)
+        public async Task<EffortValuesDTO> AddEffortValues(PostEffortValuesDTO model)
         {
+            var existing = await _context.EffortValues!.SingleOrDefaultAsync(b => b.evStatName == model.evStatName);
+
+            if (existing != null)
+                return null;
+
             var newEffortValues = _mapper.Map<EffortValues>(model);
             _context.EffortValues!.Add(newEffortValues);
-            await _context.SaveChangesAsync();
 
-            return newEffortValues.evID;
+            var saved = await _context.SaveChangesAsync();
+            if (saved > 0)
+                return _mapper.Map<EffortValuesDTO?>(newEffortValues);
+
+            return null;
         }
 
-        public async Task DeleteEffortValues(Guid evID)
+        public async Task<bool> DeleteEffortValues(Guid evID)
         {
             var effortValues = _context.EffortValues!.SingleOrDefault(b => b.evID == evID);
             if (effortValues != null)
             {
                 _context.EffortValues!.Remove(effortValues);
-                await _context.SaveChangesAsync();
+                var check = await _context.SaveChangesAsync();
+                return check > 0 ? true : false;
             }
+            return false;
         }
 
         public async Task<List<EffortValuesDTO>> GetAllEffortValues()
@@ -48,14 +58,16 @@ namespace RPD_API.Repo
             return _mapper.Map<EffortValuesDTO>(effortValues);
         }
 
-        public async Task UpdateEffortValues(Guid evID, EffortValuesDTO model)
+        public async Task<bool> UpdateEffortValues(Guid evID, EffortValuesDTO model)
         {
             if (evID == model.evID)
             {
                 var updateEffortValues = _mapper.Map<EffortValues>(model);
                 _context.EffortValues!.Update(updateEffortValues);
-                await _context.SaveChangesAsync();
+                var check = await _context.SaveChangesAsync();
+                return check > 0 ? true : false;
             }
+            return false;
         }
     }
 }

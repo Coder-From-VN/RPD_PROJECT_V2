@@ -26,7 +26,7 @@ namespace RPD_API.DTO
 
         public ICollection<PostImageLinkDTO> ImageLink { get; set; }
 
-        public ICollection<PostEffortValuesDTO> EffortValues { get; set; }
+        public ICollection<PostPokemonsEffortValuesDTO> EffortValues { get; set; }
 
         public ICollection<PostPokemonStatsDTO> PokemonStats { get; set; }
 
