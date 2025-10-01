@@ -17,21 +17,22 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<EffortValuesDTO> AddEffortValues(PostEffortValuesDTO model)
+        public async Task<bool> AddEffortValues(PostPokemonsEffortValuesDTO model, Guid pokeID)
         {
-            var existing = await _context.EffortValues!.SingleOrDefaultAsync(b => b.evStatName == model.evStatName);
-
-            if (existing != null)
-                return null;
-
-            var newEffortValues = _mapper.Map<EffortValues>(model);
+            var pokeIdCheck = await _context.Pokemons!
+                .SingleOrDefaultAsync(p => p.pokeID == pokeID);
+            if (pokeIdCheck == null)
+                return false;
+            EffortValues newEffortValues = new EffortValues
+            {
+                evStatName = model.evStatName,
+                eValues = model.eValues,
+                pokeID = pokeID,
+                Pokemons = pokeIdCheck
+            };
             _context.EffortValues!.Add(newEffortValues);
-
             var saved = await _context.SaveChangesAsync();
-            if (saved > 0)
-                return _mapper.Map<EffortValuesDTO?>(newEffortValues);
-
-            return null;
+            return saved > 0 ? true : false;
         }
 
         public async Task<bool> DeleteEffortValues(Guid evID)
@@ -46,28 +47,28 @@ namespace RPD_API.Repo
             return false;
         }
 
-        public async Task<List<EffortValuesDTO>> GetAllEffortValues()
-        {
-            var effortValues = await _context.EffortValues.ToListAsync();
-            return _mapper.Map<List<EffortValuesDTO>>(effortValues);
-        }
+        //public async Task<List<EffortValuesDTO>> GetAllEffortValues()
+        //{
+        //    var effortValues = await _context.EffortValues.ToListAsync();
+        //    return _mapper.Map<List<EffortValuesDTO>>(effortValues);
+        //}
 
-        public async Task<EffortValuesDTO> GetEffortValuesById(Guid evID)
-        {
-            var effortValues = await _context.EffortValues!.FindAsync(evID);
-            return _mapper.Map<EffortValuesDTO>(effortValues);
-        }
+        //public async Task<EffortValuesDTO> GetEffortValuesById(Guid evID)
+        //{
+        //    var effortValues = await _context.EffortValues!.FindAsync(evID);
+        //    return _mapper.Map<EffortValuesDTO>(effortValues);
+        //}
 
-        public async Task<bool> UpdateEffortValues(Guid evID, EffortValuesDTO model)
-        {
-            if (evID == model.evID)
-            {
-                var updateEffortValues = _mapper.Map<EffortValues>(model);
-                _context.EffortValues!.Update(updateEffortValues);
-                var check = await _context.SaveChangesAsync();
-                return check > 0 ? true : false;
-            }
-            return false;
-        }
+        //public async Task<bool> UpdateEffortValues(Guid evID, EffortValuesDTO model)
+        //{
+        //    if (evID == model.evID)
+        //    {
+        //        var updateEffortValues = _mapper.Map<EffortValues>(model);
+        //        _context.EffortValues!.Update(updateEffortValues);
+        //        var check = await _context.SaveChangesAsync();
+        //        return check > 0 ? true : false;
+        //    }
+        //    return false;
+        //}
     }
 }

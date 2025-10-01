@@ -47,8 +47,10 @@ namespace RPD_API.Helper
             CreateMap<PostMoveDTO, Move>();
 
             CreateMap<PokemonsDTO, Pokemons>();
-            CreateMap<Pokemons, PokemonsDTO>();
+            CreateMap<Pokemons, PokemonsDTO>()
+                .ForMember(dest => dest.grName, opt => opt.MapFrom(src => src.GrowthRate.grName));
             CreateMap<PostPokemonDTO, Pokemons>();
+            CreateMap<PostFullPokemonsDTO, PostPokemonDTO>();
         }
     }
 }

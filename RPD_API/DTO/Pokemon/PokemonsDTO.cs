@@ -1,7 +1,4 @@
-﻿using RPD_API.DTO;
-using RPD_API.Models;
-
-namespace RPD_API.DTO
+﻿namespace RPD_API.DTO
 {
     public class PokemonsDTO
     {
@@ -19,27 +16,23 @@ namespace RPD_API.DTO
         public double pokeFemaleRate { get; set; }
         public int pokeEggCycles { get; set; }
         public int pokeState { get; set; }
-        //growthRate
         public Guid growthRateID { get; set; }
-        public GrowthRate GrowthRate { get; set; }
-        //Image 
-        public ICollection<ImageLink> ImageLink { get; set; }
-        //EffortValues
-        public ICollection<EffortValues> EffortValues { get; set; }
-        //PokemonStats
-        public ICollection<PokemonStats> PokemonStats { get; set; }
+        public string grName { get; set; }
 
-        public ICollection<PokemonAbilitiesDTO> PokemonAbilities { get; set; }
-        //PokemonGameVersion 
-        public ICollection<PokemonGameVersion> PokemonGameVersion { get; set; }
-        //PokemonEggGroup 
-        public ICollection<PokemonEggGroup> PokemonEggGroup { get; set; }
-        //PokemonType 
-        public ICollection<PokemonType> PokemonType { get; set; }
-        //PokemonMove
-        public ICollection<PokemonMove> PokemonMove { get; set; }
-        //EvolutionChart
-        public ICollection<EvolutionChart> EvolutionChart { get; set; }
-        public ICollection<EvolutionChart> PreEvolutionChart { get; set; }
+        public ICollection<PostImageLinkDTO> ImageLink { get; set; }
+
+        public ICollection<PostPokemonsEffortValuesDTO> EffortValues { get; set; }
+
+        public ICollection<PostPokemonStatsDTO> PokemonStats { get; set; }
+
+        public ICollection<PostPokemonAbilitiesDTO> PokemonAbilities { get; set; }
+
+        public ICollection<PostPokemonGameVersionDTO> PokemonGameVersion { get; set; }
+
+        public ICollection<PostPokemonEggGroupDTO> PokemonEggGroup { get; set; }
+
+        public ICollection<PostPokemonTypeDTO> PokemonType { get; set; }
+
+        public ICollection<PostPokemonMoveDTO> PokemonMove { get; set; }
     }
 }

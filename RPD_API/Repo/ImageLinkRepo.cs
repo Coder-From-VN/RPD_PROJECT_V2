@@ -17,20 +17,21 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<ImageLinkDTO> AddImageLink(PostImageLinkDTO model)
+        public async Task<bool> AddImageLink(PostImageLinkDTO model, Guid pokeID)
         {
-            var newImageLink = _mapper.Map<ImageLink>(model);
+            var pokeIdCheck = await _context.Pokemons!
+                .SingleOrDefaultAsync(p => p.pokeID == pokeID);
+            if (pokeIdCheck == null)
+                return false;
+            ImageLink newImageLink = new ImageLink
+            {
+                imgLink = model.imgLink,
+                pokeID = pokeID,
+                Pokemons = pokeIdCheck
+            };
             _context.ImageLink!.Add(newImageLink);
             var saved = await _context.SaveChangesAsync();
-
-            if (saved > 0)
-            {
-                var ImageLinkWithPokemonName = await _context.ImageLink
-                    .Include(m => m.Pokemons)
-                    .FirstOrDefaultAsync(m => m.imgID == newImageLink.imgID);
-                return _mapper.Map<ImageLinkDTO>(ImageLinkWithPokemonName);
-            }
-            return null;
+            return saved > 0 ? true : false;
         }
 
         public async Task<bool> DeleteImageLink(Guid imgID)
@@ -45,28 +46,28 @@ namespace RPD_API.Repo
             return false;
         }
 
-        public async Task<List<ImageLinkDTO>> GetAllImageLink()
-        {
-            var imageLink = await _context.ImageLink.Include(m => m.Pokemons).ToListAsync();
-            return _mapper.Map<List<ImageLinkDTO>>(imageLink);
-        }
+        //public async Task<List<ImageLinkDTO>> GetAllImageLink()
+        //{
+        //    var imageLink = await _context.ImageLink.Include(m => m.Pokemons).ToListAsync();
+        //    return _mapper.Map<List<ImageLinkDTO>>(imageLink);
+        //}
 
-        public async Task<ImageLinkDTO> GetImageLinkById(Guid imgID)
-        {
-            var imageLink = await _context.ImageLink.Include(m => m.Pokemons).SingleOrDefaultAsync(img => img.imgID == imgID);
-            return _mapper.Map<ImageLinkDTO>(imageLink);
-        }
+        //public async Task<ImageLinkDTO> GetImageLinkById(Guid imgID)
+        //{
+        //    var imageLink = await _context.ImageLink.Include(m => m.Pokemons).SingleOrDefaultAsync(img => img.imgID == imgID);
+        //    return _mapper.Map<ImageLinkDTO>(imageLink);
+        //}
 
-        public async Task<bool> UpdateImageLink(Guid imgID, ImageLinkDTO model)
-        {
-            if (imgID == model.imgID)
-            {
-                var updateImageLink = _mapper.Map<ImageLink>(model);
-                _context.ImageLink!.Update(updateImageLink);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
-            return false;
-        }
+        //public async Task<bool> UpdateImageLink(Guid imgID, ImageLinkDTO model)
+        //{
+        //    if (imgID == model.imgID)
+        //    {
+        //        var updateImageLink = _mapper.Map<ImageLink>(model);
+        //        _context.ImageLink!.Update(updateImageLink);
+        //        var saved = await _context.SaveChangesAsync();
+        //        return saved > 0 ? true : false;
+        //    }
+        //    return false;
+        //}
     }
 }
