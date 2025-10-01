@@ -36,20 +36,20 @@ namespace RPD_API.Controllers
             var poke = await _pokeRepo.GetPokemonsById(pokeID);
             return poke == null ? NotFound() : Ok(poke);
         }
-
-        [HttpPost]
-        public async Task<IActionResult> PostPokemons(PostPokemonDTO model)
-        {
-            try
-            {
-                var newpoke = await _pokeRepo.AddPokemons(model);
-                return newpoke == null ? NotFound("Pokemon existed") : Ok(newpoke);
-            }
-            catch
-            {
-                return BadRequest();
-            }
-        }
+        //on going
+        //[HttpPost]
+        //public async Task<IActionResult> PostPokemons(PostFullPokemonsDTO model)
+        //{
+        //    try
+        //    {
+        //        var newpoke = await _pokeRepo.AddPokemons(model);
+        //        return newpoke == null ? NotFound("Pokemon existed") : Ok(newpoke);
+        //    }
+        //    catch
+        //    {
+        //        return BadRequest();
+        //    }
+        //}
         //nedd fix
         [HttpPut("{pokeID}")]
         public async Task<IActionResult> PutPokemons(Guid pokeID, [FromBody] PokemonsDTO model)

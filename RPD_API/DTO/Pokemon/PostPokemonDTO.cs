@@ -20,21 +20,5 @@ namespace RPD_API.DTO
         public int pokeState { get; set; }
 
         public Guid growthRateID { get; set; }
-
-        public ICollection<PostImageLinkDTO> ImageLink { get; set; }
-
-        public ICollection<PostPokemonsEffortValuesDTO> EffortValues { get; set; }
-
-        public ICollection<PostPokemonStatsDTO> PokemonStats { get; set; }
-
-        public ICollection<PostPokemonAbilitiesDTO> PokemonAbilities { get; set; }
-
-        public ICollection<PostPokemonGameVersionDTO> PokemonGameVersion { get; set; }
-
-        public ICollection<PostPokemonEggGroupDTO> PokemonEggGroup { get; set; }
-
-        public ICollection<PostPokemonTypeDTO> PokemonType { get; set; }
-
-        public ICollection<PostPokemonMoveDTO> PokemonMove { get; set; }
     }
 }

@@ -26,8 +26,8 @@ namespace RPD_API.Repo
 
             var newPokemons = _mapper.Map<Pokemons>(model);
             _context.Pokemons.Add(newPokemons);
-            var saved = await _context.SaveChangesAsync();
 
+            var saved = await _context.SaveChangesAsync();
             if (saved > 0)
             {
                 return _mapper.Map<PokemonsDTO>(newPokemons);
