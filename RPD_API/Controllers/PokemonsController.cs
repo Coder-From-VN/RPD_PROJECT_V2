@@ -16,6 +16,7 @@ namespace RPD_API.Controllers
             _pokeRepo = pokeRepo;
         }
 
+        //nedd fix
         [HttpGet]
         public async Task<IActionResult> GetMove()
         {
@@ -28,7 +29,7 @@ namespace RPD_API.Controllers
                 return BadRequest();
             }
         }
-
+        //nedd fix
         [HttpGet("{pokeID}")]
         public async Task<IActionResult> GetAllPokemon(Guid pokeID)
         {
@@ -49,7 +50,7 @@ namespace RPD_API.Controllers
                 return BadRequest();
             }
         }
-
+        //nedd fix
         [HttpPut("{pokeID}")]
         public async Task<IActionResult> PutPokemons(Guid pokeID, [FromBody] PokemonsDTO model)
         {
@@ -60,7 +61,7 @@ namespace RPD_API.Controllers
             var result = await _pokeRepo.UpdatePokemons(pokeID, model);
             return Ok(result);
         }
-
+        //nedd fix
         [HttpDelete("{pokeID}")]
         public async Task<IActionResult> DeletePokemons([FromRoute] Guid pokeID)
         {

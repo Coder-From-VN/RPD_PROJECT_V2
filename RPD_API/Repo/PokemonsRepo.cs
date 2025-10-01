@@ -16,7 +16,7 @@ namespace RPD_API.Repo
             _context = context;
             _mapper = mapper;
         }
-
+        //on going
         public async Task<PokemonsDTO> AddPokemons(PostPokemonDTO model)
         {
             var existing = await _context.Pokemons!.SingleOrDefaultAsync(m => m.pokeNationalNumber == model.pokeNationalNumber);
@@ -35,6 +35,7 @@ namespace RPD_API.Repo
             return null;
         }
 
+        //need fix
         public async Task<bool> DeletePokemons(Guid pokeID)
         {
             var pokemons = _context.Pokemons!.SingleOrDefault(b => b.pokeID == pokeID);
@@ -46,20 +47,20 @@ namespace RPD_API.Repo
             }
             return false;
         }
-
+        //nedd fix
         public async Task<List<PokemonsDTO>> GetAllPokemons()
         {
             //add include
             var pokemons = await _context.Pokemons.ToListAsync();
             return _mapper.Map<List<PokemonsDTO>>(pokemons);
         }
-
+        //nedd fix
         public async Task<PokemonsDTO> GetPokemonsById(Guid pokeID)
         {
             var pokemons = await _context.Pokemons.FirstOrDefaultAsync(p => p.pokeID == pokeID);
             return _mapper.Map<PokemonsDTO>(pokemons);
         }
-
+        //nedd fix
         public async Task<bool> UpdatePokemons(Guid pokeID, PokemonsDTO model)
         {
             if (pokeID == model.pokeID)
