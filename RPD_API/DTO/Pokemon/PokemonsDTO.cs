@@ -1,4 +1,6 @@
-﻿namespace RPD_API.DTO
+﻿using RPD_API.Models;
+
+namespace RPD_API.DTO
 {
     public class PokemonsDTO
     {
@@ -18,21 +20,21 @@
         public int pokeState { get; set; }
         public Guid growthRateID { get; set; }
         public string grName { get; set; }
-
-        public ICollection<PostImageLinkDTO> ImageLink { get; set; }
-
-        public ICollection<PostPokemonsEffortValuesDTO> EffortValues { get; set; }
-
-        public ICollection<PostPokemonStatsDTO> PokemonStats { get; set; }
-
-        public ICollection<PostPokemonAbilitiesDTO> PokemonAbilities { get; set; }
-
-        public ICollection<PostPokemonGameVersionDTO> PokemonGameVersion { get; set; }
-
-        public ICollection<PostPokemonEggGroupDTO> PokemonEggGroup { get; set; }
-
-        public ICollection<PostPokemonTypeDTO> PokemonType { get; set; }
-
-        public ICollection<PostPokemonMoveDTO> PokemonMove { get; set; }
+        //Image 
+        public ICollection<ImageLinkDTO> ImageLink { get; set; }
+        //EffortValues
+        public ICollection<EffortValuesDTO> EffortValues { get; set; }
+        //PokemonStats
+        public ICollection<PokemonStatsDTO> PokemonStats { get; set; }
+        //PokemonAbilities
+        public ICollection<PokemonAbilitiesDTO> PokemonAbilities { get; set; }
+        //PokemonGameVersion 
+        public ICollection<PokemonGameVersionDTO> PokemonGameVersion { get; set; }
+        //PokemonEggGroup 
+        public ICollection<PokemonEggGroupDTO> PokemonEggGroup { get; set; }
+        //PokemonType 
+        public ICollection<PokemonTypeDTO> PokemonType { get; set; }
+        //PokemonMove
+        public ICollection<PokemonMoveDTO> PokemonMove { get; set; }
     }
 }

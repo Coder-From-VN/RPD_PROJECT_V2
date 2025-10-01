@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
+using RPD_API.Service;
 
 namespace RPD_API.Controllers
 {
@@ -10,10 +11,12 @@ namespace RPD_API.Controllers
     public class PokemonsController : ControllerBase
     {
         private readonly IPokemonsRepo _pokeRepo;
+        private readonly PokemonService _pokeSer;
 
-        public PokemonsController(IPokemonsRepo pokeRepo)
+        public PokemonsController(IPokemonsRepo pokeRepo, PokemonService pokeSer)
         {
             _pokeRepo = pokeRepo;
+            _pokeSer = pokeSer;
         }
 
         //nedd fix
@@ -38,11 +41,11 @@ namespace RPD_API.Controllers
         }
         //on going
         [HttpPost]
-        public async Task<IActionResult> PostPokemons(PostPokemonDTO model)
+        public async Task<IActionResult> PostPokemons([FromBody] PostFullPokemonsDTO model)
         {
             try
             {
-                var newpoke = await _pokeRepo.AddPokemons(model);
+                var newpoke = await _pokeSer.PostFullPokemons(model);
                 return newpoke == null ? NotFound("Pokemon existed") : Ok(newpoke);
             }
             catch

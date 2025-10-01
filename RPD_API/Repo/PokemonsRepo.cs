@@ -53,6 +53,7 @@ namespace RPD_API.Repo
             var pokemons = await _context.Pokemons.Include(m => m.GrowthRate).ToListAsync();
             return _mapper.Map<List<PokemonsDTO>>(pokemons);
         }
+
         public async Task<PokemonsDTO> GetPokemonsById(Guid pokeID)
         {
             var pokemons = await _context.Pokemons.FirstOrDefaultAsync(p => p.pokeID == pokeID);

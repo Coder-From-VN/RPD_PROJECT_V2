@@ -1,4 +1,4 @@
-﻿namespace RPD_API.DTO.StatType
+﻿namespace RPD_API.DTO
 {
     public class StatTypeDTO
     {

@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RPD_API.Repo.IRepo;
 using RPD_API.Repo;
 using System.Text.Json.Serialization;
+using RPD_API.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -33,6 +34,7 @@ builder.Services.AddScoped<IPokemonEggGroupRepo, PokemonEggGroupRepo>();
 builder.Services.AddScoped<IPokemonGameVersionRepo, PokemonGameVersionRepo>();
 builder.Services.AddScoped<IPokemonMoveRepo, PokemonMoveRepo>();
 builder.Services.AddScoped<IEvolutionChartRepo, EvolutionChartRepo>();
+builder.Services.AddScoped<PokemonService>();
 //dependeci injection
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle

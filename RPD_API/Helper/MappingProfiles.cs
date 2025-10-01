@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using RPD_API.DTO;
-using RPD_API.DTO.StatType;
 using RPD_API.Models;
 
 namespace RPD_API.Helper
@@ -39,7 +38,6 @@ namespace RPD_API.Helper
 
             CreateMap<ImageLink, ImageLinkDTO>();
             CreateMap<ImageLinkDTO, ImageLink>();
-            CreateMap<ImageLink, ImageLinkDTO>().ForMember(dest => dest.pokeName, opt => opt.MapFrom(src => src.Pokemons.pokeName));
 
             CreateMap<MoveDTO, Move>();
             CreateMap<Move, MoveDTO>()
