@@ -50,7 +50,16 @@ namespace RPD_API.Repo
         public async Task<List<PokemonsDTO>> GetAllPokemons()
         {
             //add include
-            var pokemons = await _context.Pokemons.Include(m => m.GrowthRate).ToListAsync();
+            var pokemons = await _context.Pokemons.Include(m => m.GrowthRate)
+                                                  .Include(img => img.ImageLink)
+                                                  .Include(ev => ev.EffortValues)
+                                                  .Include(ps => ps.PokemonStats)
+                                                  .Include(pgv => pgv.PokemonGameVersion)
+                                                  .Include(pa => pa.PokemonAbilities)
+                                                  .Include(eg => eg.PokemonEggGroup)
+                                                  .Include(pt => pt.PokemonType)
+                                                  .Include(pm => pm.PokemonMove)
+                                                  .ToListAsync();
             return _mapper.Map<List<PokemonsDTO>>(pokemons);
         }
 
