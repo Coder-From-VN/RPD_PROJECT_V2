@@ -8,6 +8,6 @@ namespace RPD_API.DTO
         public int Basevalue { get; set; }
         public int minValue { get; set; }
         public int MaxValue { get; set; }
-        public StatType StatType { get; set; }
+        public StatTypeDTO StatType { get; set; }
     }
 }

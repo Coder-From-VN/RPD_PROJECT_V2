@@ -141,5 +141,10 @@ namespace RPD_API.Service
 
         }
 
+        //public async Task<bool> DeletePokemons(Guid pokeID)
+        //{
+        //    var result = false;
+        //    result = await _egRepo.DeletePokemonEggGroup(pokeID).Result;
+        //}
     }
 }

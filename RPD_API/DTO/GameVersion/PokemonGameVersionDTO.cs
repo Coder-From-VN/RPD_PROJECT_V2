@@ -8,6 +8,6 @@ namespace RPD_API.DTO
         public int pgvDexNumber { get; set; }
         public string pgvEntries { get; set; }
 
-        public GameVersion GameVersion { get; set; }
+        public GameVersionDTO GameVersion { get; set; }
     }
 }
