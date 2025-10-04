@@ -64,9 +64,10 @@ namespace RPD_API.Repo
             var abilities = _context.Abilities!.SingleOrDefault(b => b.abID == abID);
             if (abilities != null)
             {
-                abilities.abName = model.abName;
-                abilities.abDescription = model.abDescription;
-                abilities.abEffect = model.abEffect;
+                if (model.abDescription != "")
+                    abilities.abDescription = model.abDescription;
+                if (abilities.abEffect != "")
+                    abilities.abEffect = model.abEffect;
 
                 _context.Abilities!.Update(abilities);
                 var check = await _context.SaveChangesAsync();
