@@ -51,12 +51,8 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{abID}")]
-        public async Task<IActionResult> PutAbilities(Guid abID, [FromBody] AbilitiesDTO model)
+        public async Task<IActionResult> PutAbilities(Guid abID, [FromBody] PutAbilitiesDTO model)
         {
-            if (abID != model.abID)
-            {
-                return NotFound();
-            }
             await _abRepo.PutAbilities(abID, model);
             return Ok();
         }

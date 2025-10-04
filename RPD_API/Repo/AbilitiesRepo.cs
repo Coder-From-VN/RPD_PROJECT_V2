@@ -59,12 +59,16 @@ namespace RPD_API.Repo
         }
 
 
-        public async Task<bool> PutAbilities(Guid abID, AbilitiesDTO model)
+        public async Task<bool> PutAbilities(Guid abID, PutAbilitiesDTO model)
         {
-            if (abID == model.abID)
+            var abilities = _context.Abilities!.SingleOrDefault(b => b.abID == abID);
+            if (abilities != null)
             {
-                var updateAbilities = _mapper.Map<Abilities>(model);
-                _context.Abilities!.Update(updateAbilities);
+                abilities.abName = model.abName;
+                abilities.abDescription = model.abDescription;
+                abilities.abEffect = model.abEffect;
+
+                _context.Abilities!.Update(abilities);
                 var check = await _context.SaveChangesAsync();
                 return check > 0 ? true : false;
             }
