@@ -55,12 +55,17 @@ namespace RPD_API.Repo
             return _mapper.Map<GameVersionDTO>(gameVersion);
         }
 
-        public async Task<bool> UpdateGameVersion(Guid gvID, GameVersionDTO model)
+        public async Task<bool> UpdateGameVersion(Guid gvID, PutGameVersionDTO model)
         {
-            if (gvID == model.gvID)
+            var gameVersion = await _context.GameVersion!.FindAsync(gvID);
+            if (gameVersion != null)
             {
-                var updateGameVersion = _mapper.Map<GameVersion>(model);
-                _context.GameVersion!.Update(updateGameVersion);
+                if (model.gvName != "")
+                    gameVersion.gvName = model.gvName;
+                if (model.gvGen != 0)
+                    gameVersion.gvGen = model.gvGen;
+
+                _context.GameVersion!.Update(gameVersion);
                 var saved = await _context.SaveChangesAsync();
                 return saved > 0 ? true : false;
             }

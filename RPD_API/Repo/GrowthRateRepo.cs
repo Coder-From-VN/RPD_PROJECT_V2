@@ -58,12 +58,16 @@ namespace RPD_API.Repo
             return _mapper.Map<GrowthRateDTO>(growthRate);
         }
 
-        public async Task<bool> UpdateGrowthRate(Guid growthRateID, GrowthRateDTO model)
+        public async Task<bool> UpdateGrowthRate(Guid growthRateID, PutGrowthRateDTO model)
         {
-            if (growthRateID == model.growthRateID)
+            var growthRate = await _context.GrowthRate!.FindAsync(growthRateID);
+            if (growthRate != null)
             {
-                var updateBook = _mapper.Map<GrowthRate>(model);
-                _context.GrowthRate!.Update(updateBook);
+                if (model.grName != "")
+                    growthRate.grName = model.grName;
+                if (model.grTotalExp != 0)
+                    growthRate.grTotalExp = model.grTotalExp;
+                _context.GrowthRate!.Update(growthRate);
                 var saved = await _context.SaveChangesAsync();
                 return saved > 0 ? true : false;
             }

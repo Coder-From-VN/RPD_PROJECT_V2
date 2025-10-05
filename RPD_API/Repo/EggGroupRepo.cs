@@ -59,12 +59,15 @@ namespace RPD_API.Repo
             return _mapper.Map<EggGroupDTO>(eggGroup);
         }
 
-        public async Task<bool> UpdateEggGroup(Guid egID, EggGroupDTO model)
+        public async Task<bool> UpdateEggGroup(Guid egID, PutEggGroupDTO model)
         {
-            if (egID == model.egID)
+            var eggGroup = await _context.EggGroup!.FindAsync(egID);
+
+            if (eggGroup != null)
             {
-                var updateEggGroup = _mapper.Map<EggGroup>(model);
-                _context.EggGroup!.Update(updateEggGroup);
+                if (model.egName != "")
+                    eggGroup.egName = model.egName;
+                _context.EggGroup!.Update(eggGroup);
                 var check = await _context.SaveChangesAsync();
                 return check > 0 ? true : false;
             }

@@ -51,18 +51,14 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{gvID}")]
-        public async Task<IActionResult> UpdateType(Guid gvID, [FromBody] GameVersionDTO model)
+        public async Task<IActionResult> PutGameVersion(Guid gvID, [FromBody] PutGameVersionDTO model)
         {
-            if (gvID != model.gvID)
-            {
-                return NotFound();
-            }
             var output = await _gvRepo.UpdateGameVersion(gvID, model);
             return Ok(output);
         }
 
         [HttpDelete("{gvID}")]
-        public async Task<IActionResult> DeleteType([FromRoute] Guid gvID)
+        public async Task<IActionResult> DeleteGameVersion([FromRoute] Guid gvID)
         {
             var output = await _gvRepo.DeleteGameVersion(gvID);
             return Ok(output);

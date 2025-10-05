@@ -52,12 +52,8 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{egID}")]
-        public async Task<IActionResult> UpdateType(Guid egID, [FromBody] EggGroupDTO model)
+        public async Task<IActionResult> UpdateType(Guid egID, [FromBody] PutEggGroupDTO model)
         {
-            if (egID != model.egID)
-            {
-                return NotFound();
-            }
             var output = await _egRepo.UpdateEggGroup(egID, model);
             return Ok(output);
         }

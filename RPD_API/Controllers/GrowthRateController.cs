@@ -52,12 +52,8 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{growthRateID}")]
-        public async Task<IActionResult> UpdateGrowthRate(Guid growthRateID, [FromBody] GrowthRateDTO model)
+        public async Task<IActionResult> PutGrowthRate(Guid growthRateID, [FromBody] PutGrowthRateDTO model)
         {
-            if (growthRateID != model.growthRateID)
-            {
-                return NotFound();
-            }
             var output = await _grRepo.UpdateGrowthRate(growthRateID, model);
             return Ok(output);
         }
