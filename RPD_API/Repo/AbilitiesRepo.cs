@@ -66,7 +66,7 @@ namespace RPD_API.Repo
             {
                 if (model.abDescription != "")
                     abilities.abDescription = model.abDescription;
-                if (abilities.abEffect != "")
+                if (model.abEffect != "")
                     abilities.abEffect = model.abEffect;
 
                 _context.Abilities!.Update(abilities);
