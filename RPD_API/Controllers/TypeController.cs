@@ -50,12 +50,8 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{typesID}")]
-        public async Task<IActionResult> UpdateTypes(Guid typesID, [FromBody] TypesDTO model)
+        public async Task<IActionResult> UpdateTypes(Guid typesID, [FromBody] PostTypesDTO model)
         {
-            if (typesID != model.typesID)
-            {
-                return NotFound();
-            }
             var result = await _typesRepo.UpdateTypes(typesID, model);
             return Ok(result);
         }

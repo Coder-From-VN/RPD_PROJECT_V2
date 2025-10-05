@@ -56,12 +56,14 @@ namespace RPD_API.Repo
             return _mapper.Map<TypesDTO>(type);
         }
 
-        public async Task<bool> UpdateTypes(Guid typeID, TypesDTO model)
+        public async Task<bool> UpdateTypes(Guid typeID, PostTypesDTO model)
         {
-            if (typeID == model.typesID)
+            var type = await _context.Types!.FindAsync(typeID);
+            if (type != null)
             {
-                var updateType = _mapper.Map<Models.Types>(model);
-                _context.Types!.Update(updateType);
+                if (model.typesName != "")
+                    type.typesName = model.typesName;
+                _context.Types!.Update(type);
                 var saved = await _context.SaveChangesAsync();
                 return saved > 0 ? true : false;
             }

@@ -50,18 +50,14 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{moveID}")]
-        public async Task<IActionResult> UpdateImageLink(Guid moveID, [FromBody] MoveDTO model)
+        public async Task<IActionResult> PutMove(Guid moveID, [FromBody] PutMoveDTO model)
         {
-            if (moveID != model.moveID)
-            {
-                return NotFound();
-            }
             var result = await _mRepo.UpdateMove(moveID, model);
             return Ok(result);
         }
 
         [HttpDelete("{moveID}")]
-        public async Task<IActionResult> DeleteImageLink([FromRoute] Guid moveID)
+        public async Task<IActionResult> DeleteMove([FromRoute] Guid moveID)
         {
             var result = await _mRepo.DeleteMove(moveID);
             return Ok(result);

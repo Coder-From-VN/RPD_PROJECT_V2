@@ -63,12 +63,30 @@ namespace RPD_API.Repo
             return _mapper.Map<MoveDTO>(move);
         }
 
-        public async Task<bool> UpdateMove(Guid moveID, MoveDTO model)
+        public async Task<bool> UpdateMove(Guid moveID, PutMoveDTO model)
         {
-            if (moveID == model.moveID)
+            var move = await _context.Move.Include(m => m.Types).FirstOrDefaultAsync(m => m.moveID == moveID);
+
+            if (move != null)
             {
-                var updateMove = _mapper.Map<Move>(model);
-                _context.Move!.Update(updateMove);
+                if (model.moveDamageClass != "")
+                    move.moveDamageClass = model.moveDamageClass;
+                if (model.moveName != "")
+                    move.moveName = model.moveName;
+                if (model.movePower != 0)
+                    move.movePower = model.movePower;
+                if (model.moveAccuracy != 0)
+                    move.moveAccuracy = model.moveAccuracy;
+                if (model.movePP != 0)
+                    move.movePP = model.movePP;
+                if (model.movePriority != 0)
+                    move.movePriority = model.movePriority;
+                if (model.moveDescription != "")
+                    move.moveDescription = model.moveDescription;
+                if (model.typesID != Guid.Empty)
+                    move.typesID = model.typesID;
+
+                _context.Move!.Update(move);
                 var saved = await _context.SaveChangesAsync();
                 return saved > 0 ? true : false;
             }

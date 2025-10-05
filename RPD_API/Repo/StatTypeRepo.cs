@@ -55,12 +55,14 @@ namespace RPD_API.Repo
             return _mapper.Map<StatTypeDTO>(statType);
         }
 
-        public async Task<bool> UpdateStatType(Guid statTypeID, StatTypeDTO model)
+        public async Task<bool> UpdateStatType(Guid statTypeID, PostStatTypeDTO model)
         {
-            if (statTypeID == model.stID)
+            var statType = await _context.StatType!.FindAsync(statTypeID);
+            if (statType != null)
             {
-                var updateType = _mapper.Map<StatType>(model);
-                _context.StatType!.Update(updateType);
+                if (model.stName != "")
+                    statType.stName = model.stName;
+                _context.StatType!.Update(statType);
                 var saved = await _context.SaveChangesAsync();
                 return saved > 0 ? true : false;
             }

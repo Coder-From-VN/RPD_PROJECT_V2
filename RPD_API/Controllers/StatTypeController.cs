@@ -51,12 +51,8 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{statTypeID}")]
-        public async Task<IActionResult> UpdateGrowthRate(Guid statTypeID, [FromBody] StatTypeDTO model)
+        public async Task<IActionResult> UpdateGrowthRate(Guid statTypeID, [FromBody] PostStatTypeDTO model)
         {
-            if (statTypeID != model.stID)
-            {
-                return NotFound();
-            }
             var result = await _stRepo.UpdateStatType(statTypeID, model);
             return Ok(result);
         }
