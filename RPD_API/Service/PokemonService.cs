@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
+using RPD_API.DTO.Pokemon;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 
@@ -138,6 +139,31 @@ namespace RPD_API.Service
             }
 
             return await _pokeRepo.GetPokemonsById(newPokemonID);
+
+        }
+
+        public async Task<PokemonsDTO> PutFullPokemons(Guid pokeId, PutFullPokemonsDTO model)
+        {
+            var pokemon = await _pokeRepo.FindPokemonsById(pokeId);
+
+            //Add PokemonEggGroup
+
+            //Add PokemonGameVersion
+
+            //Add PokemonMove
+
+            //Add PokemonTypes
+
+            //Add PokemonTypes
+
+            //Add PokemonAbilities
+
+            //Add PokemonAbilities
+
+            //Add PokemonAbilities
+
+
+            return _mapper.Map<PokemonsDTO>(pokemon);
 
         }
 

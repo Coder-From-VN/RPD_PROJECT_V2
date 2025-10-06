@@ -16,7 +16,7 @@ namespace RPD_API.Repo
             _context = context;
             _mapper = mapper;
         }
-        //on going
+
         public async Task<PokemonsDTO> AddPokemons(PostPokemonDTO model)
         {
             var existing = await _context.Pokemons!.SingleOrDefaultAsync(m => m.pokeNationalNumber == model.pokeNationalNumber);
@@ -79,6 +79,28 @@ namespace RPD_API.Repo
                 return saved > 0 ? true : false;
             }
             return false;
+        }
+
+        public async Task<Pokemons> FindPokemonsById(Guid pokeID)
+        {
+            var pokemons = await _context.Pokemons.Include(m => m.GrowthRate)
+                                                  .Include(img => img.ImageLink)
+                                                  .Include(ev => ev.EffortValues)
+                                                  .Include(ps => ps.PokemonStats)
+                                                    .ThenInclude(s => s.StatType)
+                                                  .Include(pgv => pgv.PokemonGameVersion)
+                                                    .ThenInclude(gv => gv.GameVersion)
+                                                  .Include(pa => pa.PokemonAbilities)
+                                                    .ThenInclude(a => a.Abilities)
+                                                  .Include(eg => eg.PokemonEggGroup)
+                                                    .ThenInclude(e => e.EggGroup)
+                                                  .Include(pt => pt.PokemonType)
+                                                    .ThenInclude(t => t.Types)
+                                                  .Include(pm => pm.PokemonMove)
+                                                    .ThenInclude(pt => pt.Move)
+                                                    .ThenInclude(t => t.Types)
+                                                  .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+            return pokemons;
         }
     }
 }
