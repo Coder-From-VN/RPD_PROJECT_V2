@@ -53,22 +53,27 @@ namespace RPD_API.Repo
         //    return _mapper.Map<List<EffortValuesDTO>>(effortValues);
         //}
 
-        //public async Task<EffortValuesDTO> GetEffortValuesById(Guid evID)
-        //{
-        //    var effortValues = await _context.EffortValues!.FindAsync(evID);
-        //    return _mapper.Map<EffortValuesDTO>(effortValues);
-        //}
+        public async Task<bool> UpdateEffortValues(Guid pokeID, ICollection<PutEffortValuesDTO> model)
+        {
+            var pokemon = await _context.Pokemons
+                .Include(ev => ev.EffortValues)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
 
-        //public async Task<bool> UpdateEffortValues(Guid evID, EffortValuesDTO model)
-        //{
-        //    if (evID == model.evID)
-        //    {
-        //        var updateEffortValues = _mapper.Map<EffortValues>(model);
-        //        _context.EffortValues!.Update(updateEffortValues);
-        //        var check = await _context.SaveChangesAsync();
-        //        return check > 0 ? true : false;
-        //    }
-        //    return false;
-        //}
+            if (pokemon == null)
+                return false;
+
+            foreach (var ev in pokemon.EffortValues)
+            {
+                var dto = model.FirstOrDefault(m => m.evStatName == ev.evStatName);
+                if (dto != null)
+                {
+                    ev.eValues = dto.eValues;
+                    ev.evStatName = dto.evStatName;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

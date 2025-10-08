@@ -51,5 +51,29 @@ namespace RPD_API.Repo
             }
             return false;
         }
+
+        public async Task<bool> UpdatePokemonStats(Guid pokeID, ICollection<PutPokemonStatsDTO> model)
+        {
+            var pokemon = await _context.Pokemons
+                .Include(p => p.PokemonStats)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+
+            if (pokemon == null)
+                return false;
+
+            foreach (var stat in pokemon.PokemonStats)
+            {
+                var dto = model.FirstOrDefault(m => m.stID == stat.stID);
+                if (dto != null)
+                {
+                    stat.Basevalue = dto.Basevalue;
+                    stat.minValue = dto.minValue;
+                    stat.MaxValue = dto.MaxValue;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

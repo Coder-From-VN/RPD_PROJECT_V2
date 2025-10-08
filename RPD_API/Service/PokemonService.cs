@@ -1,7 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
-using RPD_API.DTO.Pokemon;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 
@@ -93,7 +92,7 @@ namespace RPD_API.Service
                 await _pokeRepo.DeletePokemons(newPokemonID);
                 return null;
             }
-            //Add PokemonTypes
+            //Add PokemonStats
             var checkPokemonST = false;
             foreach (var pst in model.PokemonStats)
             {
@@ -115,7 +114,7 @@ namespace RPD_API.Service
                 await _pokeRepo.DeletePokemons(newPokemonID);
                 return null;
             }
-            //Add PokemonAbilities
+            //Add ImageLink
             var checkImage = false;
             foreach (var a in model.ImageLink)
             {
@@ -126,7 +125,7 @@ namespace RPD_API.Service
                 await _pokeRepo.DeletePokemons(newPokemonID);
                 return null;
             }
-            //Add PokemonAbilities
+            //Add EffortValues
             var checkEV = false;
             foreach (var ev in model.EffortValues)
             {
@@ -145,32 +144,42 @@ namespace RPD_API.Service
         public async Task<PokemonsDTO> PutFullPokemons(Guid pokeId, PutFullPokemonsDTO model)
         {
             var pokemon = await _pokeRepo.FindPokemonsById(pokeId);
+            if (pokemon == null)
+                return null;
+            //Put PutImageLinkDTO
+            await _imgRepo.UpdateImageLink(pokeId, model.ImageLink);
+            //Put EV
+            await _evRepo.UpdateEffortValues(pokeId, model.EffortValues);
+            //Put PokemonStats
+            await _pstRepo.UpdatePokemonStats(pokeId, model.PokemonStats);
 
-            //Add PokemonEggGroup
-
-            //Add PokemonGameVersion
-
-            //Add PokemonMove
-
-            //Add PokemonTypes
-
-            //Add PokemonTypes
-
-            //Add PokemonAbilities
-
-            //Add PokemonAbilities
-
-            //Add PokemonAbilities
-
-
-            return _mapper.Map<PokemonsDTO>(pokemon);
+            return _mapper.Map<PokemonsDTO>(await _pokeRepo.FindPokemonsById(pokeId));
 
         }
 
-        //public async Task<bool> DeletePokemons(Guid pokeID)
-        //{
-        //    var result = false;
-        //    result = await _egRepo.DeletePokemonEggGroup(pokeID).Result;
-        //}
+        public async Task<bool> DeletePokemons(Guid pokeID)
+        {
+            var pokemon = await _pokeRepo.FindPokemonsById(pokeID);
+            if (pokemon == null)
+                return false;
+            //Delete ImageLink
+            foreach (var item in pokemon.ImageLink)
+            {
+                await _imgRepo.DeleteImageLink(item.pokeID);
+            }
+            //Delete EV
+            foreach (var item in pokemon.EffortValues)
+            {
+                await _imgRepo.DeleteImageLink(item.evID);
+            }
+            //Delete PokemonStats
+            foreach (var item in pokemon.PokemonStats)
+            {
+                await _pstRepo.DeletePokemonStats(pokeID, item.stID);
+            }
+
+
+            return false;
+        }
     }
 }

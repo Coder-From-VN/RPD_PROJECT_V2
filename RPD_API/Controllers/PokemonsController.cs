@@ -55,13 +55,9 @@ namespace RPD_API.Controllers
         }
         //nedd fix
         [HttpPut("{pokeID}")]
-        public async Task<IActionResult> PutPokemons(Guid pokeID, [FromBody] PokemonsDTO model)
+        public async Task<IActionResult> PutPokemons(Guid pokeID, [FromBody] PutFullPokemonsDTO model)
         {
-            if (pokeID != model.pokeID)
-            {
-                return NotFound();
-            }
-            var result = await _pokeRepo.UpdatePokemons(pokeID, model);
+            var result = await _pokeSer.PutFullPokemons(pokeID, model);
             return Ok(result);
         }
         //nedd fix
