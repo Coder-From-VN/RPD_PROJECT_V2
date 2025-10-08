@@ -49,6 +49,7 @@ namespace RPD_API.Helper
                 .ForMember(dest => dest.grName, opt => opt.MapFrom(src => src.GrowthRate.grName));
             CreateMap<PostPokemonDTO, Pokemons>();
             CreateMap<PostFullPokemonsDTO, PostPokemonDTO>();
+            CreateMap<PutFullPokemonsDTO, PutPokemonDTO>().ReverseMap();
 
             CreateMap<ImageLink, ImageLinkDTO>().ReverseMap();
             CreateMap<EffortValues, EffortValuesDTO>().ReverseMap();

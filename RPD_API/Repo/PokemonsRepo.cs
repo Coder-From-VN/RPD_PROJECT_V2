@@ -69,16 +69,32 @@ namespace RPD_API.Repo
             return _mapper.Map<PokemonsDTO>(pokemons);
         }
 
-        public async Task<bool> UpdatePokemons(Guid pokeID, PokemonsDTO model)
+        public async Task<bool> UpdatePokemons(Guid pokeID, PutPokemonDTO model)
         {
-            if (pokeID == model.pokeID)
-            {
-                var updatePokemons = _mapper.Map<Pokemons>(model);
-                _context.Pokemons!.Update(updatePokemons);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
-            return false;
+            var pokemon = await _context.Pokemons.FirstOrDefaultAsync(p => p.pokeID == pokeID);
+
+            if (pokemon == null)
+                return false;
+
+            // Map manually or use AutoMapper here
+            pokemon.pokeNationalNumber = model.pokeNationalNumber;
+            pokemon.pokeName = model.pokeName;
+            pokemon.pokeDescription = model.pokeDescription;
+            pokemon.pokeSpecies = model.pokeSpecies;
+            pokemon.pokeHeight = model.pokeHeight;
+            pokemon.pokeWidth = model.pokeWidth;
+            pokemon.pokeCatchRate = model.pokeCatchRate;
+            pokemon.pokeBaseFriendship = model.pokeBaseFriendship;
+            pokemon.pokeBaseExp = model.pokeBaseExp;
+            pokemon.pokeMaleRate = model.pokeMaleRate;
+            pokemon.pokeFemaleRate = model.pokeFemaleRate;
+            pokemon.pokeEggCycles = model.pokeEggCycles;
+            pokemon.pokeState = model.pokeState;
+            pokemon.growthRateID = model.growthRateID;
+
+            _context.Pokemons.Update(pokemon);
+            await _context.SaveChangesAsync();
+            return true;
         }
 
         public async Task<Pokemons> FindPokemonsById(Guid pokeID)

@@ -1,9 +1,8 @@
-﻿using RPD_API.DTO;
-
-namespace RPD_API.DTO
+﻿namespace RPD_API.DTO
 {
-    public class PostPokemonDTO
+    public class PutPokemonDTO
     {
+        public Guid pokeID { get; set; }
         public int pokeNationalNumber { get; set; }
         public string pokeName { get; set; }
         public string pokeDescription { get; set; }
@@ -17,7 +16,6 @@ namespace RPD_API.DTO
         public double pokeFemaleRate { get; set; }
         public int pokeEggCycles { get; set; }
         public int pokeState { get; set; }
-
         public Guid growthRateID { get; set; }
     }
 }

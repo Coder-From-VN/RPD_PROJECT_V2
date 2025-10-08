@@ -49,5 +49,28 @@ namespace RPD_API.Repo
             }
             return false;
         }
+
+        public async Task<bool> UpdatePokemonAbilities(Guid pokeID, ICollection<PutPokemonGameVersionDTO> model)
+        {
+            var pokemon = await _context.Pokemons
+        .Include(p => p.PokemonGameVersion)
+        .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+
+            if (pokemon == null)
+                return false;
+
+            foreach (var version in pokemon.PokemonGameVersion)
+            {
+                var dto = model.FirstOrDefault(m => m.gvID == version.gvID);
+                if (dto != null)
+                {
+                    version.pgvDexNumber = dto.pgvDexNumber;
+                    version.pgvEntries = dto.pgvEntries;
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

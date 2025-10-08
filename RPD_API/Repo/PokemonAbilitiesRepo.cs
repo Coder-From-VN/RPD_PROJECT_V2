@@ -36,7 +36,7 @@ namespace RPD_API.Repo
             return saved > 0 ? true : false;
         }
 
-        public async Task<bool> DeleteEffortValues(Guid pokeID, Guid abID)
+        public async Task<bool> DeletePokemonAbilities(Guid pokeID, Guid abID)
         {
             var entry = _context.PokemonAbilities!
                 .SingleOrDefault(pb => pb.abID == abID && pb.pokeID == pokeID);
@@ -47,6 +47,31 @@ namespace RPD_API.Repo
                 return check > 0 ? true : false;
             }
             return false;
+        }
+
+        public async Task<bool> UpdatePokemonAbilities(Guid pokeID, ICollection<PutPokemonAbilitiesDTO> model)
+        {
+            var pokemon = await _context.Pokemons
+                .Include(p => p.PokemonAbilities)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+
+            if (pokemon == null)
+                return false;
+
+            pokemon.PokemonAbilities.Clear();
+
+            foreach (var dto in model)
+            {
+                pokemon.PokemonAbilities.Add(new PokemonAbilities
+                {
+                    abID = dto.abID,
+                    paHiddenCheck = dto.paHiddenCheck,
+                    pokeID = pokeID
+                });
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
         }
     }
 }

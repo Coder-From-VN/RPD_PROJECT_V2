@@ -49,5 +49,48 @@ namespace RPD_API.Repo
             }
             return false;
         }
+
+        public async Task<bool> UpdatePokemonMove(Guid pokeID, ICollection<PutPokemonMoveDTO> model)
+        {
+            var pokemon = await _context.Pokemons
+       .Include(p => p.PokemonMove)
+       .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+
+            if (pokemon == null)
+                return false;
+
+            // Remove moves that are no longer in the DTO list
+            var toRemove = pokemon.PokemonMove
+                .Where(m => !model.Any(dto => dto.moveID == m.moveID))
+                .ToList();
+            _context.RemoveRange(toRemove);
+
+            // Update existing and add new
+            foreach (var dto in model)
+            {
+                var existing = pokemon.PokemonMove.FirstOrDefault(m => m.moveID == dto.moveID);
+
+                if (existing != null)
+                {
+                    // Update existing move info
+                    existing.pmLearnMethod = dto.pmLearnMethod;
+                    existing.pmLearnLevel = dto.pmLearnLevel;
+                }
+                else
+                {
+                    // Add new move record
+                    pokemon.PokemonMove.Add(new PokemonMove
+                    {
+                        pokeID = pokeID,
+                        moveID = dto.moveID,
+                        pmLearnMethod = dto.pmLearnMethod,
+                        pmLearnLevel = dto.pmLearnLevel
+                    });
+                }
+            }
+
+            await _context.SaveChangesAsync();
+            return true;
+        }
     }
 }

@@ -152,34 +152,66 @@ namespace RPD_API.Service
             await _evRepo.UpdateEffortValues(pokeId, model.EffortValues);
             //Put PokemonStats
             await _pstRepo.UpdatePokemonStats(pokeId, model.PokemonStats);
+            //Put PokemonAbilities
+            await _abRepo.UpdatePokemonAbilities(pokeId, model.PokemonAbilities);
+            //Put PokemonEggGroup
+            await _egRepo.UpdatePokemonEggGroup(pokeId, model.PokemonEggGroup);
+            //Put PokemonType
+            await _ptRepo.UpdatePokemonType(pokeId, model.PokemonType);
+            //Put pokemonMove
+            await _pmRepo.UpdatePokemonMove(pokeId, model.PokemonMove);
+            //Put pokemon
+            await _pokeRepo.UpdatePokemons(pokeId, _mapper.Map<PutPokemonDTO>(model));
 
             return _mapper.Map<PokemonsDTO>(await _pokeRepo.FindPokemonsById(pokeId));
 
         }
 
-        public async Task<bool> DeletePokemons(Guid pokeID)
+        public async Task<bool> DeleteFullPokemons(Guid pokeID)
         {
             var pokemon = await _pokeRepo.FindPokemonsById(pokeID);
             if (pokemon == null)
                 return false;
+            var check = false;
             //Delete ImageLink
             foreach (var item in pokemon.ImageLink)
             {
-                await _imgRepo.DeleteImageLink(item.pokeID);
+                check = await _imgRepo.DeleteImageLink(item.pokeID);
             }
             //Delete EV
             foreach (var item in pokemon.EffortValues)
             {
-                await _imgRepo.DeleteImageLink(item.evID);
+                check = await _imgRepo.DeleteImageLink(item.evID);
             }
             //Delete PokemonStats
             foreach (var item in pokemon.PokemonStats)
             {
-                await _pstRepo.DeletePokemonStats(pokeID, item.stID);
+                check = await _pstRepo.DeletePokemonStats(pokeID, item.stID);
             }
+            //Delete PokemonAbilities
+            foreach (var item in pokemon.PokemonAbilities)
+            {
+                await _abRepo.DeletePokemonAbilities(pokeID, item.abID);
+            }
+            //Delete PokemonEggGroup
+            foreach (var item in pokemon.PokemonEggGroup)
+            {
+                check = await _egRepo.DeletePokemonEggGroup(pokeID, item.egID);
+            }
+            //Delete PokemonType
+            foreach (var item in pokemon.PokemonType)
+            {
+                check = await _ptRepo.DeletePokemonType(pokeID, item.typesID);
+            }
+            //Delete PokemonMove
+            foreach (var item in pokemon.PokemonMove)
+            {
+                check = await _pmRepo.DeletePokemonMove(pokeID, item.moveID);
+            }
+            //Delete Pokemon
+            check = await _pokeRepo.DeletePokemons(pokeID);
 
-
-            return false;
+            return check;
         }
     }
 }
