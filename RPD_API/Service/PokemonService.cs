@@ -1,7 +1,5 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
-using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Service
