@@ -98,6 +98,11 @@ StyleCopReport.xml
 *.svclog
 *.scc
 
+# Ignore appsettings files
+appsettings.json
+appsettings.Development.json
+appsettings.*.json
+
 # Chutzpah Test files
 _Chutzpah*
 
@@ -361,8 +366,3 @@ MigrationBackup/
 
 # Fody - auto-generated XML schema
 FodyWeavers.xsd
-
-# Ignore appsettings files
-appsettings.json
-appsettings.Development.json
-appsettings.*.json
