@@ -15,6 +15,7 @@ namespace RPD_API.Service
         private readonly IPokemonAbilitiesRepo _abRepo;
         private readonly IImageLinkRepo _imgRepo;
         private readonly IEffortValuesRepo _evRepo;
+        private readonly IEvolutionChartRepo _evoRepo;
         private readonly IMapper _mapper;
 
         public PokemonService(IPokemonsRepo pokeRepo,
@@ -26,6 +27,7 @@ namespace RPD_API.Service
             IPokemonAbilitiesRepo abRepo,
             IImageLinkRepo imgRepo,
             IEffortValuesRepo evRepo,
+            IEvolutionChartRepo evoRepo,
             IMapper mapper)
         {
             _pokeRepo = pokeRepo;
@@ -38,6 +40,7 @@ namespace RPD_API.Service
             _imgRepo = imgRepo;
             _evRepo = evRepo;
             _mapper = mapper;
+            _evoRepo = evoRepo;
         }
 
         public async Task<PokemonsDTO> PostFullPokemons(PostFullPokemonsDTO model)
@@ -134,6 +137,29 @@ namespace RPD_API.Service
                 await _pokeRepo.DeletePokemons(newPokemonID);
                 return null;
             }
+            //Add preEvolution
+            var checkEvo = false;
+            foreach (var ev in model.PreEvolutionChart)
+            {
+                checkEV = _evoRepo.AddEvolutionChart(ev).Result;
+            }
+            if (!checkEvo)
+            {
+                await _pokeRepo.DeletePokemons(newPokemonID);
+                return null;
+            }
+            //Add Evolution
+            var checkEvo2 = false;
+            foreach (var ev in model.EvolutionChart)
+            {
+                checkEvo2 = _evoRepo.AddEvolutionChart(ev).Result;
+            }
+            if (!checkEvo2)
+            {
+                await _pokeRepo.DeletePokemons(newPokemonID);
+                return null;
+            }
+
 
             return await _pokeRepo.GetPokemonsById(newPokemonID);
 
