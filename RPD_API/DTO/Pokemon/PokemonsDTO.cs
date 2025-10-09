@@ -36,5 +36,8 @@ namespace RPD_API.DTO
         public ICollection<PokemonTypeDTO> PokemonType { get; set; }
         //PokemonMove
         public ICollection<PokemonMoveDTO> PokemonMove { get; set; }
+        //EvolutionChart
+        public ICollection<EvolutionChartDTO> EvolutionChart { get; set; }
+        public ICollection<EvolutionChartDTO> PreEvolutionChart { get; set; }
     }
 }

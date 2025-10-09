@@ -49,17 +49,19 @@ namespace RPD_API.Repo
 
         public async Task<List<PokemonsDTO>> GetAllPokemons()
         {
-            //add include
-            var pokemons = await _context.Pokemons.Include(m => m.GrowthRate)
-                                                  .Include(img => img.ImageLink)
-                                                  .Include(ev => ev.EffortValues)
-                                                  .Include(ps => ps.PokemonStats).ThenInclude(s => s.StatType)
-                                                  .Include(pgv => pgv.PokemonGameVersion).ThenInclude(gv => gv.GameVersion)
-                                                  .Include(pa => pa.PokemonAbilities).ThenInclude(a => a.Abilities)
-                                                  .Include(eg => eg.PokemonEggGroup).ThenInclude(e => e.EggGroup)
-                                                  .Include(pt => pt.PokemonType).ThenInclude(t => t.Types)
-                                                  .Include(pm => pm.PokemonMove).ThenInclude(pt => pt.Move).ThenInclude(t => t.Types)
-                                                  .ToListAsync();
+            var pokemons = await _context.Pokemons
+                .Include(m => m.GrowthRate)
+                .Include(img => img.ImageLink)
+                .Include(ev => ev.EffortValues)
+                .Include(ps => ps.PokemonStats).ThenInclude(s => s.StatType)
+                .Include(pgv => pgv.PokemonGameVersion).ThenInclude(gv => gv.GameVersion)
+                .Include(pa => pa.PokemonAbilities).ThenInclude(a => a.Abilities)
+                .Include(eg => eg.PokemonEggGroup).ThenInclude(e => e.EggGroup)
+                .Include(pt => pt.PokemonType).ThenInclude(t => t.Types)
+                .Include(pm => pm.PokemonMove).ThenInclude(pt => pt.Move).ThenInclude(t => t.Types)
+                .Include(p => p.EvolutionChart).ThenInclude(e => e.PrePokemons).ThenInclude(p2 => p2.ImageLink)
+                .Include(p => p.PreEvolutionChart).ThenInclude(e => e.Pokemons).ThenInclude(p2 => p2.ImageLink)
+                .ToListAsync();
             return _mapper.Map<List<PokemonsDTO>>(pokemons);
         }
 
