@@ -1,8 +1,9 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore;
 
 namespace RPD_API.Models
 {
-    public class rpdDbContext : DbContext
+    public class rpdDbContext : IdentityDbContext<Trainner>
     {
         public rpdDbContext(
             DbContextOptions<rpdDbContext> options) : base(options)
@@ -135,6 +136,7 @@ namespace RPD_API.Models
                 .WithMany(m => m.PokemonMove)
                 .HasForeignKey(pm => pm.moveID);
 
+            base.OnModelCreating(modelBuilder);
         }
 
     }

@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
 using RPD_API.Service;
@@ -20,7 +21,8 @@ namespace RPD_API.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetMove()
+        [Authorize]
+        public async Task<IActionResult> GetPokemons()
         {
             try
             {

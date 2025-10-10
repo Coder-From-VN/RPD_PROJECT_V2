@@ -4,6 +4,11 @@ using RPD_API.Repo.IRepo;
 using RPD_API.Repo;
 using System.Text.Json.Serialization;
 using RPD_API.Service;
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -34,7 +39,7 @@ builder.Services.AddScoped<IPokemonEggGroupRepo, PokemonEggGroupRepo>();
 builder.Services.AddScoped<IPokemonGameVersionRepo, PokemonGameVersionRepo>();
 builder.Services.AddScoped<IPokemonMoveRepo, PokemonMoveRepo>();
 builder.Services.AddScoped<IEvolutionChartRepo, EvolutionChartRepo>();
-builder.Services.AddScoped<IUserRepo, UserRepo>();
+builder.Services.AddScoped<ITrainnerRepo, TrainnerRepo>();
 builder.Services.AddScoped<PokemonService>();
 //dependeci injection
 
@@ -42,9 +47,62 @@ builder.Services.AddScoped<PokemonService>();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+//Add Identity User
+builder.Services.AddIdentity<Trainner, IdentityRole>()
+    .AddEntityFrameworkStores<rpdDbContext>().AddDefaultTokenProviders();
+
 builder.Services.AddDbContext<rpdDbContext>(op =>
 {
     op.UseSqlServer(builder.Configuration.GetConnectionString("RPD_API_DB_CS"));
+});
+
+//add authen token
+builder.Services.AddAuthentication(options =>
+{
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultScheme = JwtBearerDefaults.AuthenticationScheme;
+}).AddJwtBearer(options =>
+{
+    options.SaveToken = true;
+    options.RequireHttpsMetadata = false;
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidAudience = builder.Configuration["JWT:ValidAudience"],
+        ValidIssuer = builder.Configuration["JWT:ValidIssuer"],
+        IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(builder.Configuration["JWT:Secret"]))
+    };
+});
+
+//Add lock
+builder.Services.AddSwaggerGen(option =>
+{
+    option.SwaggerDoc("v1", new OpenApiInfo { Title = "RPD API", Version = "v1" });
+    option.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        In = ParameterLocation.Header,
+        Description = "Please enter a valid token",
+        Name = "Authorization",
+        Type = SecuritySchemeType.Http,
+        BearerFormat = "JWT",
+        Scheme = "Bearer"
+    });
+    option.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        {
+            new OpenApiSecurityScheme
+            {
+                Reference = new OpenApiReference
+                {
+                    Type=ReferenceType.SecurityScheme,
+                    Id="Bearer"
+                }
+            },
+            new string[]{}
+        }
+    });
 });
 
 var app = builder.Build();
@@ -58,6 +116,7 @@ if (app.Environment.IsDevelopment())
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();
