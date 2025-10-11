@@ -34,7 +34,6 @@ builder.Services.AddScoped<IPokemonEggGroupRepo, PokemonEggGroupRepo>();
 builder.Services.AddScoped<IPokemonGameVersionRepo, PokemonGameVersionRepo>();
 builder.Services.AddScoped<IPokemonMoveRepo, PokemonMoveRepo>();
 builder.Services.AddScoped<IEvolutionChartRepo, EvolutionChartRepo>();
-builder.Services.AddScoped<IUserRepo, UserRepo>();
 builder.Services.AddScoped<PokemonService>();
 //dependeci injection
 
