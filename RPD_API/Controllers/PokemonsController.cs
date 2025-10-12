@@ -20,7 +20,7 @@ namespace RPD_API.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetMove()
+        public async Task<IActionResult> GetAllPokemonss()
         {
             try
             {
@@ -33,7 +33,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet("{pokeID}")]
-        public async Task<IActionResult> GetAllPokemon(Guid pokeID)
+        public async Task<IActionResult> GetPokemonById(Guid pokeID)
         {
             var poke = await _pokeRepo.GetPokemonsById(pokeID);
             return poke == null ? NotFound() : Ok(poke);
