@@ -30,20 +30,20 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet("{egID}")]
-        public async Task<IActionResult> GetEggGroup(Guid egID)
+        public async Task<IActionResult> GetEggGroupById(Guid egID)
         {
             var eg = await _egRepo.GetEggGroupById(egID);
             return eg == null ? NotFound() : Ok(eg);
         }
 
         [HttpPost]
-        public async Task<IActionResult> PostType(PostEggGroupDTO model)
+        public async Task<IActionResult> PostEggGroup(PostEggGroupDTO model)
         {
             try
             {
-                var newEgID = await _egRepo.AddEggGroup(model);
+                var newEg = await _egRepo.AddEggGroup(model);
 
-                return newEgID == null ? NotFound("Egg Group already exists.") : Ok(newEgID);
+                return newEg == null ? NotFound("Egg Group already exists.") : Ok(newEg);
             }
             catch
             {
@@ -52,14 +52,14 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{egID}")]
-        public async Task<IActionResult> UpdateType(Guid egID, [FromBody] PutEggGroupDTO model)
+        public async Task<IActionResult> PutEggGroup(Guid egID, [FromBody] PutEggGroupDTO model)
         {
             var output = await _egRepo.UpdateEggGroup(egID, model);
             return Ok(output);
         }
 
         [HttpDelete("{egID}")]
-        public async Task<IActionResult> DeleteType([FromRoute] Guid egID)
+        public async Task<IActionResult> DeleteEggGroup([FromRoute] Guid egID)
         {
             var output = await _egRepo.DeleteEggGroup(egID);
             return Ok(output);

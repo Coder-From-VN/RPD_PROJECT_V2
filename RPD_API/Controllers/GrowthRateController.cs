@@ -18,7 +18,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetGrowthRate()
+        public async Task<IActionResult> GetAllGrowthRate()
         {
             try
             {
@@ -31,7 +31,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet("{growthRateID}")]
-        public async Task<IActionResult> GetGrowthRate(Guid growthRateID)
+        public async Task<IActionResult> GetGrowthRateById(Guid growthRateID)
         {
             var growthRate = await _grRepo.GetGrowthRateById(growthRateID);
             return growthRate == null ? NotFound() : Ok(growthRate);

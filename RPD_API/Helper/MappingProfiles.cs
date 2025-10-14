@@ -8,36 +8,28 @@ namespace RPD_API.Helper
     {
         public MappingProfiles()
         {
-            CreateMap<GrowthRate, GrowthRateDTO>();
-            CreateMap<GrowthRateDTO, GrowthRate>();
+            CreateMap<GrowthRate, GrowthRateDTO>().ReverseMap();
             CreateMap<PostGrowthRateDTO, GrowthRate>();
 
-            CreateMap<Types, TypesDTO>();
-            CreateMap<TypesDTO, Types>();
+            CreateMap<Types, TypesDTO>().ReverseMap();
             CreateMap<PostTypesDTO, Types>();
 
-            CreateMap<StatType, StatTypeDTO>();
-            CreateMap<StatTypeDTO, StatType>();
+            CreateMap<StatType, StatTypeDTO>().ReverseMap();
             CreateMap<PostStatTypeDTO, StatType>();
 
-            CreateMap<Abilities, AbilitiesDTO>();
-            CreateMap<AbilitiesDTO, Abilities>();
+            CreateMap<Abilities, AbilitiesDTO>().ReverseMap();
             CreateMap<PostAbilitiesDTO, Abilities>();
 
-            CreateMap<EggGroup, EggGroupDTO>();
-            CreateMap<EggGroupDTO, EggGroup>();
+            CreateMap<EggGroup, EggGroupDTO>().ReverseMap();
             CreateMap<PostEggGroupDTO, EggGroup>();
 
-            CreateMap<EffortValues, EffortValuesDTO>();
-            CreateMap<EffortValuesDTO, EffortValues>();
+            CreateMap<EffortValues, EffortValuesDTO>().ReverseMap();
             CreateMap<PostEffortValuesDTO, EffortValues>();
 
-            CreateMap<GameVersion, GameVersionDTO>();
-            CreateMap<GameVersionDTO, GameVersion>();
+            CreateMap<GameVersion, GameVersionDTO>().ReverseMap();
             CreateMap<PostGameVersionDTO, GameVersion>();
 
-            CreateMap<ImageLink, ImageLinkDTO>();
-            CreateMap<ImageLinkDTO, ImageLink>();
+            CreateMap<ImageLink, ImageLinkDTO>().ReverseMap();
 
             CreateMap<MoveDTO, Move>();
             CreateMap<Move, MoveDTO>()

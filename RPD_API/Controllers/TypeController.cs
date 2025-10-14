@@ -16,7 +16,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetTypes()
+        public async Task<IActionResult> GetAllTypes()
         {
             try
             {
@@ -29,7 +29,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet("{typesID}")]
-        public async Task<IActionResult> GetTypes(Guid typesID)
+        public async Task<IActionResult> GetTypesById(Guid typesID)
         {
             var types = await _typesRepo.GetTypesById(typesID);
             return types == null ? NotFound() : Ok(types);
@@ -50,7 +50,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{typesID}")]
-        public async Task<IActionResult> UpdateTypes(Guid typesID, [FromBody] PostTypesDTO model)
+        public async Task<IActionResult> PutTypes(Guid typesID, [FromBody] PostTypesDTO model)
         {
             var result = await _typesRepo.UpdateTypes(typesID, model);
             return Ok(result);

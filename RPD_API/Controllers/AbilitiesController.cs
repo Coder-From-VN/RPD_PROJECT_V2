@@ -53,15 +53,15 @@ namespace RPD_API.Controllers
         [HttpPut("{abID}")]
         public async Task<IActionResult> PutAbilities(Guid abID, [FromBody] PutAbilitiesDTO model)
         {
-            await _abRepo.PutAbilities(abID, model);
-            return Ok();
+            var result = await _abRepo.PutAbilities(abID, model);
+            return Ok(result);
         }
 
         [HttpDelete("{abID}")]
         public async Task<IActionResult> DeleteAbilities([FromRoute] Guid abID)
         {
-            await _abRepo.DeleteAbilities(abID);
-            return Ok();
+            var result = await _abRepo.DeleteAbilities(abID);
+            return Ok(result);
         }
     }
 }

@@ -17,7 +17,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetGameVersion()
+        public async Task<IActionResult> GetAllGameVersion()
         {
             try
             {
@@ -30,7 +30,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet("{gvID}")]
-        public async Task<IActionResult> GetGameVersion(Guid gvID)
+        public async Task<IActionResult> GetGameVersionById(Guid gvID)
         {
             var gameVersion = await _gvRepo.GetGameVersionById(gvID);
             return gameVersion == null ? NotFound() : Ok(gameVersion);

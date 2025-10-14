@@ -17,7 +17,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetStatType()
+        public async Task<IActionResult> GetAllStatType()
         {
             try
             {
@@ -30,7 +30,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet("{statTypeID}")]
-        public async Task<IActionResult> GetStatType(Guid statTypeID)
+        public async Task<IActionResult> GetStatTypeById(Guid statTypeID)
         {
             var growthRate = await _stRepo.GetStatTypeById(statTypeID);
             return growthRate == null ? NotFound() : Ok(growthRate);
@@ -51,7 +51,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpPut("{statTypeID}")]
-        public async Task<IActionResult> UpdateGrowthRate(Guid statTypeID, [FromBody] PostStatTypeDTO model)
+        public async Task<IActionResult> PutGrowthRate(Guid statTypeID, [FromBody] PostStatTypeDTO model)
         {
             var result = await _stRepo.UpdateStatType(statTypeID, model);
             return Ok(result);

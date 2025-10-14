@@ -16,7 +16,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetMove()
+        public async Task<IActionResult> GetAllMove()
         {
             try
             {
@@ -29,7 +29,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet("{moveID}")]
-        public async Task<IActionResult> GetMove(Guid moveID)
+        public async Task<IActionResult> GetMoveById(Guid moveID)
         {
             var move = await _mRepo.GetMoveById(moveID);
             return move == null ? NotFound() : Ok(move);
