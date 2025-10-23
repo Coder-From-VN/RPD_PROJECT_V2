@@ -7,7 +7,6 @@ using RPD_API.Service;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 
 builder.Services.AddControllers();
 //dependeci injection
