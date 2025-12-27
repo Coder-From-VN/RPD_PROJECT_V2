@@ -34,6 +34,7 @@ builder.Services.AddScoped<IPokemonGameVersionRepo, PokemonGameVersionRepo>();
 builder.Services.AddScoped<IPokemonMoveRepo, PokemonMoveRepo>();
 builder.Services.AddScoped<IEvolutionChartRepo, EvolutionChartRepo>();
 builder.Services.AddScoped<PokemonService>();
+
 //dependeci injection
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
