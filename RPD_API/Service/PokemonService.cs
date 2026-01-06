@@ -137,28 +137,28 @@ namespace RPD_API.Service
                 await _pokeRepo.DeletePokemons(newPokemonID);
                 return null;
             }
-            //Add preEvolution
-            var checkEvo = false;
-            foreach (var ev in model.PreEvolutionChart)
-            {
-                checkEV = _evoRepo.AddEvolutionChart(ev).Result;
-            }
-            if (!checkEvo)
-            {
-                await _pokeRepo.DeletePokemons(newPokemonID);
-                return null;
-            }
-            //Add Evolution
-            var checkEvo2 = false;
-            foreach (var ev in model.EvolutionChart)
-            {
-                checkEvo2 = _evoRepo.AddEvolutionChart(ev).Result;
-            }
-            if (!checkEvo2)
-            {
-                await _pokeRepo.DeletePokemons(newPokemonID);
-                return null;
-            }
+            ////Add preEvolution
+            //var checkEvo = false;
+            //foreach (var ev in model.PreEvolutionChart)
+            //{
+            //    checkEV = _evoRepo.AddEvolutionChart(ev).Result;
+            //}
+            //if (!checkEvo)
+            //{
+            //    await _pokeRepo.DeletePokemons(newPokemonID);
+            //    return null;
+            //}
+            ////Add Evolution
+            //var checkEvo2 = false;
+            //foreach (var ev in model.EvolutionChart)
+            //{
+            //    checkEvo2 = _evoRepo.AddEvolutionChart(ev).Result;
+            //}
+            //if (!checkEvo2)
+            //{
+            //    await _pokeRepo.DeletePokemons(newPokemonID);
+            //    return null;
+            //}
 
 
             return await _pokeRepo.GetPokemonsById(newPokemonID);
