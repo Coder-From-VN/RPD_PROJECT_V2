@@ -50,6 +50,16 @@ namespace RPD_API.Repo
         public async Task<List<PokemonsDTO>> GetAllPokemons()
         {
             var pokemons = await _context.Pokemons
+                    .Include(p => p.ImageLink)
+                    .Include(p => p.PokemonType)
+                    .ThenInclude(pt => pt.Types)
+                    .ToListAsync();
+            return _mapper.Map<List<PokemonsDTO>>(pokemons);
+        }
+
+        public async Task<PokemonDetailDTO> GetPokemonsById(Guid pokeID)
+        {
+            var pokemons = await _context.Pokemons
                 .Include(m => m.GrowthRate)
                 .Include(img => img.ImageLink)
                 .Include(ev => ev.EffortValues)
@@ -61,14 +71,10 @@ namespace RPD_API.Repo
                 .Include(pm => pm.PokemonMove).ThenInclude(pt => pt.Move).ThenInclude(t => t.Types)
                 .Include(p => p.EvolutionChart).ThenInclude(e => e.PrePokemons).ThenInclude(p2 => p2.ImageLink)
                 .Include(p => p.PreEvolutionChart).ThenInclude(e => e.Pokemons).ThenInclude(p2 => p2.ImageLink)
-                .ToListAsync();
-            return _mapper.Map<List<PokemonsDTO>>(pokemons);
-        }
-
-        public async Task<PokemonsDTO> GetPokemonsById(Guid pokeID)
-        {
-            var pokemons = await _context.Pokemons.FirstOrDefaultAsync(p => p.pokeID == pokeID);
-            return _mapper.Map<PokemonsDTO>(pokemons);
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+            if (pokemons == null)
+                return null;
+            return _mapper.Map<PokemonDetailDTO>(pokemons);
         }
 
         public async Task<bool> UpdatePokemons(Guid pokeID, PutPokemonDTO model)

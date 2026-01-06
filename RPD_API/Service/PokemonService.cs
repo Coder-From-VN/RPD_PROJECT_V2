@@ -43,7 +43,7 @@ namespace RPD_API.Service
             _evoRepo = evoRepo;
         }
 
-        public async Task<PokemonsDTO> PostFullPokemons(PostFullPokemonsDTO model)
+        public async Task<PokemonDetailDTO> PostFullPokemons(PostFullPokemonsDTO model)
         {
             var newPokemon = _pokeRepo.AddPokemons(_mapper.Map<PostPokemonDTO>(model));
             Guid newPokemonID = newPokemon.Result.pokeID;

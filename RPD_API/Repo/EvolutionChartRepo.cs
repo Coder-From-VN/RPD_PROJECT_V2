@@ -15,7 +15,7 @@ namespace RPD_API.Repo
             _context = context;
         }
 
-        public async Task<bool> AddEvolutionChart(PostEvolutionChartDTO model)
+        public async Task<bool> PostEvolutionChart(PostEvolutionChartDTO model)
         {
             var pokeCheck = await _context.Pokemons!
                  .SingleOrDefaultAsync(p => p.pokeID == model.pokeID);

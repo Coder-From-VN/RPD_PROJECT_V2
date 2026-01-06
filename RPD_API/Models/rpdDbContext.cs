@@ -52,9 +52,11 @@ namespace RPD_API.Models
                 .WithMany(p => p.EffortValues)
                 .HasForeignKey(p => p.pokeID);
             //One Pokémon can evolve into many others
+            //modelBuilder.Entity<EvolutionChart>()
+            //    .HasKey(ec => new { ec.pokeID, ec.prePokeID });
             modelBuilder.Entity<EvolutionChart>()
-                .HasKey(ec => new { ec.pokeID, ec.prePokeID });
-
+                .HasIndex(ec => new { ec.pokeID, ec.prePokeID })
+                .IsUnique();
             modelBuilder.Entity<EvolutionChart>()
                 .HasOne(ec => ec.Pokemons)
                 .WithMany(p => p.EvolutionChart)

@@ -37,10 +37,11 @@ namespace RPD_API.Helper
             CreateMap<PostMoveDTO, Move>();
 
             CreateMap<PokemonsDTO, Pokemons>();
-            CreateMap<Pokemons, PokemonsDTO>()
+            CreateMap<Pokemons, PokemonsDTO>();
+            CreateMap<Pokemons, PokemonDetailDTO>()
                 .ForMember(dest => dest.grName, opt => opt.MapFrom(src => src.GrowthRate.grName))
-                .ForMember(dest => dest.EvolutionChart, opt => opt.MapFrom(src => src.EvolutionChart))
-                .ForMember(dest => dest.PreEvolutionChart, opt => opt.MapFrom(src => src.PreEvolutionChart));
+                .ForMember(dest => dest.EvolutionChart, opt => opt.MapFrom(src => src.PreEvolutionChart))
+                .ForMember(dest => dest.PreEvolutionChart, opt => opt.MapFrom(src => src.EvolutionChart));
             CreateMap<PostPokemonDTO, Pokemons>();
             CreateMap<PostFullPokemonsDTO, PostPokemonDTO>();
             CreateMap<PutFullPokemonsDTO, PutPokemonDTO>().ReverseMap();
