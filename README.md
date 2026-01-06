@@ -11,7 +11,7 @@ A RESTful Pokémon Database API built with **ASP.NET Core 6**, **Entity Framewor
 - JWT Authentication In ASP.NET Core With Firebase
 - DTO + AutoMapper architecture
 - EF Core Repository & Service pattern
-
+- Google Login with FireBase
 ---
 
 ## 🧩 Tech Stack
