@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IPokemonAbilitiesRepo
+    public interface IPokemonAbilitiesRepo : IBaseRepository
     {
         public Task<bool> AddPokemonAbilities(PostPokemonAbilitiesDTO model, Guid pokeID);
         public Task<bool> UpdatePokemonAbilities(Guid pokeID, ICollection<PutPokemonAbilitiesDTO> model);

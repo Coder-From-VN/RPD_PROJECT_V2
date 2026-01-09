@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IMoveRepo
+    public interface IMoveRepo : IBaseRepository
     {
         public Task<List<MoveDTO>> GetAllMove();
         public Task<MoveDTO> GetMoveById(Guid moveID);

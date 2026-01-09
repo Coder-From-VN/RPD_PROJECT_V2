@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IPokemonGameVersionRepo
+    public interface IPokemonGameVersionRepo : IBaseRepository
     {
         public Task<bool> AddPokemonGameVersion(PostPokemonGameVersionDTO model, Guid pokeID);
         public Task<bool> UpdatePokemonAbilities(Guid pokeID, ICollection<PutPokemonGameVersionDTO> model);

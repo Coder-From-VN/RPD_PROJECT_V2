@@ -3,7 +3,7 @@ using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IPokemonsRepo
+    public interface IPokemonsRepo : IBaseRepository
     {
         public Task<List<PokemonsDTO>> GetAllPokemons();
         public Task<PokemonDetailDTO> GetPokemonsById(Guid pokeID);

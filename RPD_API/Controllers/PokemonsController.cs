@@ -10,12 +10,12 @@ namespace RPD_API.Controllers
     public class PokemonsController : ControllerBase
     {
         private readonly IPokemonsRepo _pokeRepo;
-        private readonly PokemonService _pokeSer;
+        private readonly IPokemonService _pokemonService;
 
-        public PokemonsController(IPokemonsRepo pokeRepo, PokemonService pokeSer)
+        public PokemonsController(IPokemonsRepo pokeRepo, IPokemonService pokemonService)
         {
             _pokeRepo = pokeRepo;
-            _pokeSer = pokeSer;
+            _pokemonService = pokemonService;
         }
 
 
@@ -44,7 +44,7 @@ namespace RPD_API.Controllers
         {
             try
             {
-                var newpoke = await _pokeSer.PostFullPokemons(model);
+                var newpoke = await _pokemonService.PostFullPokemons(model);
                 return newpoke == null ? NotFound("Pokemon existed") : Ok(newpoke);
             }
             catch
@@ -56,14 +56,14 @@ namespace RPD_API.Controllers
         [HttpPut("{pokeID}")]
         public async Task<IActionResult> PutPokemons(Guid pokeID, [FromBody] PutFullPokemonsDTO model)
         {
-            var result = await _pokeSer.PutFullPokemons(pokeID, model);
+            var result = await _pokemonService.PutFullPokemons(pokeID, model);
             return Ok(result);
         }
         //nedd fix
         [HttpDelete("{pokeID}")]
         public async Task<IActionResult> DeletePokemons([FromRoute] Guid pokeID)
         {
-            var result = await _pokeSer.DeleteFullPokemons(pokeID);
+            var result = await _pokemonService.DeleteFullPokemons(pokeID);
             return Ok(result);
         }
 

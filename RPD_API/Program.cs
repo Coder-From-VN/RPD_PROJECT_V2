@@ -1,67 +1,54 @@
 using RPD_API.Models;
 using Microsoft.EntityFrameworkCore;
-using RPD_API.Repo.IRepo;
-using RPD_API.Repo;
-using System.Text.Json.Serialization;
 using RPD_API.Service;
+using RPD_API.UnitOfWork;
+using RPD_API.Extensions;
+using RPD_API.Middleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
-
 builder.Services.AddControllers();
-//dependeci injection
-builder.Services.AddSwaggerGen();
-//ignorCycles
-builder.Services.AddControllers().AddJsonOptions(x => x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-//automappper
+//Add autoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
-//repo
-builder.Services.AddScoped<IGrowthRateRepo, GrowthRateRepo>();
-builder.Services.AddScoped<ITypesRepo, TypesRepo>();
-builder.Services.AddScoped<IStatTypeRepo, StatTypeRepo>();
-builder.Services.AddScoped<IAbilitiesRepo, AbilitiesRepo>();
-builder.Services.AddScoped<IEggGroupRepo, EggGroupRepo>();
-builder.Services.AddScoped<IEffortValuesRepo, EffortValuesRepo>();
-builder.Services.AddScoped<IGameVersionRepo, GameVersionRepo>();
-builder.Services.AddScoped<IImageLinkRepo, ImageLinkRepo>();
-builder.Services.AddScoped<IMoveRepo, MoveRepo>();
-builder.Services.AddScoped<IPokemonsRepo, PokemonsRepo>();
-builder.Services.AddScoped<IPokemonAbilitiesRepo, PokemonAbilitiesRepo>();
-builder.Services.AddScoped<IPokemonTypeRepo, PokemonTypeRepo>();
-builder.Services.AddScoped<IPokemonStatsRepo, PokemonStatsRepo>();
-builder.Services.AddScoped<IPokemonEggGroupRepo, PokemonEggGroupRepo>();
-builder.Services.AddScoped<IPokemonGameVersionRepo, PokemonGameVersionRepo>();
-builder.Services.AddScoped<IPokemonMoveRepo, PokemonMoveRepo>();
-builder.Services.AddScoped<IEvolutionChartRepo, EvolutionChartRepo>();
-builder.Services.AddScoped<PokemonService>();
 
-//dependeci injection
+builder.Services.AddRepositories();
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+builder.Services.AddScoped<IUnitOfWorkRepo, UnitOfWorkRepo>();
+builder.Services.AddScoped<IPokemonService, PokemonService>();
+
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
 builder.Services.AddDbContext<rpdDbContext>(op =>
 {
-    op.UseSqlServer(builder.Configuration.GetConnectionString("RPD_API_DB_CS"));
+    op.UseSqlServer(
+        builder.Configuration.GetConnectionString("RPD_API_DB_CS"),
+        sql => sql.EnableRetryOnFailure()
+    );
+});
+
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowFrontend",
+        policy =>
+        {
+            policy
+                .WithOrigins("http://localhost:7185")
+                .AllowAnyMethod()
+                .AllowAnyHeader();
+        });
 });
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
-//if (app.Environment.IsDevelopment())
-//{
+app.UseMiddleware<ExceptionHandlingMiddleware>();
+
+app.UseCors("AllowFrontend");
+
 app.UseSwagger();
 app.UseSwaggerUI();
-//}
-//app.UseSwaggerUI(c =>
-//{
-//    c.SwaggerEndpoint("/swagger/v1/swagger.json", "My API V1");
-//});
 
 app.UseHttpsRedirection();
-
-app.UseAuthorization();
 
 app.MapControllers();
 

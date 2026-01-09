@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IGameVersionRepo
+    public interface IGameVersionRepo : IBaseRepository
     {
         public Task<List<GameVersionDTO>> GetAllGameVersion();
         public Task<GameVersionDTO> GetGameVersionById(Guid gvID);

@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IEggGroupRepo
+    public interface IEggGroupRepo : IBaseRepository
     {
         public Task<List<EggGroupDTO>> GetAllEggGroup();
         public Task<EggGroupDTO> GetEggGroupById(Guid egID);

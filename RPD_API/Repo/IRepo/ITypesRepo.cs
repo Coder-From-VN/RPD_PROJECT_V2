@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface ITypesRepo
+    public interface ITypesRepo : IBaseRepository
     {
         public Task<List<TypesDTO>> GetAllTypes();
         public Task<TypesDTO> GetTypesById(Guid typesID);

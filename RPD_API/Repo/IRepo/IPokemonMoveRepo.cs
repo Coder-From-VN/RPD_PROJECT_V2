@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IPokemonMoveRepo
+    public interface IPokemonMoveRepo : IBaseRepository
     {
         public Task<bool> AddPokemonMove(PostPokemonMoveDTO model, Guid pokeID);
         public Task<bool> UpdatePokemonMove(Guid pokeID, ICollection<PutPokemonMoveDTO> model);

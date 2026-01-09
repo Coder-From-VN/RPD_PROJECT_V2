@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IEffortValuesRepo
+    public interface IEffortValuesRepo : IBaseRepository
     {
         //public Task<List<EffortValuesDTO>> GetAllEffortValues();
         public Task<bool> AddEffortValues(PostPokemonsEffortValuesDTO model, Guid pokeID);

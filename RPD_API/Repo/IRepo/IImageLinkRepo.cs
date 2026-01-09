@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IImageLinkRepo
+    public interface IImageLinkRepo : IBaseRepository
     {
         public Task<bool> AddImageLink(PostImageLinkDTO model, Guid pokeID);
         public Task<bool> UpdateImageLink(Guid pokeID, ICollection<PutImageLinkDTO> model);

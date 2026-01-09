@@ -3,7 +3,7 @@ using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IAbilitiesRepo
+    public interface IAbilitiesRepo : IBaseRepository
     {
         public Task<List<AbilitiesDTO>> GetAllAbilities();
         public Task<AbilitiesDTO> GetAbilitiesById(Guid abID);

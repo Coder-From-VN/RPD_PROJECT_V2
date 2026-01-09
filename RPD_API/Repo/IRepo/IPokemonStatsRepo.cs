@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IPokemonStatsRepo
+    public interface IPokemonStatsRepo : IBaseRepository
     {
         public Task<bool> AddPokemonStats(PostPokemonStatsDTO model, Guid pokeID);
         public Task<bool> DeletePokemonStats(Guid pokeID, Guid stID);

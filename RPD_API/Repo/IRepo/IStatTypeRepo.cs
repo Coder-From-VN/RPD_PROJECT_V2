@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IStatTypeRepo
+    public interface IStatTypeRepo : IBaseRepository
     {
         public Task<List<StatTypeDTO>> GetAllStatType();
         public Task<StatTypeDTO> GetStatTypeById(Guid statTypeID);
