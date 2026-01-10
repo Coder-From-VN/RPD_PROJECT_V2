@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
+using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 
 namespace RPD_API.Service

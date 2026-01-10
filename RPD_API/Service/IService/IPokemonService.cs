@@ -1,6 +1,6 @@
 ﻿using RPD_API.DTO;
 
-namespace RPD_API.Service
+namespace RPD_API.Service.IService
 {
     public interface IPokemonService
     {

@@ -4,6 +4,7 @@ using RPD_API.Service;
 using RPD_API.UnitOfWork;
 using RPD_API.Extensions;
 using RPD_API.Middleware;
+using RPD_API.Service.IService;
 
 var builder = WebApplication.CreateBuilder(args);
 
