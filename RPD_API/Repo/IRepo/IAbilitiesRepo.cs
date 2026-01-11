@@ -5,10 +5,13 @@ namespace RPD_API.Repo.IRepo
 {
     public interface IAbilitiesRepo : IBaseRepository
     {
-        public Task<List<AbilitiesDTO>> GetAllAbilities();
-        public Task<AbilitiesDTO> GetAbilitiesById(Guid abID);
-        public Task<AbilitiesDTO?> PostAbilities(PostAbilitiesDTO model);
-        public Task<bool> PutAbilities(Guid abID, PutAbilitiesDTO model);
-        public Task<bool> DeleteAbilities(Guid abID);
+        public Task<List<Abilities>> GetAllAbilities();
+        public Task<Abilities> GetAbilitiesById(Guid abID);
+        public Task PostAbilities(Abilities model);
+        public Task PutAbilities(Guid abID, Abilities model);
+        public Task DeleteAbilities(Abilities model);
+
+        public Task<Abilities?> FindAbilitiesById(Guid abID);
+        public Task<bool> CheckAbilitiesExistsByName(string abName);
     }
 }

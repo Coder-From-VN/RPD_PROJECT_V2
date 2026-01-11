@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using RPD_API.DTO;
+using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -19,26 +20,36 @@ namespace RPD_API.Service
 
         public async Task<PokemonDetailDTO> PostFullPokemons(PostFullPokemonsDTO model)
         {
-            var newPokemon = _uow.Pokemons.AddPokemons(_mapper.Map<PostPokemonDTO>(model));
-            Guid newPokemonID = newPokemon.Result.pokeID;
-            if (newPokemon == null)
+            if (await _uow.Pokemons.CheckPokemonExited(model.pokeNationalNumber))
                 return null;
+
+            var newPokemonDTO = _mapper.Map<PostPokemonDTO>(model);
+            var newPokemons = _mapper.Map<Pokemons>(newPokemonDTO);
+
+            await _uow.Pokemons.AddPokemons(newPokemons);
+            await _uow.SaveAsync();
+
+            Guid newPokemonID = newPokemons.pokeID;
+
+            //if (newPokemons == null)
+            //    return null;
+
             //Add PokemonEggGroup
             var checkPokemonEG = false;
             foreach (var pg in model.PokemonEggGroup)
             {
-                checkPokemonEG = _uow.PokemonEggGroups.AddPokemonEggGroup(pg.egID, newPokemonID).Result;
+                checkPokemonEG = await _uow.PokemonEggGroups.AddPokemonEggGroup(pg.egID, newPokemonID);
             }
             if (!checkPokemonEG)
             {
-                await _uow.Pokemons.DeletePokemons(newPokemon.Result.pokeID);
+                await _uow.Pokemons.DeletePokemons(newPokemons.pokeID);
                 return null;
             }
             //Add PokemonGameVersion
             var checkPokemonGV = false;
             foreach (var gv in model.PokemonGameVersion)
             {
-                checkPokemonGV = _uow.PokemonGameVersions.AddPokemonGameVersion(gv, newPokemonID).Result;
+                checkPokemonGV = await _uow.PokemonGameVersions.AddPokemonGameVersion(gv, newPokemonID);
             }
             if (!checkPokemonGV)
             {
@@ -49,7 +60,7 @@ namespace RPD_API.Service
             var checkPokemonM = false;
             foreach (var m in model.PokemonMove)
             {
-                checkPokemonM = _uow.PokemonMoves.AddPokemonMove(m, newPokemonID).Result;
+                checkPokemonM = await _uow.PokemonMoves.AddPokemonMove(m, newPokemonID);
             }
             if (!checkPokemonM)
             {
@@ -60,7 +71,7 @@ namespace RPD_API.Service
             var checkPokemonTypes = false;
             foreach (var t in model.PokemonType)
             {
-                checkPokemonTypes = _uow.PokemonTypes.AddPokemonType(t.typesID, newPokemonID).Result;
+                checkPokemonTypes = await _uow.PokemonTypes.AddPokemonType(t.typesID, newPokemonID);
             }
             if (!checkPokemonTypes)
             {
@@ -71,7 +82,7 @@ namespace RPD_API.Service
             var checkPokemonST = false;
             foreach (var pst in model.PokemonStats)
             {
-                checkPokemonST = _uow.PokemonStats.AddPokemonStats(pst, newPokemonID).Result;
+                checkPokemonST = await _uow.PokemonStats.AddPokemonStats(pst, newPokemonID);
             }
             if (!checkPokemonST)
             {
@@ -82,7 +93,7 @@ namespace RPD_API.Service
             var checkPokemonA = false;
             foreach (var a in model.PokemonAbilities)
             {
-                checkPokemonA = _uow.PokemonAbilities.AddPokemonAbilities(a, newPokemonID).Result;
+                checkPokemonA = await _uow.PokemonAbilities.AddPokemonAbilities(a, newPokemonID);
             }
             if (!checkPokemonST)
             {
@@ -93,7 +104,7 @@ namespace RPD_API.Service
             var checkImage = false;
             foreach (var a in model.ImageLink)
             {
-                checkImage = _uow.ImageLinks.AddImageLink(a, newPokemonID).Result;
+                checkImage = await _uow.ImageLinks.AddImageLink(a, newPokemonID);
             }
             if (!checkImage)
             {
@@ -104,13 +115,14 @@ namespace RPD_API.Service
             var checkEV = false;
             foreach (var ev in model.EffortValues)
             {
-                checkEV = _uow.EffortValues.AddEffortValues(ev, newPokemonID).Result;
+                checkEV = await _uow.EffortValues.AddEffortValues(ev, newPokemonID);
             }
             if (!checkEV)
             {
                 await _uow.Pokemons.DeletePokemons(newPokemonID);
                 return null;
             }
+
             return await _uow.Pokemons.GetPokemonsById(newPokemonID);
 
         }
@@ -187,5 +199,7 @@ namespace RPD_API.Service
 
             return check;
         }
+
+
     }
 }

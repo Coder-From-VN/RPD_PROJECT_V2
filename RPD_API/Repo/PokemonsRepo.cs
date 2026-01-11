@@ -17,22 +17,9 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<PokemonsDTO> AddPokemons(PostPokemonDTO model)
+        public async Task AddPokemons(Pokemons model)
         {
-            var existing = await _context.Pokemons!.SingleOrDefaultAsync(m => m.pokeNationalNumber == model.pokeNationalNumber);
-
-            if (existing != null)
-                return null;
-
-            var newPokemons = _mapper.Map<Pokemons>(model);
-            _context.Pokemons.Add(newPokemons);
-
-            var saved = await _context.SaveChangesAsync();
-            if (saved > 0)
-            {
-                return _mapper.Map<PokemonsDTO>(newPokemons);
-            }
-            return null;
+            await _context.Pokemons.AddAsync(model);
         }
 
         public async Task<bool> DeletePokemons(Guid pokeID)
@@ -125,6 +112,12 @@ namespace RPD_API.Repo
                                                     .ThenInclude(t => t.Types)
                                                   .FirstOrDefaultAsync(p => p.pokeID == pokeID);
             return pokemons;
+        }
+
+        public async Task<bool> CheckPokemonExited(int pokeNationalNumber)
+        {
+            return await _context.Pokemons!
+                .AnyAsync(p => p.pokeNationalNumber == pokeNationalNumber);
         }
     }
 }

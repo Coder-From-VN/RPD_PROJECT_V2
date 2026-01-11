@@ -17,47 +17,28 @@ namespace RPD_API.Repo
             _mapper = mapper;
         }
 
-        public async Task<AbilitiesDTO?> PostAbilities(PostAbilitiesDTO model)
+        public async Task<bool> CheckAbilitiesExistsByName(string abName)
         {
-            var existing = await _context.Abilities!.SingleOrDefaultAsync(b => b.abName == model.abName);
-
-            if (existing != null)
-                return null;
-
-            var newAbilities = _mapper.Map<Abilities>(model);
-            _context.Abilities!.Add(newAbilities);
-
-            var saved = await _context.SaveChangesAsync();
-            if (saved > 0)
-                return _mapper.Map<AbilitiesDTO?>(newAbilities);
-
-            return null;
+            return await _context.Abilities!
+                .AnyAsync(ab => ab.abName == abName);
         }
 
-        public async Task<bool> DeleteAbilities(Guid abID)
+        public async Task<Abilities?> FindAbilitiesById(Guid abID)
         {
-            var abilities = _context.Abilities!.SingleOrDefault(b => b.abID == abID);
-            if (abilities != null)
-            {
-                _context.Abilities!.Remove(abilities);
-                var check = await _context.SaveChangesAsync();
-                return check > 0 ? true : false;
-            }
-            return false;
+            return await _context.Abilities!
+                .FirstOrDefaultAsync(ab => ab.abID == abID);
         }
 
-        public async Task<AbilitiesDTO> GetAbilitiesById(Guid abID)
+        public async Task PostAbilities(Abilities model)
         {
-            var abilities = await _context.Abilities!.FindAsync(abID);
-            return _mapper.Map<AbilitiesDTO>(abilities);
+            await _context.Abilities.AddAsync(model);
         }
 
-        public async Task<List<AbilitiesDTO>> GetAllAbilities()
+        public Task DeleteAbilities(Abilities model)
         {
-            var abilities = await _context.Abilities.ToListAsync();
-            return _mapper.Map<List<AbilitiesDTO>>(abilities);
+            _context.Abilities.Remove(model);
+            return Task.CompletedTask;
         }
-
 
         public async Task<bool> PutAbilities(Guid abID, PutAbilitiesDTO model)
         {
@@ -76,6 +57,21 @@ namespace RPD_API.Repo
                 return check > 0 ? true : false;
             }
             return false;
+        }
+
+        public Task<List<Abilities>> GetAllAbilities()
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task<Abilities> GetAbilitiesById(Guid abID)
+        {
+            throw new NotImplementedException();
+        }
+
+        public Task PutAbilities(Guid abID, Abilities model)
+        {
+            throw new NotImplementedException();
         }
     }
 }
