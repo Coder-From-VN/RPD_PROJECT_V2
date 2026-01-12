@@ -6,47 +6,46 @@ using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
 {
-    public class EvolutionChartRepo : IEvolutionChartRepo
+    public class EvolutionChartRepo : BaseRepository<EvolutionChart>, IEvolutionChartRepo
     {
-        private readonly rpdDbContext _context;
-
-        public EvolutionChartRepo(rpdDbContext context, IMapper mapper)
+        public EvolutionChartRepo(rpdDbContext context) : base(context)
         {
-            _context = context;
         }
 
-        public async Task<bool> PostEvolutionChart(PostEvolutionChartDTO model)
+        public async Task AddAsync(EvolutionChart model)
         {
-            var pokeCheck = await _context.Pokemons!
-                 .SingleOrDefaultAsync(p => p.pokeID == model.pokeID);
-            var prePokeIdCheck = await _context.Pokemons!
-                .SingleOrDefaultAsync(p => p.pokeID == model.prePokeID);
-            if (pokeCheck == null || prePokeIdCheck == null)
-                return false;
-            EvolutionChart newEvolutionChart = new EvolutionChart
-            {
-                pokeID = model.pokeID,
-                Pokemons = pokeCheck,
-                prePokeID = model.prePokeID,
-                PrePokemons = prePokeIdCheck,
-                evoCondition = model.evoCondition,
-            };
-            _context.EvolutionChart!.Add(newEvolutionChart);
-            var saved = await _context.SaveChangesAsync();
-            return saved > 0 ? true : false;
+            await _context.EvolutionChart.AddAsync(model);
         }
 
-        public async Task<bool> DeleteEvolutionChart(Guid pokeID, Guid prePokeID)
+        public async Task<List<EvolutionChart>> GetAllAsync()
         {
-            var entry = _context.EvolutionChart!
-                 .SingleOrDefault(ec => ec.pokeID == pokeID && ec.prePokeID == prePokeID);
-            if (entry != null)
-            {
-                _context.EvolutionChart!.Remove(entry);
-                var check = await _context.SaveChangesAsync();
-                return check > 0 ? true : false;
-            }
-            return false;
+            return await _context.EvolutionChart!.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<EvolutionChart?> GetByIdAsync(Guid evoID)
+        {
+            return await _context.EvolutionChart!
+                .FirstOrDefaultAsync(evo => evo.evoID == evoID);
+        }
+
+        public Task RemoveAsync(EvolutionChart model)
+        {
+            _context.EvolutionChart.Remove(model);
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateAsync(EvolutionChart model)
+        {
+            _context.EvolutionChart!.Update(model);
+            return Task.CompletedTask;
+        }
+
+        public async Task<EvolutionChart?> FindAsync(Guid pokeID, Guid prePokeID)
+        {
+            return await _context.EvolutionChart
+                .FirstOrDefaultAsync(ec =>
+                    ec.pokeID == pokeID &&
+                    ec.prePokeID == prePokeID);
         }
     }
 }

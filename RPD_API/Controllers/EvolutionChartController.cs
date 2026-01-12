@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
+using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
 {
@@ -9,11 +10,11 @@ namespace RPD_API.Controllers
     [ApiController]
     public class EvolutionChartController : ControllerBase
     {
-        private readonly IEvolutionChartRepo _ecRepo;
+        private readonly IEvolutionChartService _evoSer;
 
-        public EvolutionChartController(IEvolutionChartRepo ecRepo)
+        public EvolutionChartController(IEvolutionChartService evoSer)
         {
-            _ecRepo = ecRepo;
+            _evoSer = evoSer;
         }
 
         [HttpPost]
@@ -21,9 +22,11 @@ namespace RPD_API.Controllers
         {
             try
             {
-                var newEg = await _ecRepo.PostEvolutionChart(model);
+                var result = await _evoSer.PostEvolutionChart(model);
 
-                return newEg == null ? NotFound("Evolution Chart Post fail") : Ok(newEg);
+                return result
+                    ? Ok()
+                    : BadRequest("Evolution Chart post failed");
             }
             catch
             {
@@ -31,11 +34,11 @@ namespace RPD_API.Controllers
             }
         }
 
-        [HttpDelete("{pokeID,prePokeID}")]
-        public async Task<IActionResult> DeleteEggGroup([FromRoute] Guid pokeID, Guid prePokeID)
+        [HttpDelete("{pokeID}/{prePokeID}")]
+        public async Task<IActionResult> DeleteEggGroup([FromRoute] Guid pokeID, [FromRoute] Guid prePokeID)
         {
-            var output = await _ecRepo.DeleteEvolutionChart(pokeID, prePokeID);
-            return Ok(output);
+            var output = await _evoSer.DeleteEvolutionChart(pokeID, prePokeID);
+            return output ? Ok() : NotFound();
         }
     }
 }

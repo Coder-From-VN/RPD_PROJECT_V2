@@ -64,14 +64,27 @@ namespace RPD_API.Helper
             CreateMap<PokemonMove, PokemonMoveDTO>().ReverseMap();
 
             CreateMap<EvolutionChart, EvolutionChartDTO>()
-    .ForMember(dest => dest.prePokemonName, opt => opt.MapFrom(src => src.PrePokemons.pokeName))
-    .ForMember(dest => dest.prePokemonImagelink, opt => opt.MapFrom(src => src.PrePokemons.ImageLink.FirstOrDefault().imgLink))
-    .ForMember(dest => dest.PokemonName, opt => opt.MapFrom(src => src.Pokemons.pokeName))
-    .ForMember(dest => dest.PokemonImagelink, opt => opt.MapFrom(src => src.Pokemons.ImageLink.FirstOrDefault().imgLink));
-            CreateMap<PostEvolutionChartDTO, EvolutionChart>();
-            CreateMap<PutEvolutionChartDTO, EvolutionChart>();
+    .ForMember(d => d.prePokemonName,
+        o => o.MapFrom(s => s.PrePokemons.pokeName))
+    .ForMember(d => d.prePokemonImagelink,
+        o => o.MapFrom(s =>
+            s.PrePokemons.ImageLink
+                .Select(i => i.imgLink)
+                .FirstOrDefault()))
+    .ForMember(d => d.PokemonName,
+        o => o.MapFrom(s => s.Pokemons.pokeName))
+    .ForMember(d => d.PokemonImagelink,
+        o => o.MapFrom(s =>
+            s.Pokemons.ImageLink
+                .Select(i => i.imgLink)
+                .FirstOrDefault()));
+            CreateMap<PostEvolutionChartDTO, EvolutionChart>()
+                .ForMember(d => d.Pokemons, o => o.Ignore())
+                .ForMember(d => d.PrePokemons, o => o.Ignore());
 
-
+            CreateMap<PutEvolutionChartDTO, EvolutionChart>()
+                .ForMember(d => d.Pokemons, o => o.Ignore())
+                .ForMember(d => d.PrePokemons, o => o.Ignore());
         }
     }
 }
