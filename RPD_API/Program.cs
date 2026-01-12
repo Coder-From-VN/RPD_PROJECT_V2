@@ -13,9 +13,9 @@ builder.Services.AddControllers();
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
 builder.Services.AddRepositories();
+builder.Services.AddServices();
 
 builder.Services.AddScoped<IUnitOfWorkRepo, UnitOfWorkRepo>();
-builder.Services.AddScoped<IPokemonService, PokemonService>();
 
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();

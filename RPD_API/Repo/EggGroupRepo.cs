@@ -7,71 +7,44 @@ using System.Xml.Linq;
 
 namespace RPD_API.Repo
 {
-    public class EggGroupRepo : IEggGroupRepo
+    public class EggGroupRepo : BaseRepository<EggGroup>, IEggGroupRepo
     {
-        private readonly rpdDbContext _context;
-        private readonly IMapper _mapper;
-
-        public EggGroupRepo(rpdDbContext context, IMapper mapper)
+        public EggGroupRepo(rpdDbContext context) : base(context)
         {
-            _context = context;
-            _mapper = mapper;
         }
 
-        public async Task<EggGroupDTO?> AddEggGroup(PostEggGroupDTO model)
+        public async Task AddAsync(EggGroup model)
         {
-            var existing = await _context.EggGroup!.SingleOrDefaultAsync(b => b.egName == model.egName);
-
-            if (existing != null)
-                return null;
-
-            var newEggGroup = _mapper.Map<EggGroup>(model);
-            _context.EggGroup!.Add(newEggGroup);
-
-            var saved = await _context.SaveChangesAsync();
-            if (saved > 0)
-                return _mapper.Map<EggGroupDTO?>(newEggGroup);
-
-            return null;
+            await _context.EggGroup.AddAsync(model);
         }
 
-        public async Task<bool> DeleteEggGroup(Guid egID)
+        public async Task<List<EggGroup>> GetAllAsync()
         {
-            var eggGroup = _context.EggGroup!.SingleOrDefault(b => b.egID == egID);
-            if (eggGroup != null)
-            {
-                _context.EggGroup!.Remove(eggGroup);
-                var check = await _context.SaveChangesAsync();
-                return check > 0 ? true : false;
-            }
-            return false;
+            return await _context.EggGroup!.AsNoTracking().ToListAsync();
         }
 
-        public async Task<List<EggGroupDTO>> GetAllEggGroup()
+        public async Task<EggGroup?> GetByIdAsync(Guid egID)
         {
-            var eggGroup = await _context.EggGroup.ToListAsync();
-            return _mapper.Map<List<EggGroupDTO>>(eggGroup);
+            return await _context.EggGroup!
+                .FirstOrDefaultAsync(ab => ab.egID == egID);
         }
 
-        public async Task<EggGroupDTO> GetEggGroupById(Guid egID)
+        public Task RemoveAsync(EggGroup model)
         {
-            var eggGroup = await _context.EggGroup!.FindAsync(egID);
-            return _mapper.Map<EggGroupDTO>(eggGroup);
+            _context.EggGroup.Remove(model);
+            return Task.CompletedTask;
         }
 
-        public async Task<bool> UpdateEggGroup(Guid egID, PutEggGroupDTO model)
+        public Task UpdateAsync(EggGroup model)
         {
-            var eggGroup = await _context.EggGroup!.FindAsync(egID);
+            _context.EggGroup!.Update(model);
+            return Task.CompletedTask;
+        }
 
-            if (eggGroup != null)
-            {
-                if (model.egName != "")
-                    eggGroup.egName = model.egName;
-                _context.EggGroup!.Update(eggGroup);
-                var check = await _context.SaveChangesAsync();
-                return check > 0 ? true : false;
-            }
-            return false;
+        public async Task<bool> ExistsByNameAsync(string egName)
+        {
+            return await _context.EggGroup!
+                .AnyAsync(ab => ab.egName == egName);
         }
     }
 }

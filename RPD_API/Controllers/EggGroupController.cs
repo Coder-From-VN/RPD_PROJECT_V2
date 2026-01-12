@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
+using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
 {
@@ -9,60 +10,47 @@ namespace RPD_API.Controllers
     [ApiController]
     public class EggGroupController : ControllerBase
     {
-        private readonly IEggGroupRepo _egRepo;
+        private readonly IEggGroupService _egSer;
 
-        public EggGroupController(IEggGroupRepo egRepo)
+        public EggGroupController(IEggGroupService egSer)
         {
-            _egRepo = egRepo;
+            _egSer = egSer;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetEggGroup()
         {
-            try
-            {
-                return Ok(await _egRepo.GetAllEggGroup());
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            return Ok(await _egSer.GetAllEggGroup());
         }
 
-        [HttpGet("{egID}")]
+        [HttpGet("{egID:guid}")]
         public async Task<IActionResult> GetEggGroupById(Guid egID)
         {
-            var eg = await _egRepo.GetEggGroupById(egID);
-            return eg == null ? NotFound() : Ok(eg);
+            var result = await _egSer.GetEggGroupById(egID);
+            return result == null ? NotFound() : Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> PostEggGroup(PostEggGroupDTO model)
         {
-            try
-            {
-                var newEg = await _egRepo.AddEggGroup(model);
 
-                return newEg == null ? NotFound("Egg Group already exists.") : Ok(newEg);
-            }
-            catch
-            {
-                return BadRequest(new { message = "Something off at Egg Group controller" });
-            }
+            var result = await _egSer.AddEggGroup(model);
+            if (result == null)
+                return Conflict("Ability already exists.");
+            return Ok(result);
+
         }
 
         [HttpPut("{egID}")]
         public async Task<IActionResult> PutEggGroup(Guid egID, [FromBody] PutEggGroupDTO model)
         {
-            var output = await _egRepo.UpdateEggGroup(egID, model);
-            return Ok(output);
+            return await _egSer.UpdateEggGroup(egID, model) ? NoContent() : NotFound();
         }
 
         [HttpDelete("{egID}")]
         public async Task<IActionResult> DeleteEggGroup([FromRoute] Guid egID)
         {
-            var output = await _egRepo.DeleteEggGroup(egID);
-            return Ok(output);
+            return await _egSer.DeleteEggGroup(egID) ? NoContent() : NotFound();
         }
     }
 }

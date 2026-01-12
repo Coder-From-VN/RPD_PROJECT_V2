@@ -44,13 +44,13 @@ namespace RPD_API.UnitOfWork
             _statTypes ??= new StatTypeRepo(_context, _mapper);
 
         public IAbilitiesRepo Abilities =>
-            _abilities ??= new AbilitiesRepo(_context, _mapper);
+            _abilities ??= new AbilitiesRepo(_context);
 
         public IEggGroupRepo EggGroups =>
             _eggGroups ??= new EggGroupRepo(_context, _mapper);
 
         public IEffortValuesRepo EffortValues =>
-            _effortValues ??= new EffortValuesRepo(_context, _mapper);
+            _effortValues ??= new EffortValuesRepo(_context);
 
         public IGameVersionRepo GameVersions =>
             _gameVersions ??= new GameVersionRepo(_context, _mapper);

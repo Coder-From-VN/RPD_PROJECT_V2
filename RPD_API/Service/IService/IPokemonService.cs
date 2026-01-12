@@ -2,7 +2,7 @@
 
 namespace RPD_API.Service.IService
 {
-    public interface IPokemonService
+    public interface IPokemonService : IBaseService
     {
         Task<PokemonDetailDTO?> PostFullPokemons(PostFullPokemonsDTO model);
 

@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
+using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
 {
@@ -8,60 +9,48 @@ namespace RPD_API.Controllers
     [ApiController]
     public class AbilitiesController : ControllerBase
     {
-        private readonly IAbilitiesRepo _abRepo;
+        private readonly IAbilitiesService _abSer;
 
-        public AbilitiesController(IAbilitiesRepo abRepo)
+        public AbilitiesController(IAbilitiesService abSer)
         {
-            _abRepo = abRepo;
+            _abSer = abSer;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAbilities()
         {
-            try
-            {
-                return Ok(await _abRepo.GetAllAbilities());
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            return Ok(await _abSer.GetAllAbilities());
         }
 
-        [HttpGet("{abID}")]
+        [HttpGet("{abID:guid}")]
         public async Task<IActionResult> GetAbilities(Guid abID)
         {
-            var type = await _abRepo.GetAbilitiesById(abID);
-            return type == null ? NotFound() : Ok(type);
+            var result = await _abSer.GetAbilitiesById(abID);
+            return result == null ? NotFound() : Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> PostAbilities(PostAbilitiesDTO model)
         {
-            try
-            {
-                var newAbID = await _abRepo.PostAbilities(model);
 
-                return newAbID == null ? NotFound("Ability already exists.") : Ok(newAbID);
-            }
-            catch
-            {
-                return BadRequest(new { message = "Something off at Ability controller" });
-            }
+            var result = await _abSer.PostAbilities(model);
+            if (result == null)
+                return Conflict("Ability already exists.");
+
+            return Ok(result);
+
         }
 
         [HttpPut("{abID}")]
         public async Task<IActionResult> PutAbilities(Guid abID, [FromBody] PutAbilitiesDTO model)
         {
-            var result = await _abRepo.PutAbilities(abID, model);
-            return Ok(result);
+            return await _abSer.PutAbilities(abID, model) ? NoContent() : NotFound();
         }
 
         [HttpDelete("{abID}")]
         public async Task<IActionResult> DeleteAbilities([FromRoute] Guid abID)
         {
-            var result = await _abRepo.DeleteAbilities(abID);
-            return Ok(result);
+            return await _abSer.DeleteAbilities(abID) ? NoContent() : NotFound();
         }
     }
 }

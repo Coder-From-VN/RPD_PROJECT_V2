@@ -12,5 +12,6 @@ namespace RPD_API.Repo.IRepo
         public Task<bool> DeletePokemons(Guid pokeID);
         public Task<Pokemons> FindPokemonsById(Guid pokeID);
         public Task<bool> CheckPokemonExited(int pokeNationalNumber);
+        public Task<Pokemons?> GetPokemonWithEVsAsync(Guid pokeID);
     }
 }

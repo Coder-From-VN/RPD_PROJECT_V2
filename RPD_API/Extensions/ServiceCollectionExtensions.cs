@@ -1,4 +1,5 @@
 ﻿using RPD_API.Repo.IRepo;
+using RPD_API.Service.IService;
 
 namespace RPD_API.Extensions
 {
@@ -9,6 +10,17 @@ namespace RPD_API.Extensions
             services.Scan(scan => scan
                 .FromAssemblyOf<IBaseRepository>()
                 .AddClasses(classes => classes.AssignableTo<IBaseRepository>())
+                .AsImplementedInterfaces()
+                .WithScopedLifetime());
+
+            return services;
+        }
+
+        public static IServiceCollection AddServices(this IServiceCollection services)
+        {
+            services.Scan(scan => scan
+                .FromAssemblyOf<IBaseService>()
+                .AddClasses(classes => classes.AssignableTo<IBaseService>())
                 .AsImplementedInterfaces()
                 .WithScopedLifetime());
 

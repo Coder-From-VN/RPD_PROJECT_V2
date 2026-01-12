@@ -119,5 +119,12 @@ namespace RPD_API.Repo
             return await _context.Pokemons!
                 .AnyAsync(p => p.pokeNationalNumber == pokeNationalNumber);
         }
+
+        public async Task<Pokemons?> GetPokemonWithEVsAsync(Guid pokeID)
+        {
+            return await _context.Pokemons
+                .Include(p => p.EffortValues)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+        }
     }
 }

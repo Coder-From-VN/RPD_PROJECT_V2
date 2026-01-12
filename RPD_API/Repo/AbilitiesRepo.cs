@@ -6,72 +6,45 @@ using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
 {
-    public class AbilitiesRepo : IAbilitiesRepo
+    public class AbilitiesRepo : BaseRepository<Abilities>, IAbilitiesRepo
     {
-        private readonly rpdDbContext _context;
-        private readonly IMapper _mapper;
-
-        public AbilitiesRepo(rpdDbContext context, IMapper mapper)
+        public AbilitiesRepo(rpdDbContext context) : base(context)
         {
-            _context = context;
-            _mapper = mapper;
         }
 
-        public async Task<bool> CheckAbilitiesExistsByName(string abName)
+        public async Task AddAsync(Abilities model)
         {
-            return await _context.Abilities!
-                .AnyAsync(ab => ab.abName == abName);
+            await _context.Abilities.AddAsync(model);
         }
 
-        public async Task<Abilities?> FindAbilitiesById(Guid abID)
+        public async Task<List<Abilities>> GetAllAsync()
+        {
+            return await _context.Abilities!.AsNoTracking().ToListAsync();
+        }
+
+        public async Task<Abilities?> GetByIdAsync(Guid abID)
         {
             return await _context.Abilities!
                 .FirstOrDefaultAsync(ab => ab.abID == abID);
         }
 
-        public async Task PostAbilities(Abilities model)
+        public Task UpdateAsync(Abilities model)
         {
-            await _context.Abilities.AddAsync(model);
+            _context.Abilities!.Update(model);
+            return Task.CompletedTask;
         }
 
-        public Task DeleteAbilities(Abilities model)
+        public Task RemoveAsync(Abilities model)
         {
             _context.Abilities.Remove(model);
             return Task.CompletedTask;
         }
 
-        public async Task<bool> PutAbilities(Guid abID, PutAbilitiesDTO model)
+        public async Task<bool> ExistsByNameAsync(string abName)
         {
-            var abilities = _context.Abilities!.SingleOrDefault(b => b.abID == abID);
-            if (abilities != null)
-            {
-                if (model.abName != "")
-                    abilities.abName = model.abName;
-                if (model.abDescription != "")
-                    abilities.abDescription = model.abDescription;
-                if (model.abEffect != "")
-                    abilities.abEffect = model.abEffect;
-
-                _context.Abilities!.Update(abilities);
-                var check = await _context.SaveChangesAsync();
-                return check > 0 ? true : false;
-            }
-            return false;
+            return await _context.Abilities!
+                .AnyAsync(ab => ab.abName == abName);
         }
 
-        public Task<List<Abilities>> GetAllAbilities()
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task<Abilities> GetAbilitiesById(Guid abID)
-        {
-            throw new NotImplementedException();
-        }
-
-        public Task PutAbilities(Guid abID, Abilities model)
-        {
-            throw new NotImplementedException();
-        }
     }
 }

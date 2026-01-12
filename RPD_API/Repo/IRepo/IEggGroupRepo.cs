@@ -1,13 +1,17 @@
 ﻿using RPD_API.DTO;
+using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
     public interface IEggGroupRepo : IBaseRepository
     {
-        public Task<List<EggGroupDTO>> GetAllEggGroup();
-        public Task<EggGroupDTO> GetEggGroupById(Guid egID);
-        public Task<EggGroupDTO?> AddEggGroup(PostEggGroupDTO model);
-        public Task<bool> UpdateEggGroup(Guid egID, PutEggGroupDTO model);
-        public Task<bool> DeleteEggGroup(Guid egID);
+        public Task AddAsync(EggGroup model);
+        public Task<List<EggGroup>> GetAllAsync();
+        public Task<EggGroup?> GetByIdAsync(Guid egID);
+        public Task UpdateAsync(EggGroup model);
+        public Task RemoveAsync(EggGroup model);
+
+        public Task<bool> ExistsByNameAsync(string egName);
+
     }
 }

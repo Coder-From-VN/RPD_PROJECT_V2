@@ -24,7 +24,15 @@ namespace RPD_API.Helper
             CreateMap<PostEggGroupDTO, EggGroup>();
 
             CreateMap<EffortValues, EffortValuesDTO>().ReverseMap();
-            CreateMap<PostEffortValuesDTO, EffortValues>();
+            CreateMap<PostEffortValuesDTO, EffortValues>()
+                .ForMember(dest => dest.pokeID,
+                    opt => opt.Ignore())   // set in service
+                .ForMember(dest => dest.Pokemons,
+                    opt => opt.Ignore());
+            CreateMap<PutEffortValuesDTO, EffortValues>()
+                .ForAllMembers(opt =>
+                    opt.Condition((src, dest, srcMember) => srcMember != null));
+
 
             CreateMap<GameVersion, GameVersionDTO>().ReverseMap();
             CreateMap<PostGameVersionDTO, GameVersion>();

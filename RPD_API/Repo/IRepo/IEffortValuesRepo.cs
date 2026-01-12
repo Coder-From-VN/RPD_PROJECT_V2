@@ -1,12 +1,14 @@
 ﻿using RPD_API.DTO;
+using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
     public interface IEffortValuesRepo : IBaseRepository
     {
-        //public Task<List<EffortValuesDTO>> GetAllEffortValues();
-        public Task<bool> AddEffortValues(PostPokemonsEffortValuesDTO model, Guid pokeID);
-        public Task<bool> UpdateEffortValues(Guid pokeID, ICollection<PutEffortValuesDTO> model);
-        public Task<bool> DeleteEffortValues(Guid evID);
+        public Task AddAsync(EffortValues model);
+        public Task<List<EffortValues>> GetAllAsync();
+        public Task<EffortValues?> GetByIdAsync(Guid abID);
+        public Task UpdateAsync(EffortValues model);
+        public Task RemoveAsync(EffortValues model);
     }
 }
