@@ -1,13 +1,15 @@
-﻿using RPD_API.DTO;
+﻿using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
     public interface IGameVersionRepo : IBaseRepository
     {
-        public Task<List<GameVersionDTO>> GetAllGameVersion();
-        public Task<GameVersionDTO> GetGameVersionById(Guid gvID);
-        public Task<GameVersionDTO?> AddGameVersion(PostGameVersionDTO model);
-        public Task<bool> UpdateGameVersion(Guid gvID, PutGameVersionDTO model);
-        public Task<bool> DeleteGameVersion(Guid gvID);
+        public Task AddAsync(GameVersion model);
+        public Task<List<GameVersion>> GetAllAsync();
+        public Task<GameVersion?> GetByIdAsync(Guid gvID);
+        public Task UpdateAsync(GameVersion model);
+        public Task RemoveAsync(GameVersion model);
+
+        public Task<bool> ExistsByNameAsync(string gvName);
     }
 }

@@ -3,73 +3,48 @@ using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
+using System.Xml.Linq;
 
 namespace RPD_API.Repo
 {
-    public class GameVersionRepo : IGameVersionRepo
+    public class GameVersionRepo : BaseRepository<GameVersion>, IGameVersionRepo
     {
-        private readonly rpdDbContext _context;
-        private readonly IMapper _mapper;
-
-        public GameVersionRepo(rpdDbContext context, IMapper mapper)
+        public GameVersionRepo(rpdDbContext context) : base(context)
         {
-            _context = context;
-            _mapper = mapper;
         }
 
-        public async Task<GameVersionDTO?> AddGameVersion(PostGameVersionDTO model)
+        public async Task AddAsync(GameVersion model)
         {
-            var existing = await _context.GameVersion!.SingleOrDefaultAsync(gv => gv.gvName == model.gvName);
-
-            if (existing != null)
-                return null;
-
-            var newGameVersion = _mapper.Map<GameVersion>(model);
-            _context.GameVersion!.Add(newGameVersion);
-            var saved = await _context.SaveChangesAsync();
-
-            return saved > 0 ? _mapper.Map<GameVersionDTO>(newGameVersion) : null;
+            await _context.GameVersion.AddAsync(model);
         }
 
-        public async Task<bool> DeleteGameVersion(Guid gvID)
+        public async Task<List<GameVersion>> GetAllAsync()
         {
-            var gameVersion = _context.GameVersion!.SingleOrDefault(b => b.gvID == gvID);
-            if (gameVersion != null)
-            {
-                _context.GameVersion!.Remove(gameVersion);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
-            return false;
+            return await _context.GameVersion!.AsNoTracking().ToListAsync();
         }
 
-        public async Task<List<GameVersionDTO>> GetAllGameVersion()
+        public async Task<GameVersion?> GetByIdAsync(Guid gvID)
         {
-            var gameVersion = await _context.GameVersion.ToListAsync();
-            return _mapper.Map<List<GameVersionDTO>>(gameVersion);
+            return await _context.GameVersion!
+                .FirstOrDefaultAsync(ab => ab.gvID == gvID);
         }
 
-        public async Task<GameVersionDTO> GetGameVersionById(Guid gvID)
+        public Task UpdateAsync(GameVersion model)
         {
-            var gameVersion = await _context.GameVersion!.FindAsync(gvID);
-            return _mapper.Map<GameVersionDTO>(gameVersion);
+            _context.GameVersion!.Update(model);
+            return Task.CompletedTask;
         }
 
-        public async Task<bool> UpdateGameVersion(Guid gvID, PutGameVersionDTO model)
+        public Task RemoveAsync(GameVersion model)
         {
-            var gameVersion = await _context.GameVersion!.FindAsync(gvID);
-            if (gameVersion != null)
-            {
-                if (model.gvName != "")
-                    gameVersion.gvName = model.gvName;
-                if (model.gvGen != 0)
-                    gameVersion.gvGen = model.gvGen;
+            _context.GameVersion.Remove(model);
+            return Task.CompletedTask;
+        }
 
-                _context.GameVersion!.Update(gameVersion);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
-            return false;
+        public async Task<bool> ExistsByNameAsync(string gvName)
+        {
+            return await _context.GameVersion!
+                .AnyAsync(gv => gv.gvName == gvName);
         }
     }
 }

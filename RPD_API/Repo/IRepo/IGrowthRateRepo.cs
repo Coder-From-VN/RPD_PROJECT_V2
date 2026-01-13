@@ -5,10 +5,12 @@ namespace RPD_API.Repo.IRepo
 {
     public interface IGrowthRateRepo : IBaseRepository
     {
-        public Task<List<GrowthRateDTO>> GetAllGrowthRate();
-        public Task<GrowthRateDTO> GetGrowthRateById(Guid growthRateID);
-        public Task<GrowthRateDTO?> AddGrowthRate(PostGrowthRateDTO model);
-        public Task<bool> UpdateGrowthRate(Guid growthRateID, PutGrowthRateDTO model);
-        public Task<bool> DeleteGrowthRate(Guid growthRateID);
+        public Task AddAsync(GrowthRate model);
+        public Task<List<GrowthRate>> GetAllAsync();
+        public Task<GrowthRate?> GetByIdAsync(Guid growthRateID);
+        public Task UpdateAsync(GrowthRate model);
+        public Task RemoveAsync(GrowthRate model);
+
+        public Task<bool> ExistsByNameAsync(string grName);
     }
 }

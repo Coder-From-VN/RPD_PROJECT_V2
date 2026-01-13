@@ -1,13 +1,15 @@
-﻿using RPD_API.DTO;
+﻿using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
     public interface ITypesRepo : IBaseRepository
     {
-        public Task<List<TypesDTO>> GetAllTypes();
-        public Task<TypesDTO> GetTypesById(Guid typesID);
-        public Task<TypesDTO> AddTypes(PostTypesDTO model);
-        public Task<bool> UpdateTypes(Guid typesID, PostTypesDTO model);
-        public Task<bool> DeleteTypes(Guid typesID);
+        public Task AddAsync(Types model);
+        public Task<List<Types>> GetAllAsync();
+        public Task<Types?> GetByIdAsync(Guid typesID);
+        public Task UpdateAsync(Types model);
+        public Task RemoveAsync(Types model);
+
+        public Task<bool> ExistsByNameAsync(string typesName);
     }
 }

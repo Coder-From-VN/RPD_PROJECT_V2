@@ -2,6 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
+using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
 {
@@ -9,59 +10,46 @@ namespace RPD_API.Controllers
     [ApiController]
     public class StatTypeController : ControllerBase
     {
-        private readonly IStatTypeRepo _stRepo;
+        private readonly IStatTypeService _stSer;
 
-        public StatTypeController(IStatTypeRepo stRepo)
+        public StatTypeController(IStatTypeService stSer)
         {
-            _stRepo = stRepo;
+            _stSer = stSer;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllStatType()
         {
-            try
-            {
-                return Ok(await _stRepo.GetAllStatType());
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            return Ok(await _stSer.GetAllStatType());
         }
 
         [HttpGet("{statTypeID}")]
         public async Task<IActionResult> GetStatTypeById(Guid statTypeID)
         {
-            var growthRate = await _stRepo.GetStatTypeById(statTypeID);
-            return growthRate == null ? NotFound() : Ok(growthRate);
+            var result = await _stSer.GetStatTypeById(statTypeID);
+            return result == null ? NotFound() : Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> PostStatType(PostStatTypeDTO model)
         {
-            try
-            {
-                var newStatTypeID = await _stRepo.AddStatType(model);
-                return newStatTypeID == null ? NotFound("StatType Exit") : Ok(newStatTypeID);
-            }
-            catch
-            {
-                return BadRequest("Some thing worng at StatType controller");
-            }
+            var result = await _stSer.AddStatType(model);
+            if (result == null)
+                return Conflict("Ability already exists.");
+
+            return Ok(result);
         }
 
         [HttpPut("{statTypeID}")]
         public async Task<IActionResult> PutGrowthRate(Guid statTypeID, [FromBody] PostStatTypeDTO model)
         {
-            var result = await _stRepo.UpdateStatType(statTypeID, model);
-            return Ok(result);
+            return await _stSer.UpdateStatType(statTypeID, model) ? NoContent() : NotFound();
         }
 
         [HttpDelete("{statTypeID}")]
         public async Task<IActionResult> DeleteGrowthRate([FromRoute] Guid statTypeID)
         {
-            var result = await _stRepo.DeleteStatType(statTypeID);
-            return Ok(result);
+            return await _stSer.DeleteStatType(statTypeID) ? NoContent() : NotFound();
         }
     }
 }

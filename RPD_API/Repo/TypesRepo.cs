@@ -4,70 +4,48 @@ using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 using System;
+using System.Xml.Linq;
 
 namespace RPD_API.Repo
 {
-    public class TypesRepo : ITypesRepo
+    public class TypesRepo : BaseRepository<Types>, ITypesRepo
     {
-        private readonly rpdDbContext _context;
-        private readonly IMapper _mapper;
-
-        public TypesRepo(rpdDbContext context, IMapper mapper)
+        public TypesRepo(rpdDbContext context) : base(context)
         {
-            _context = context;
-            _mapper = mapper;
         }
 
-        public async Task<TypesDTO> AddTypes(PostTypesDTO model)
+        public async Task AddAsync(Types model)
         {
-            var existing = await _context.Types!.SingleOrDefaultAsync(b => b.typesName == model.typesName);
-
-            if (existing != null)
-                return null;
-
-            var newType = _mapper.Map<Types>(model);
-            _context.Types!.Add(newType);
-            var saved = await _context.SaveChangesAsync();
-
-            return saved > 0 ? _mapper.Map<TypesDTO>(newType) : null;
+            await _context.Types.AddAsync(model);
         }
 
-        public async Task<bool> DeleteTypes(Guid typeID)
+        public async Task<bool> ExistsByNameAsync(string typesName)
         {
-            var type = _context.Types!.SingleOrDefault(b => b.typesID == typeID);
-            if (type != null)
-            {
-                _context.Types!.Remove(type);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
-            return false;
+            return await _context.Types!
+                .AnyAsync(t => t.typesName == typesName);
         }
 
-        public async Task<List<TypesDTO>> GetAllTypes()
+        public async Task<List<Types>> GetAllAsync()
         {
-            var type = await _context.Types.ToListAsync();
-            return _mapper.Map<List<TypesDTO>>(type);
+            return await _context.Types!.AsNoTracking().ToListAsync();
         }
 
-        public async Task<TypesDTO> GetTypesById(Guid typeID)
+        public async Task<Types?> GetByIdAsync(Guid typesID)
         {
-            var type = await _context.Types!.FindAsync(typeID);
-            return _mapper.Map<TypesDTO>(type);
+            return await _context.Types!
+                .FirstOrDefaultAsync(t => t.typesID == typesID);
         }
 
-        public async Task<bool> UpdateTypes(Guid typeID, PostTypesDTO model)
+        public Task RemoveAsync(Types model)
         {
-            var type = await _context.Types!.FindAsync(typeID);
-            if (type != null)
-            {
-                if (model.typesName != "")
-                    type.typesName = model.typesName;
-                _context.Types!.Update(type);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
-            return false;
+            _context.Types.Remove(model);
+            return Task.CompletedTask;
+        }
+
+        public Task UpdateAsync(Types model)
+        {
+            _context.Types!.Update(model);
+            return Task.CompletedTask;
         }
     }
 }

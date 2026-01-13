@@ -1,11 +1,14 @@
 ﻿using RPD_API.DTO;
+using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
     public interface IImageLinkRepo : IBaseRepository
     {
-        public Task<bool> AddImageLink(PostImageLinkDTO model, Guid pokeID);
-        public Task<bool> UpdateImageLink(Guid pokeID, ICollection<PutImageLinkDTO> model);
-        public Task<bool> DeleteImageLink(Guid imgID);
+        public Task AddAsync(ImageLink model);
+        public Task<List<ImageLink>> GetAllAsync();
+        public Task<ImageLink?> GetByIdAsync(Guid imgID);
+        public Task UpdateAsync(ImageLink model);
+        public Task RemoveAsync(ImageLink model);
     }
 }

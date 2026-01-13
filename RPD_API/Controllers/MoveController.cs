@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
+using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
 {
@@ -8,59 +9,46 @@ namespace RPD_API.Controllers
     [ApiController]
     public class MoveController : ControllerBase
     {
-        private readonly IMoveRepo _mRepo;
+        private readonly IMoveService _moveSer;
 
-        public MoveController(IMoveRepo mRepo)
+        public MoveController(IMoveService moveSer)
         {
-            _mRepo = mRepo;
+            _moveSer = moveSer;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllMove()
         {
-            try
-            {
-                return Ok(await _mRepo.GetAllMove());
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            return Ok(await _moveSer.GetAllMove());
         }
 
         [HttpGet("{moveID}")]
         public async Task<IActionResult> GetMoveById(Guid moveID)
         {
-            var move = await _mRepo.GetMoveById(moveID);
-            return move == null ? NotFound() : Ok(move);
+            var result = await _moveSer.GetMoveById(moveID);
+            return result == null ? NotFound() : Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> PostImageLink(PostMoveDTO model)
         {
-            try
-            {
-                var newMove = await _mRepo.AddMove(model);
-                return newMove == null ? NotFound("move existed") : Ok(newMove);
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            var result = await _moveSer.AddMove(model);
+            if (result == null)
+                return Conflict("Move already exists.");
+
+            return Ok(result);
         }
 
         [HttpPut("{moveID}")]
         public async Task<IActionResult> PutMove(Guid moveID, [FromBody] PutMoveDTO model)
         {
-            var result = await _mRepo.UpdateMove(moveID, model);
-            return Ok(result);
+            return await _moveSer.UpdateMove(moveID, model) ? NoContent() : NotFound();
         }
 
         [HttpDelete("{moveID}")]
         public async Task<IActionResult> DeleteMove([FromRoute] Guid moveID)
         {
-            var result = await _mRepo.DeleteMove(moveID);
-            return Ok(result);
+            return await _moveSer.DeleteMove(moveID) ? NoContent() : NotFound();
         }
     }
 }

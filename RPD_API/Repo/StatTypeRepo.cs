@@ -6,68 +6,44 @@ using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
 {
-    public class StatTypeRepo : IStatTypeRepo
+    public class StatTypeRepo : BaseRepository<StatType>, IStatTypeRepo
     {
-
-        private readonly rpdDbContext _context;
-        private readonly IMapper _mapper;
-
-        public StatTypeRepo(rpdDbContext context, IMapper mapper)
+        public StatTypeRepo(rpdDbContext context) : base(context)
         {
-            _context = context;
-            _mapper = mapper;
         }
 
-        public async Task<StatTypeDTO> AddStatType(PostStatTypeDTO model)
+        public async Task AddAsync(StatType model)
         {
-            var existing = await _context.StatType!.SingleOrDefaultAsync(st => st.stName == model.stName);
-            if (existing != null)
-                return null;
-
-            var newStatType = _mapper.Map<StatType>(model);
-            _context.StatType!.Add(newStatType);
-
-            var saved = await _context.SaveChangesAsync();
-            return saved > 0 ? _mapper.Map<StatTypeDTO>(newStatType) : null;
+            await _context.StatType.AddAsync(model);
         }
 
-        public async Task<bool> DeleteStatType(Guid statTypeID)
+        public async Task<List<StatType>> GetAllAsync()
         {
-            var statType = _context.StatType!.SingleOrDefault(b => b.stID == statTypeID);
-            if (statType != null)
-            {
-                _context.StatType!.Remove(statType);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
-            return false;
+            return await _context.StatType!.AsNoTracking().ToListAsync();
         }
 
-        public async Task<List<StatTypeDTO>> GetAllStatType()
+        public async Task<StatType?> GetByIdAsync(Guid stID)
         {
-            var statType = await _context.StatType.ToListAsync();
-            return _mapper.Map<List<StatTypeDTO>>(statType);
+            return await _context.StatType!
+                .FirstOrDefaultAsync(st => st.stID == stID);
         }
 
-        public async Task<StatTypeDTO> GetStatTypeById(Guid statTypeID)
+        public Task UpdateAsync(StatType model)
         {
-            var statType = await _context.StatType!.FindAsync(statTypeID);
-            return _mapper.Map<StatTypeDTO>(statType);
+            _context.StatType!.Update(model);
+            return Task.CompletedTask;
         }
 
-        public async Task<bool> UpdateStatType(Guid statTypeID, PostStatTypeDTO model)
+        public Task RemoveAsync(StatType model)
         {
-            var statType = await _context.StatType!.FindAsync(statTypeID);
-            if (statType != null)
-            {
-                if (model.stName != "")
-                    statType.stName = model.stName;
-                _context.StatType!.Update(statType);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
+            _context.StatType.Remove(model);
+            return Task.CompletedTask;
+        }
 
-            return false;
+        public async Task<bool> ExistsByNameAsync(string stName)
+        {
+            return await _context.StatType!
+                .AnyAsync(st => st.stName == stName);
         }
     }
 }

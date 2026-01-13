@@ -6,62 +6,40 @@ using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
 {
-    public class ImageLinkRepo : IImageLinkRepo
+    public class ImageLinkRepo : BaseRepository<ImageLink>, IImageLinkRepo
     {
-        private readonly rpdDbContext _context;
-        private readonly IMapper _mapper;
-
-        public ImageLinkRepo(rpdDbContext context, IMapper mapper)
+        public ImageLinkRepo(rpdDbContext context) : base(context)
         {
-            _context = context;
-            _mapper = mapper;
         }
 
-        public async Task<bool> AddImageLink(PostImageLinkDTO model, Guid pokeID)
+        public async Task AddAsync(ImageLink model)
         {
-            var pokeIdCheck = await _context.Pokemons!
-                .SingleOrDefaultAsync(p => p.pokeID == pokeID);
-            if (pokeIdCheck == null)
-                return false;
-            ImageLink newImageLink = new ImageLink
-            {
-                imgLink = model.imgLink,
-                pokeID = pokeID,
-                Pokemons = pokeIdCheck
-            };
-            _context.ImageLink!.Add(newImageLink);
-            var saved = await _context.SaveChangesAsync();
-            return saved > 0 ? true : false;
+            await _context.ImageLink.AddAsync(model);
         }
 
-        public async Task<bool> DeleteImageLink(Guid imgID)
+        public async Task<List<ImageLink>> GetAllAsync()
         {
-            var imageLink = _context.ImageLink!.SingleOrDefault(b => b.imgID == imgID);
-            if (imageLink != null)
-            {
-                _context.ImageLink!.Remove(imageLink);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
-            return false;
+            return await _context.ImageLink!.AsNoTracking().ToListAsync();
         }
 
-        public async Task<bool> UpdateImageLink(Guid pokeID, ICollection<PutImageLinkDTO> model)
+        public async Task<ImageLink?> GetByIdAsync(Guid imgID)
         {
-            var pokemon = await _context.Pokemons
-                .Include(p => p.ImageLink)
-                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
-
-            if (pokemon == null)
-                return false;
-
-            for (int i = 0; i < pokemon.ImageLink.Count && i < model.Count; i++)
-            {
-                pokemon.ImageLink.ElementAt(i).imgLink = model.ElementAt(i).imgLink;
-            }
-
-            await _context.SaveChangesAsync();
-            return true;
+            return await _context.ImageLink!
+                .FirstOrDefaultAsync(img => img.imgID == imgID);
         }
+
+        public Task UpdateAsync(ImageLink model)
+        {
+            _context.ImageLink.Update(model);
+            return Task.CompletedTask;
+        }
+
+        public Task RemoveAsync(ImageLink model)
+        {
+            _context.ImageLink.Remove(model);
+            return Task.CompletedTask;
+        }
+
+
     }
 }

@@ -1,8 +1,6 @@
-﻿using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
-using RPD_API.Repo.IRepo;
+using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
 {
@@ -10,59 +8,46 @@ namespace RPD_API.Controllers
     [ApiController]
     public class GrowthRateController : ControllerBase
     {
-        private readonly IGrowthRateRepo _grRepo;
+        private readonly IGrowthRateService _grSer;
 
-        public GrowthRateController(IGrowthRateRepo grRepo)
+        public GrowthRateController(IGrowthRateService grSer)
         {
-            _grRepo = grRepo;
+            _grSer = grSer;
         }
 
         [HttpGet]
         public async Task<IActionResult> GetAllGrowthRate()
         {
-            try
-            {
-                return Ok(await _grRepo.GetAllGrowthRate());
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            return Ok(await _grSer.GetAllGrowthRate());
         }
 
         [HttpGet("{growthRateID}")]
         public async Task<IActionResult> GetGrowthRateById(Guid growthRateID)
         {
-            var growthRate = await _grRepo.GetGrowthRateById(growthRateID);
-            return growthRate == null ? NotFound() : Ok(growthRate);
+            var result = await _grSer.GetGrowthRateById(growthRateID);
+            return result == null ? NotFound() : Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> PostGrowthRate(PostGrowthRateDTO model)
         {
-            try
-            {
-                var newGrowthRateID = await _grRepo.AddGrowthRate(model);
-                return newGrowthRateID == null ? NotFound("Growth Rate already exists.") : Ok(newGrowthRateID);
-            }
-            catch
-            {
-                return BadRequest(new { message = "Something off at Growth Rate controller" });
-            }
+            var result = await _grSer.AddGrowthRate(model);
+            if (result == null)
+                return Conflict("Ability already exists.");
+
+            return Ok(result);
         }
 
         [HttpPut("{growthRateID}")]
         public async Task<IActionResult> PutGrowthRate(Guid growthRateID, [FromBody] PutGrowthRateDTO model)
         {
-            var output = await _grRepo.UpdateGrowthRate(growthRateID, model);
-            return Ok(output);
+            return await _grSer.UpdateGrowthRate(growthRateID, model) ? NoContent() : NotFound();
         }
 
         [HttpDelete("{growthRateID}")]
         public async Task<IActionResult> DeleteGrowthRate([FromRoute] Guid growthRateID)
         {
-            var output = await _grRepo.DeleteGrowthRate(growthRateID);
-            return Ok(output);
+            return await _grSer.DeleteGrowthRate(growthRateID) ? NoContent() : NotFound();
         }
     }
 }

@@ -6,72 +6,44 @@ using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
 {
-    public class GrowthRateRepo : IGrowthRateRepo
+    public class GrowthRateRepo : BaseRepository<GrowthRate>, IGrowthRateRepo
     {
-        private readonly rpdDbContext _context;
-        private readonly IMapper _mapper;
-
-        public GrowthRateRepo(rpdDbContext context, IMapper mapper)
+        public GrowthRateRepo(rpdDbContext context) : base(context)
         {
-            _context = context;
-            _mapper = mapper;
         }
 
-        public async Task<GrowthRateDTO?> AddGrowthRate(PostGrowthRateDTO model)
+        public async Task AddAsync(GrowthRate model)
         {
-            var existing = await _context.GrowthRate!.SingleOrDefaultAsync(gr => gr.grName == model.grName);
-
-            if (existing != null)
-                return null;
-
-            var newGrowthRate = _mapper.Map<GrowthRate>(model);
-            _context.GrowthRate!.Add(newGrowthRate);
-
-            var saved = await _context.SaveChangesAsync();
-            if (saved > 0)
-                return _mapper.Map<GrowthRateDTO?>(newGrowthRate);
-
-            return null;
+            await _context.GrowthRate.AddAsync(model);
         }
 
-        public async Task<bool> DeleteGrowthRate(Guid growthRateID)
+        public async Task<List<GrowthRate>> GetAllAsync()
         {
-            var growthRate = _context.GrowthRate!.SingleOrDefault(b => b.growthRateID == growthRateID);
-            if (growthRate != null)
-            {
-                _context.GrowthRate!.Remove(growthRate);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
-            return false;
+            return await _context.GrowthRate!.AsNoTracking().ToListAsync();
         }
 
-        public async Task<List<GrowthRateDTO>> GetAllGrowthRate()
+        public async Task<GrowthRate?> GetByIdAsync(Guid growthRateID)
         {
-            var growthRate = await _context.GrowthRate.ToListAsync();
-            return _mapper.Map<List<GrowthRateDTO>>(growthRate);
+            return await _context.GrowthRate!
+                .FirstOrDefaultAsync(gr => gr.growthRateID == growthRateID);
         }
 
-        public async Task<GrowthRateDTO> GetGrowthRateById(Guid growthRateID)
+        public Task UpdateAsync(GrowthRate model)
         {
-            var growthRate = await _context.GrowthRate!.FindAsync(growthRateID);
-            return _mapper.Map<GrowthRateDTO>(growthRate);
+            _context.GrowthRate!.Update(model);
+            return Task.CompletedTask;
         }
 
-        public async Task<bool> UpdateGrowthRate(Guid growthRateID, PutGrowthRateDTO model)
+        public Task RemoveAsync(GrowthRate model)
         {
-            var growthRate = await _context.GrowthRate!.FindAsync(growthRateID);
-            if (growthRate != null)
-            {
-                if (model.grName != "")
-                    growthRate.grName = model.grName;
-                if (model.grTotalExp != 0)
-                    growthRate.grTotalExp = model.grTotalExp;
-                _context.GrowthRate!.Update(growthRate);
-                var saved = await _context.SaveChangesAsync();
-                return saved > 0 ? true : false;
-            }
-            return false;
+            _context.GrowthRate.Remove(model);
+            return Task.CompletedTask;
+        }
+
+        public async Task<bool> ExistsByNameAsync(string grName)
+        {
+            return await _context.GrowthRate!
+                .AnyAsync(gr => gr.grName == grName);
         }
     }
 }

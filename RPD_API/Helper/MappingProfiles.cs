@@ -38,11 +38,21 @@ namespace RPD_API.Helper
             CreateMap<PostGameVersionDTO, GameVersion>();
 
             CreateMap<ImageLink, ImageLinkDTO>().ReverseMap();
+            CreateMap<PostImageLinkDTO, ImageLink>()
+                    .ForMember(d => d.Pokemons, o => o.Ignore())
+                    .ForMember(d => d.pokeID, o => o.Ignore());
+
+            CreateMap<PutImageLinkDTO, ImageLink>()
+                    .ForMember(d => d.Pokemons, o => o.Ignore())
+                    .ForMember(d => d.pokeID, o => o.Ignore());
+
 
             CreateMap<MoveDTO, Move>();
             CreateMap<Move, MoveDTO>()
                 .ForMember(dest => dest.TypesName, opt => opt.MapFrom(src => src.Types.typesName));
             CreateMap<PostMoveDTO, Move>();
+            CreateMap<PutMoveDTO, Move>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
             CreateMap<PokemonsDTO, Pokemons>();
             CreateMap<Pokemons, PokemonsDTO>();
@@ -54,8 +64,6 @@ namespace RPD_API.Helper
             CreateMap<PostFullPokemonsDTO, PostPokemonDTO>();
             CreateMap<PutFullPokemonsDTO, PutPokemonDTO>().ReverseMap();
 
-            CreateMap<ImageLink, ImageLinkDTO>().ReverseMap();
-            CreateMap<EffortValues, EffortValuesDTO>().ReverseMap();
             CreateMap<PokemonStats, PokemonStatsDTO>().ReverseMap();
             CreateMap<PokemonAbilities, PokemonAbilitiesDTO>().ReverseMap();
             CreateMap<PokemonGameVersion, PokemonGameVersionDTO>().ReverseMap();

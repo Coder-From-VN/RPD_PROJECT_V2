@@ -1,10 +1,8 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
-using System;
 
 namespace RPD_API.Service
 {
@@ -15,7 +13,7 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task<AbilitiesDTO> PostAbilities(PostAbilitiesDTO model)
+        public async Task<AbilitiesDTO?> PostAbilities(PostAbilitiesDTO model)
         {
             if (await _uow.Abilities.ExistsByNameAsync(model.abName))
                 return null;
@@ -24,9 +22,7 @@ namespace RPD_API.Service
 
             await _uow.Abilities.AddAsync(newAbilities);
 
-            await _uow.SaveAsync();
-
-            return _mapper.Map<AbilitiesDTO?>(newAbilities);
+            return await _uow.SaveAsync() > 0 ? _mapper.Map<AbilitiesDTO?>(newAbilities) : null;
         }
 
         public async Task<AbilitiesDTO> GetAbilitiesById(Guid abID)
@@ -72,7 +68,7 @@ namespace RPD_API.Service
                 return false;
 
             await _uow.Abilities.RemoveAsync(deleteThisAbilities);
-            return await _uow.SaveAsync() > 0 ? true : false;
+            return await _uow.SaveAsync() > 0;
         }
 
 
