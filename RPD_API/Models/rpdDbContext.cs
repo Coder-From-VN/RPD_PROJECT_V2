@@ -45,12 +45,14 @@ namespace RPD_API.Models
             modelBuilder.Entity<ImageLink>()
                 .HasOne(img => img.Pokemons)
                 .WithMany(p => p.ImageLink)
-                .HasForeignKey(p => p.pokeID);
+                .HasForeignKey(p => p.pokeID)
+                .OnDelete(DeleteBehavior.Cascade);
             //Pokemons 1 to Many EffortValues
             modelBuilder.Entity<EffortValues>()
                 .HasOne(ev => ev.Pokemons)
                 .WithMany(p => p.EffortValues)
-                .HasForeignKey(p => p.pokeID);
+                .HasForeignKey(p => p.pokeID)
+                .OnDelete(DeleteBehavior.Cascade);
             //One Pokémon can evolve into many others
             //modelBuilder.Entity<EvolutionChart>()
             //    .HasKey(ec => new { ec.pokeID, ec.prePokeID });
@@ -75,67 +77,72 @@ namespace RPD_API.Models
             modelBuilder.Entity<PokemonAbilities>()
                 .HasOne(pa => pa.Pokemons)
                 .WithMany(p => p.PokemonAbilities)
-                .HasForeignKey(pa => pa.pokeID);
+                .HasForeignKey(pa => pa.pokeID)
+                .OnDelete(DeleteBehavior.Cascade); ;
             //Abilities many to many PokemonAbilities
             modelBuilder.Entity<PokemonAbilities>()
                 .HasOne(pa => pa.Abilities)
                 .WithMany(a => a.PokemonAbilities)
-                .HasForeignKey(pa => pa.abID);
+                .HasForeignKey(pa => pa.abID)
+                .OnDelete(DeleteBehavior.Restrict);
+
             //Pokemon many to many EggGroup
             modelBuilder.Entity<PokemonEggGroup>()
                 .HasKey(pe => new { pe.pokeID, pe.egID });
             modelBuilder.Entity<PokemonEggGroup>()
                 .HasOne(pe => pe.Pokemons)
                 .WithMany(p => p.PokemonEggGroup)
-                .HasForeignKey(p => p.pokeID);
+                .HasForeignKey(p => p.pokeID).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<PokemonEggGroup>()
                 .HasOne(pe => pe.EggGroup)
                 .WithMany(eg => eg.PokemonEggGroup)
-                .HasForeignKey(pe => pe.egID);
+                .HasForeignKey(pe => pe.egID).OnDelete(DeleteBehavior.Restrict);
+
             //Pokemon many to many Stats
             modelBuilder.Entity<PokemonStats>()
                 .HasKey(ps => new { ps.pokeID, ps.stID });
             modelBuilder.Entity<PokemonStats>()
                 .HasOne(pe => pe.Pokemons)
                 .WithMany(p => p.PokemonStats)
-                .HasForeignKey(ps => ps.pokeID);
+                .HasForeignKey(ps => ps.pokeID).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<PokemonStats>()
                 .HasOne(pe => pe.StatType)
                 .WithMany(st => st.PokemonStats)
-                .HasForeignKey(ps => ps.stID);
+                .HasForeignKey(ps => ps.stID).OnDelete(DeleteBehavior.Restrict);
+
             //Pokemon many to many Gameversion
             modelBuilder.Entity<PokemonGameVersion>()
                 .HasKey(pgv => new { pgv.pokeID, pgv.gvID });
             modelBuilder.Entity<PokemonGameVersion>()
                 .HasOne(pgv => pgv.Pokemons)
                 .WithMany(p => p.PokemonGameVersion)
-                .HasForeignKey(pgv => pgv.pokeID);
+                .HasForeignKey(pgv => pgv.pokeID).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<PokemonGameVersion>()
                 .HasOne(pgv => pgv.GameVersion)
                 .WithMany(gv => gv.PokemonGameVersion)
-                .HasForeignKey(pgv => pgv.gvID);
+                .HasForeignKey(pgv => pgv.gvID).OnDelete(DeleteBehavior.Restrict);
             //Pokemon many to many Type
             modelBuilder.Entity<PokemonType>()
                 .HasKey(pt => new { pt.pokeID, pt.typesID });
             modelBuilder.Entity<PokemonType>()
                 .HasOne(pt => pt.Pokemons)
                 .WithMany(p => p.PokemonType)
-                .HasForeignKey(pt => pt.pokeID);
+                .HasForeignKey(pt => pt.pokeID).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<PokemonType>()
                 .HasOne(pt => pt.Types)
                 .WithMany(t => t.PokemonType)
-                .HasForeignKey(pt => pt.typesID);
+                .HasForeignKey(pt => pt.typesID).OnDelete(DeleteBehavior.Restrict);
             //Pokemon many to many Move
             modelBuilder.Entity<PokemonMove>()
                 .HasKey(pm => new { pm.pokeID, pm.moveID });
             modelBuilder.Entity<PokemonMove>()
                 .HasOne(pm => pm.Pokemons)
                 .WithMany(p => p.PokemonMove)
-                .HasForeignKey(pm => pm.pokeID);
+                .HasForeignKey(pm => pm.pokeID).OnDelete(DeleteBehavior.Cascade);
             modelBuilder.Entity<PokemonMove>()
                 .HasOne(pm => pm.Move)
                 .WithMany(m => m.PokemonMove)
-                .HasForeignKey(pm => pm.moveID);
+                .HasForeignKey(pm => pm.moveID).OnDelete(DeleteBehavior.Restrict);
 
         }
 

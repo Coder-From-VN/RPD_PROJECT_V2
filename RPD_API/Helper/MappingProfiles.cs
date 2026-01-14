@@ -54,6 +54,10 @@ namespace RPD_API.Helper
             CreateMap<PutMoveDTO, Move>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
 
+            CreateMap<PokemonAbilities, PokemonAbilitiesDTO>()
+                .ForMember(d => d.abName, o => o.MapFrom(s => s.Abilities.abName));
+
+
             CreateMap<PokemonsDTO, Pokemons>();
             CreateMap<Pokemons, PokemonsDTO>();
             CreateMap<Pokemons, PokemonDetailDTO>()
@@ -62,14 +66,18 @@ namespace RPD_API.Helper
                 .ForMember(dest => dest.PreEvolutionChart, opt => opt.MapFrom(src => src.EvolutionChart));
             CreateMap<PostPokemonDTO, Pokemons>();
             CreateMap<PostFullPokemonsDTO, PostPokemonDTO>();
-            CreateMap<PutFullPokemonsDTO, PutPokemonDTO>().ReverseMap();
 
+            CreateMap<PutFullPokemonsDTO, PutPokemonDTO>().ReverseMap();
+            CreateMap<PutPokemonDTO, Pokemons>()
+                .ForAllMembers(opt =>
+                    opt.Condition((src, dest, srcMember) => srcMember != null));
             CreateMap<PokemonStats, PokemonStatsDTO>().ReverseMap();
-            CreateMap<PokemonAbilities, PokemonAbilitiesDTO>().ReverseMap();
             CreateMap<PokemonGameVersion, PokemonGameVersionDTO>().ReverseMap();
             CreateMap<PokemonEggGroup, PokemonEggGroupDTO>().ReverseMap();
             CreateMap<PokemonType, PokemonTypeDTO>().ReverseMap();
             CreateMap<PokemonMove, PokemonMoveDTO>().ReverseMap();
+
+
 
             CreateMap<EvolutionChart, EvolutionChartDTO>()
     .ForMember(d => d.prePokemonName,

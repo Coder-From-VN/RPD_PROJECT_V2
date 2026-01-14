@@ -16,7 +16,7 @@ namespace RPD_API.Service
 
         public async Task<bool> AddEffortValues(PostPokemonsEffortValuesDTO model, Guid pokeID)
         {
-            var pokemon = await _uow.Pokemons.FindPokemonsById(pokeID);
+            var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
                 return false;
 
@@ -41,7 +41,7 @@ namespace RPD_API.Service
 
         public async Task<bool> UpdateEffortValues(Guid pokeID, ICollection<PutEffortValuesDTO> model)
         {
-            var pokemon = await _uow.Pokemons.GetPokemonWithEVsAsync(pokeID);
+            var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
                 return false;
 

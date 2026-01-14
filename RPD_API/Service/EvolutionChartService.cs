@@ -16,8 +16,8 @@ namespace RPD_API.Service
 
         public async Task<bool> PostEvolutionChart(PostEvolutionChartDTO model)
         {
-            var pokeCheck = await _uow.Pokemons.FindPokemonsById(model.pokeID);
-            var prePokeIdCheck = await _uow.Pokemons.FindPokemonsById(model.prePokeID);
+            var pokeCheck = await _uow.Pokemons.GetByIdAsync(model.pokeID);
+            var prePokeIdCheck = await _uow.Pokemons.GetByIdAsync(model.prePokeID);
             if (pokeCheck == null || prePokeIdCheck == null)
                 return false;
 

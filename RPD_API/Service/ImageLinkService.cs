@@ -16,7 +16,7 @@ namespace RPD_API.Service
 
         public async Task<bool> AddImageLink(PostImageLinkDTO model, Guid pokeID)
         {
-            var pokeIdCheck = await _uow.Pokemons.FindPokemonsById(pokeID);
+            var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokeIdCheck == null)
                 return false;
 
@@ -40,7 +40,7 @@ namespace RPD_API.Service
 
         public async Task<bool> UpdateImageLink(Guid pokeID, ICollection<PutImageLinkDTO> model)
         {
-            var pokeIdCheck = await _uow.Pokemons.FindPokemonsById(pokeID);
+            var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokeIdCheck == null)
                 return false;
 

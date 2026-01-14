@@ -6,79 +6,33 @@ using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
 {
-    public class PokemonEggGroupRepo : IPokemonEggGroupRepo
+    public class PokemonEggGroupRepo : BaseRepository<PokemonEggGroup>, IPokemonEggGroupRepo
     {
-        private readonly rpdDbContext _context;
-
-        public PokemonEggGroupRepo(rpdDbContext context, IMapper mapper)
+        public PokemonEggGroupRepo(rpdDbContext context) : base(context)
         {
-            _context = context;
         }
 
-        public async Task<bool> AddPokemonEggGroup(Guid egID, Guid pokeID)
+        public async Task AddAsync(PokemonEggGroup model)
         {
-            var eggGroupCheck = await _context.EggGroup!
-                .SingleOrDefaultAsync(eg => eg.egID == egID);
-            var pokeCheck = await _context.Pokemons!
-                .SingleOrDefaultAsync(p => p.pokeID == pokeID);
-            if (eggGroupCheck == null || pokeCheck == null)
-                return false;
-            PokemonEggGroup newPokemonEggGroup = new PokemonEggGroup
-            {
-                egID = egID,
-                pokeID = pokeID,
-                Pokemons = pokeCheck,
-                EggGroup = eggGroupCheck
-            };
-            _context.PokemonEggGroup!.Add(newPokemonEggGroup);
-            var saved = await _context.SaveChangesAsync();
-            return saved > 0 ? true : false;
+            await _context.PokemonEggGroup.AddAsync(model);
         }
 
-        public async Task<bool> DeletePokemonEggGroup(Guid egID, Guid pokeID)
+        public async Task<PokemonEggGroup?> GetLinkAsync(Guid pokeID, Guid egID)
         {
-            var entry = _context.PokemonEggGroup!
-                .SingleOrDefault(peg => peg.egID == egID && peg.pokeID == pokeID);
-            if (entry != null)
-            {
-                _context.PokemonEggGroup!.Remove(entry);
-                var check = await _context.SaveChangesAsync();
-                return check > 0 ? true : false;
-            }
-            return false;
+            return await _context.PokemonEggGroup
+                 .FirstOrDefaultAsync(eg => eg.egID == egID && eg.pokeID == pokeID);
         }
 
-        public async Task<bool> UpdatePokemonEggGroup(Guid pokeID, ICollection<PutPokemonEggGroupDTO> model)
+        public Task RemoveAsync(PokemonEggGroup model)
         {
-            var pokemon = await _context.Pokemons
-        .Include(p => p.PokemonEggGroup)
-        .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+            _context.PokemonEggGroup.Remove(model);
+            return Task.CompletedTask;
+        }
 
-            if (pokemon == null)
-                return false;
-
-            // Remove any egg groups not in the new list
-            var toRemove = pokemon.PokemonEggGroup
-                .Where(eg => !model.Any(m => m.egID == eg.egID))
-                .ToList();
-            _context.RemoveRange(toRemove);
-
-            // Add new egg groups that aren’t already linked
-            foreach (var dto in model)
-            {
-                var existing = pokemon.PokemonEggGroup.FirstOrDefault(eg => eg.egID == dto.egID);
-                if (existing == null)
-                {
-                    pokemon.PokemonEggGroup.Add(new PokemonEggGroup
-                    {
-                        pokeID = pokeID,
-                        egID = dto.egID
-                    });
-                }
-            }
-
-            await _context.SaveChangesAsync();
-            return true;
+        public Task UpdateAsync(PokemonEggGroup model)
+        {
+            _context.PokemonEggGroup!.Update(model);
+            return Task.CompletedTask;
         }
     }
 }

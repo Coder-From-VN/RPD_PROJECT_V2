@@ -35,55 +35,55 @@ namespace RPD_API.UnitOfWork
         private IEvolutionChartRepo? _evolutionCharts;
 
         public IGrowthRateRepo GrowthRates =>
-            _growthRates ??= new GrowthRateRepo(_context, _mapper);
+            _growthRates ??= new GrowthRateRepo(_context);
 
         public ITypesRepo Types =>
-            _types ??= new TypesRepo(_context, _mapper);
+            _types ??= new TypesRepo(_context);
 
         public IStatTypeRepo StatTypes =>
-            _statTypes ??= new StatTypeRepo(_context, _mapper);
+            _statTypes ??= new StatTypeRepo(_context);
 
         public IAbilitiesRepo Abilities =>
             _abilities ??= new AbilitiesRepo(_context);
 
         public IEggGroupRepo EggGroups =>
-            _eggGroups ??= new EggGroupRepo(_context, _mapper);
+            _eggGroups ??= new EggGroupRepo(_context);
 
         public IEffortValuesRepo EffortValues =>
             _effortValues ??= new EffortValuesRepo(_context);
 
         public IGameVersionRepo GameVersions =>
-            _gameVersions ??= new GameVersionRepo(_context, _mapper);
+            _gameVersions ??= new GameVersionRepo(_context);
 
         public IImageLinkRepo ImageLinks =>
-            _imageLinks ??= new ImageLinkRepo(_context, _mapper);
+            _imageLinks ??= new ImageLinkRepo(_context);
 
         public IMoveRepo Moves =>
-            _moves ??= new MoveRepo(_context, _mapper);
+            _moves ??= new MoveRepo(_context);
 
         public IPokemonsRepo Pokemons =>
-            _pokemons ??= new PokemonsRepo(_context, _mapper);
+            _pokemons ??= new PokemonsRepo(_context);
 
         public IPokemonAbilitiesRepo PokemonAbilities =>
-            _pokemonAbilities ??= new PokemonAbilitiesRepo(_context, _mapper);
+            _pokemonAbilities ??= new PokemonAbilitiesRepo(_context);
 
         public IPokemonTypeRepo PokemonTypes =>
-            _pokemonTypes ??= new PokemonTypeRepo(_context, _mapper);
+            _pokemonTypes ??= new PokemonTypeRepo(_context);
 
         public IPokemonStatsRepo PokemonStats =>
-            _pokemonStats ??= new PokemonStatsRepo(_context, _mapper);
+            _pokemonStats ??= new PokemonStatsRepo(_context);
 
         public IPokemonEggGroupRepo PokemonEggGroups =>
-            _pokemonEggGroups ??= new PokemonEggGroupRepo(_context, _mapper);
+            _pokemonEggGroups ??= new PokemonEggGroupRepo(_context);
 
         public IPokemonGameVersionRepo PokemonGameVersions =>
-            _pokemonGameVersions ??= new PokemonGameVersionRepo(_context, _mapper);
+            _pokemonGameVersions ??= new PokemonGameVersionRepo(_context);
 
         public IPokemonMoveRepo PokemonMoves =>
-            _pokemonMoves ??= new PokemonMoveRepo(_context, _mapper);
+            _pokemonMoves ??= new PokemonMoveRepo(_context);
 
         public IEvolutionChartRepo EvolutionCharts =>
-            _evolutionCharts ??= new EvolutionChartRepo(_context, _mapper);
+            _evolutionCharts ??= new EvolutionChartRepo(_context);
 
         public async Task<int> SaveAsync()
         {

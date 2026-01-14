@@ -31,10 +31,5 @@
         public ICollection<PostPokemonEggGroupDTO> PokemonEggGroup { get; set; }
 
         public ICollection<PostPokemonTypeDTO> PokemonType { get; set; }
-
-        public ICollection<PostPokemonMoveDTO> PokemonMove { get; set; }
-
-        //public ICollection<PostEvolutionChartDTO> EvolutionChart { get; set; }
-        //public ICollection<PostEvolutionChartDTO> PreEvolutionChart { get; set; }
     }
 }

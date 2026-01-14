@@ -5,13 +5,12 @@ namespace RPD_API.Repo.IRepo
 {
     public interface IPokemonsRepo : IBaseRepository
     {
-        public Task<List<PokemonsDTO>> GetAllPokemons();
-        public Task<PokemonDetailDTO> GetPokemonsById(Guid pokeID);
-        public Task AddPokemons(Pokemons model);
-        public Task<bool> UpdatePokemons(Guid pokeID, PutPokemonDTO model);
-        public Task<bool> DeletePokemons(Guid pokeID);
-        public Task<Pokemons> FindPokemonsById(Guid pokeID);
-        public Task<bool> CheckPokemonExited(int pokeNationalNumber);
-        public Task<Pokemons?> GetPokemonWithEVsAsync(Guid pokeID);
+        public Task AddAsync(Pokemons model);
+        public Task<List<Pokemons>> GetAllAsync();
+        public Task<Pokemons?> GetByIdAsync(Guid pokeID);
+        public Task UpdateAsync(Pokemons model);
+        public Task RemoveAsync(Pokemons model);
+
+        public Task<bool> ExistsByNationalNumberAsync(int pokeNationalNumber);
     }
 }

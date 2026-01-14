@@ -1,6 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
-using RPD_API.Repo.IRepo;
 using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
@@ -9,62 +8,49 @@ namespace RPD_API.Controllers
     [ApiController]
     public class PokemonsController : ControllerBase
     {
-        private readonly IPokemonsRepo _pokeRepo;
         private readonly IPokemonService _pokemonService;
+        private readonly IPokemonApplicationService _pokeFullService;
 
-        public PokemonsController(IPokemonsRepo pokeRepo, IPokemonService pokemonService)
+        public PokemonsController(IPokemonService pokemonService, IPokemonApplicationService pokeFullService)
         {
-            _pokeRepo = pokeRepo;
             _pokemonService = pokemonService;
+            _pokeFullService = pokeFullService;
         }
 
 
         [HttpGet]
         public async Task<IActionResult> GetAllPokemonss()
         {
-            try
-            {
-                return Ok(await _pokeRepo.GetAllPokemons());
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            return Ok(await _pokemonService.GetAllPokemons());
         }
 
         [HttpGet("{pokeID}")]
         public async Task<IActionResult> GetPokemonById(Guid pokeID)
         {
-            var poke = await _pokeRepo.GetPokemonsById(pokeID);
-            return poke == null ? NotFound() : Ok(poke);
+            var result = await _pokemonService.GetPokemonsById(pokeID);
+            return result == null ? NotFound() : Ok(result);
         }
 
         [HttpPost]
         public async Task<IActionResult> PostPokemons([FromBody] PostFullPokemonsDTO model)
         {
-            try
-            {
-                var newpoke = await _pokemonService.PostFullPokemons(model);
-                return newpoke == null ? NotFound("Pokemon existed") : Ok(newpoke);
-            }
-            catch
-            {
-                return BadRequest();
-            }
+            var result = await _pokeFullService.PostPokemons(model);
+            if (result == null)
+                return Conflict("Move already exists.");
+
+            return Ok(result);
         }
         //nedd fix
         [HttpPut("{pokeID}")]
         public async Task<IActionResult> PutPokemons(Guid pokeID, [FromBody] PutFullPokemonsDTO model)
         {
-            var result = await _pokemonService.PutFullPokemons(pokeID, model);
-            return Ok(result);
+            return await _pokeFullService.PutPokemons(pokeID, model) ? NoContent() : NotFound();
         }
         //nedd fix
         [HttpDelete("{pokeID}")]
         public async Task<IActionResult> DeletePokemons([FromRoute] Guid pokeID)
         {
-            var result = await _pokemonService.DeleteFullPokemons(pokeID);
-            return Ok(result);
+            return await _pokeFullService.DeleteFullPokemons(pokeID) ? NoContent() : NotFound();
         }
 
     }

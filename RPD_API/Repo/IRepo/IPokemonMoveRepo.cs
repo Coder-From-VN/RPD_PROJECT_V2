@@ -1,11 +1,13 @@
 ﻿using RPD_API.DTO;
+using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
     public interface IPokemonMoveRepo : IBaseRepository
     {
-        public Task<bool> AddPokemonMove(PostPokemonMoveDTO model, Guid pokeID);
-        public Task<bool> UpdatePokemonMove(Guid pokeID, ICollection<PutPokemonMoveDTO> model);
-        public Task<bool> DeletePokemonMove(Guid pokeID, Guid moveID);
+        public Task AddAsync(PokemonMove model);
+        public Task<PokemonMove?> GetLinkAsync(Guid pokeID, Guid moveID);
+        public Task UpdateAsync(PokemonMove model);
+        public Task RemoveAsync(PokemonMove model);
     }
 }

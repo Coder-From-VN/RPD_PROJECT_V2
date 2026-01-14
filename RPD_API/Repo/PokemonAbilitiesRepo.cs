@@ -6,72 +6,33 @@ using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
 {
-    public class PokemonAbilitiesRepo : IPokemonAbilitiesRepo
+    public class PokemonAbilitiesRepo : BaseRepository<PokemonAbilities>, IPokemonAbilitiesRepo
     {
-        private readonly rpdDbContext _context;
-
-        public PokemonAbilitiesRepo(rpdDbContext context, IMapper mapper)
+        public PokemonAbilitiesRepo(rpdDbContext context) : base(context)
         {
-            _context = context;
         }
 
-        public async Task<bool> AddPokemonAbilities(PostPokemonAbilitiesDTO model, Guid pokeID)
+        public async Task AddAsync(PokemonAbilities model)
         {
-            var abIdCheck = await _context.Abilities!
-                .SingleOrDefaultAsync(ab => ab.abID == model.abID);
-            var pokeIdCheck = await _context.Pokemons!
-                .SingleOrDefaultAsync(p => p.pokeID == pokeID);
-            if (abIdCheck == null || pokeIdCheck == null)
-                return false;
-            PokemonAbilities newPokemonAbilities = new PokemonAbilities
-            {
-                abID = model.abID,
-                pokeID = pokeID,
-                Abilities = abIdCheck,
-                paHiddenCheck = model.paHiddenCheck,
-                Pokemons = pokeIdCheck
-            };
-            _context.PokemonAbilities!.Add(newPokemonAbilities);
-            var saved = await _context.SaveChangesAsync();
-            return saved > 0 ? true : false;
+            await _context.PokemonAbilities.AddAsync(model);
         }
 
-        public async Task<bool> DeletePokemonAbilities(Guid pokeID, Guid abID)
+        public async Task<PokemonAbilities?> GetLinkAsync(Guid pokeID, Guid abID)
         {
-            var entry = _context.PokemonAbilities!
-                .SingleOrDefault(pb => pb.abID == abID && pb.pokeID == pokeID);
-            if (entry != null)
-            {
-                _context.PokemonAbilities!.Remove(entry);
-                var check = await _context.SaveChangesAsync();
-                return check > 0 ? true : false;
-            }
-            return false;
+            return await _context.PokemonAbilities
+                .FirstOrDefaultAsync(pb => pb.abID == abID && pb.pokeID == pokeID);
         }
 
-        public async Task<bool> UpdatePokemonAbilities(Guid pokeID, ICollection<PutPokemonAbilitiesDTO> model)
+        public Task RemoveAsync(PokemonAbilities model)
         {
-            var pokemon = await _context.Pokemons
-                .Include(p => p.PokemonAbilities)
-                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+            _context.PokemonAbilities.Remove(model);
+            return Task.CompletedTask;
+        }
 
-            if (pokemon == null)
-                return false;
-
-            pokemon.PokemonAbilities.Clear();
-
-            foreach (var dto in model)
-            {
-                pokemon.PokemonAbilities.Add(new PokemonAbilities
-                {
-                    abID = dto.abID,
-                    paHiddenCheck = dto.paHiddenCheck,
-                    pokeID = pokeID
-                });
-            }
-
-            await _context.SaveChangesAsync();
-            return true;
+        public Task UpdateAsync(PokemonAbilities model)
+        {
+            _context.PokemonAbilities!.Update(model);
+            return Task.CompletedTask;
         }
     }
 }
