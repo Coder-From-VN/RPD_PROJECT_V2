@@ -1,26 +1,111 @@
-# RPD_PROJECT_V2
-# 🧬 RPD_API
+# 🧬 RPD_API --- Pokémon Database REST API
 
-A RESTful Pokémon Database API built with **ASP.NET Core 6**, **Entity Framework Core**, and **AutoMapper** — supporting **JWT Authentication**, CRUD operations, and relational data structures.
+**RPD_API** is a scalable and modular **RESTful Pokémon Database API**
+built with **ASP.NET Core 6**, **Entity Framework Core**, and
+**AutoMapper**.\
+It provides full CRUD operations over complex Pokémon domain data,
+including **stats, abilities, types, moves, evolutions**, and game
+versions, secured with **JWT authentication via Firebase**.
 
----
+This project follows **clean architecture principles**, using
+**Repository, Unit of Work, and Service layers** to ensure
+maintainability, testability, and scalability.
 
-## ⚙️ Features
-- Pokémon CRUD with related entities (Stats, Abilities, Types, Moves)
-- Evolution chain relationships
-- JWT Authentication In ASP.NET Core With Firebase
-- DTO + AutoMapper architecture
-- EF Core Repository & Service pattern
-- Google Login with FireBase
----
+------------------------------------------------------------------------
 
-## 🧩 Tech Stack
-- ASP.NET Core 6
-- Entity Framework Core
-- AutoMapper
-- SQL Server
-- JWT Authentication
-- Firebase
+## 🚀 Key Features
 
+-   **Full Pokémon CRUD**
+    -   Includes Stats, Abilities, Types, Moves, Egg Groups, Game
+        Versions, Images, and Effort Values
+-   **Complex Relationships**
+    -   Many-to-many mappings (Pokémon ↔ Abilities, Types, Moves, etc.)
+    -   Evolution chains with self-referencing relationships
+-   **Authentication & Security**
+    -   JWT authentication integrated with **Firebase**
+    -   Google Sign-In support
+-   **Clean Architecture**
+    -   Repository pattern
+    -   Unit of Work pattern
+    -   Application Service orchestration layer
+-   **DTO-Driven API**
+    -   AutoMapper for safe entity-to-DTO transformation
+    -   Separate DTOs for Create / Update / Read
+-   **Transaction-Safe Operations**
+    -   Cascade delete handling
+    -   Atomic create/update flows
+-   **Extensible & Maintainable**
+    -   Clear separation of concerns
+    -   Designed for future feature expansion
 
+------------------------------------------------------------------------
 
+## 🧩 Technology Stack
+
+-   **Framework:** ASP.NET Core 6
+-   **ORM:** Entity Framework Core
+-   **Database:** SQL Server
+-   **Mapping:** AutoMapper
+-   **Authentication:** JWT + Firebase
+-   **Architecture Patterns:**
+    -   Repository
+    -   Unit of Work
+    -   Service & Application Service Layers
+
+------------------------------------------------------------------------
+
+## 🏗 Architecture Overview
+
+    Controller
+       ↓
+    Application Service
+       ↓
+    Domain Services
+       ↓
+    Repositories
+       ↓
+    Entity Framework Core
+       ↓
+    SQL Server
+
+------------------------------------------------------------------------
+
+## 🔐 Authentication
+
+-   Firebase Authentication integration
+-   JWT token generation & validation
+-   Google OAuth login support
+
+------------------------------------------------------------------------
+
+## 📦 Domain Model Highlights
+
+-   Pokémon
+-   Stats & Effort Values
+-   Abilities
+-   Types
+-   Moves
+-   Egg Groups
+-   Game Versions
+-   Evolution Chains
+-   Image Links
+
+All relationships are handled using **EF Core Fluent API** with proper
+cascade and restrict delete behaviors.
+
+------------------------------------------------------------------------
+
+## 📌 Future Improvements
+
+-   Pagination & filtering
+-   Caching (Redis)
+-   API versioning
+-   Swagger / OpenAPI enhancements
+-   Unit & integration testing
+-   Role-based authorization
+
+------------------------------------------------------------------------
+
+## 📄 License
+
+This project is for educational and portfolio purposes.
