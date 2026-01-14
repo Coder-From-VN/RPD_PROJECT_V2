@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
+using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 using RPD_API.Service.IService;
 
@@ -20,25 +21,18 @@ namespace RPD_API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostEvolutionChart(PostEvolutionChartDTO model)
         {
-            try
-            {
-                var result = await _evoSer.PostEvolutionChart(model);
+            var result = await _evoSer.PostEvolutionChart(model);
+            if (result == null)
+                return Conflict("Move already exists.");
 
-                return result
-                    ? Ok()
-                    : BadRequest("Evolution Chart post failed");
-            }
-            catch
-            {
-                return BadRequest(new { message = "Something off at Evolution Chart controller" });
-            }
+            return Ok(result);
         }
 
         [HttpDelete("{pokeID}/{prePokeID}")]
         public async Task<IActionResult> DeleteEggGroup([FromRoute] Guid pokeID, [FromRoute] Guid prePokeID)
         {
-            var output = await _evoSer.DeleteEvolutionChart(pokeID, prePokeID);
-            return output ? Ok() : NotFound();
+            return await _evoSer.DeleteEvolutionChart(pokeID, prePokeID) ? NoContent() : NotFound();
+
         }
     }
 }

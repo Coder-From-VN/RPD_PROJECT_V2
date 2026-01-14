@@ -14,14 +14,14 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task<bool> AddPokemonMove(PostPokemonMoveDTO model, Guid pokeID)
+        public async Task<bool> AddPokemonMove(PostPokemonMoveDTO model)
         {
             var moveCheck = await _uow.Moves.GetByIdAsync(model.moveID);
-            var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
+            var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(model.pokeID);
             if (moveCheck == null || pokeIdCheck == null)
                 return false;
 
-            var exists = await _uow.PokemonMoves.GetLinkAsync(pokeID, model.moveID);
+            var exists = await _uow.PokemonMoves.GetLinkAsync(model.pokeID, model.moveID);
             if (exists != null)
                 return false;
 
@@ -30,7 +30,7 @@ namespace RPD_API.Service
             {
                 moveID = model.moveID,
                 Move = moveCheck,
-                pokeID = pokeID,
+                pokeID = model.pokeID,
                 Pokemons = pokeIdCheck,
                 pmLearnLevel = model.pmLearnLevel,
                 pmLearnMethod = model.pmLearnMethod

@@ -2,7 +2,7 @@
 
 namespace RPD_API.Service.IService
 {
-    public interface IEggGroupService
+    public interface IEggGroupService : IBaseService
     {
         public Task<List<EggGroupDTO>> GetAllEggGroup();
         public Task<EggGroupDTO> GetEggGroupById(Guid egID);

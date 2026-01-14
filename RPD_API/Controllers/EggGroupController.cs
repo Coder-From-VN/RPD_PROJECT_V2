@@ -1,7 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
-using RPD_API.Repo.IRepo;
 using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers

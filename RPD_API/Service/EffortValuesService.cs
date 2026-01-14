@@ -20,10 +20,15 @@ namespace RPD_API.Service
             if (pokemon == null)
                 return false;
 
-            var ev = _mapper.Map<EffortValues>(model);
-            ev.pokeID = pokeID;
+            EffortValues newEffortValues = new EffortValues
+            {
+                evStatName = model.evStatName,
+                eValues = model.eValues,
+                pokeID = pokemon.pokeID,
+                Pokemons = pokemon
+            };
 
-            await _uow.EffortValues.AddAsync(ev);
+            await _uow.EffortValues.AddAsync(newEffortValues);
 
             return await _uow.SaveAsync() > 0;
         }

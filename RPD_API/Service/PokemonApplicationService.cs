@@ -6,7 +6,7 @@ using RPD_API.UnitOfWork;
 
 namespace RPD_API.Service
 {
-    public class PokemonApplicationService : BaseService, IPokemonApplicationService
+    public class PokemonApplicationService : IPokemonApplicationService
     {
         private readonly IPokemonService _pokemonService;
         private readonly IPokemonEggGroupService _eggGroupService;
@@ -18,6 +18,7 @@ namespace RPD_API.Service
         private readonly IImageLinkService _imageService;
         private readonly IEffortValuesService _evService;
         private readonly IUnitOfWorkRepo _uow;
+        protected readonly IMapper _mapper;
 
         public PokemonApplicationService(IPokemonService pokemonService,
         IPokemonEggGroupService eggGroupService,
@@ -29,8 +30,18 @@ namespace RPD_API.Service
         IImageLinkService imageService,
         IEffortValuesService evService,
         IUnitOfWorkRepo uow, IMapper mapper)
-        : base(uow, mapper)
         {
+            _pokemonService = pokemonService;
+            _eggGroupService = eggGroupService;
+            _gameVersionService = gameVersionService;
+            _moveService = moveService;
+            _typeService = typeService;
+            _statsService = statsService;
+            _abilitiesService = abilitiesService;
+            _imageService = imageService;
+            _evService = evService;
+            _uow = uow;
+            _mapper = mapper;
         }
 
 
