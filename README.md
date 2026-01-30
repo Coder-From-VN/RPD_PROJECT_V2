@@ -47,11 +47,14 @@ maintainability, testability, and scalability.
 -   **Database:** SQL Server
 -   **Mapping:** AutoMapper
 -   **Authentication:** JWT + Firebase
+-   **Role-based authorization** Admin + Trainer
 -   **Architecture Patterns:**
     -   Repository
     -   Unit of Work
     -   Service & Application Service Layers
-
+-   **Pagination & filtering**
+-   **Caching** : Redis + Docker
+-   
 ------------------------------------------------------------------------
 
 ## 🏗 Architecture Overview
@@ -96,13 +99,9 @@ cascade and restrict delete behaviors.
 ------------------------------------------------------------------------
 
 ## 📌 Future Improvements
-
--   Pagination & filtering
--   Caching (Redis)
 -   API versioning
 -   Swagger / OpenAPI enhancements
 -   Unit & integration testing
--   Role-based authorization
 
 ------------------------------------------------------------------------
 
