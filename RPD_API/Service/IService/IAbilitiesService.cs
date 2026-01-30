@@ -1,13 +1,16 @@
 ﻿using RPD_API.DTO;
+using RPD_API.Models;
+using RPD_API.Pagination;
 
 namespace RPD_API.Service.IService
 {
     public interface IAbilitiesService : IBaseService
     {
-        public Task<AbilitiesDTO?> PostAbilities(PostAbilitiesDTO model);
-        public Task<List<AbilitiesDTO>> GetAllAbilities();
-        public Task<AbilitiesDTO> GetAbilitiesById(Guid abID);
-        public Task<bool> PutAbilities(Guid abID, PutAbilitiesDTO model);
-        public Task<bool> DeleteAbilities(Guid abID);
+        Task<AbilitiesDTO?> PostAbilities(PostAbilitiesDTO model);
+        Task<PagedResult<AbilitiesDTO>> GetAllAbilities(QueryParams query);
+        Task<AbilitiesDTO> GetAbilitiesById(Guid abID);
+        Task<bool> PutAbilities(Guid abID, PutAbilitiesDTO model);
+        Task<bool> DeleteAbilities(Guid abID);
+
     }
 }

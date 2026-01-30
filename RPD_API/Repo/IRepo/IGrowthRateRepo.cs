@@ -1,16 +1,17 @@
 ﻿using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 
 namespace RPD_API.Repo.IRepo
 {
     public interface IGrowthRateRepo : IBaseRepository
     {
-        public Task AddAsync(GrowthRate model);
-        public Task<List<GrowthRate>> GetAllAsync();
-        public Task<GrowthRate?> GetByIdAsync(Guid growthRateID);
-        public Task UpdateAsync(GrowthRate model);
-        public Task RemoveAsync(GrowthRate model);
+        Task AddAsync(GrowthRate model);
+        Task<PagedResult<GrowthRate>> GetAllAsync(QueryParams query);
+        Task<GrowthRate?> GetByIdAsync(Guid growthRateID);
+        Task UpdateAsync(GrowthRate model);
+        Task RemoveAsync(GrowthRate model);
 
-        public Task<bool> ExistsByNameAsync(string grName);
+        Task<bool> ExistsByNameAsync(string grName);
     }
 }

@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
+using RPD_API.Pagination;
 using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
@@ -19,9 +21,9 @@ namespace RPD_API.Controllers
 
 
         [HttpGet]
-        public async Task<IActionResult> GetAllPokemonss()
+        public async Task<IActionResult> GetAllPokemonss([FromQuery] QueryParams query)
         {
-            return Ok(await _pokemonService.GetAllPokemons());
+            return Ok(await _pokemonService.GetAllPokemons(query));
         }
 
         [HttpGet("{pokeID}")]
@@ -30,7 +32,7 @@ namespace RPD_API.Controllers
             var result = await _pokemonService.GetPokemonsById(pokeID);
             return result == null ? NotFound() : Ok(result);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostPokemons([FromBody] PostFullPokemonsDTO model)
         {
@@ -40,13 +42,13 @@ namespace RPD_API.Controllers
 
             return Ok(result);
         }
-        //nedd fix
+        [Authorize(Roles = "Admin")]
         [HttpPut("{pokeID}")]
         public async Task<IActionResult> PutPokemons(Guid pokeID, [FromBody] PutFullPokemonsDTO model)
         {
             return await _pokeFullService.PutPokemons(pokeID, model) ? NoContent() : NotFound();
         }
-        //nedd fix
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{pokeID}")]
         public async Task<IActionResult> DeletePokemons([FromRoute] Guid pokeID)
         {

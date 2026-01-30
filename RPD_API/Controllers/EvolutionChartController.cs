@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
 using RPD_API.Models;
@@ -17,7 +18,7 @@ namespace RPD_API.Controllers
         {
             _evoSer = evoSer;
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostEvolutionChart(PostEvolutionChartDTO model)
         {
@@ -27,7 +28,7 @@ namespace RPD_API.Controllers
 
             return Ok(result);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{pokeID}/{prePokeID}")]
         public async Task<IActionResult> DeleteEggGroup([FromRoute] Guid pokeID, [FromRoute] Guid prePokeID)
         {

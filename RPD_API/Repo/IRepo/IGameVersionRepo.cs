@@ -1,15 +1,16 @@
 ﻿using RPD_API.Models;
+using RPD_API.Pagination;
 
 namespace RPD_API.Repo.IRepo
 {
     public interface IGameVersionRepo : IBaseRepository
     {
-        public Task AddAsync(GameVersion model);
-        public Task<List<GameVersion>> GetAllAsync();
-        public Task<GameVersion?> GetByIdAsync(Guid gvID);
-        public Task UpdateAsync(GameVersion model);
-        public Task RemoveAsync(GameVersion model);
+        Task AddAsync(GameVersion model);
+        Task<PagedResult<GameVersion>> GetAllAsync(QueryParams query);
+        Task<GameVersion?> GetByIdAsync(Guid gvID);
+        Task UpdateAsync(GameVersion model);
+        Task RemoveAsync(GameVersion model);
 
-        public Task<bool> ExistsByNameAsync(string gvName);
+        Task<bool> ExistsByNameAsync(string gvName);
     }
 }

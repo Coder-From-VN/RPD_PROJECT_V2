@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
-using RPD_API.Repo.IRepo;
+using RPD_API.Pagination;
 using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
@@ -16,10 +17,11 @@ namespace RPD_API.Controllers
             _abSer = abSer;
         }
 
+
         [HttpGet]
-        public async Task<IActionResult> GetAbilities()
+        public async Task<IActionResult> GetAbilities([FromQuery] QueryParams query)
         {
-            return Ok(await _abSer.GetAllAbilities());
+            return Ok(await _abSer.GetAllAbilities(query));
         }
 
         [HttpGet("{abID:guid}")]
@@ -30,6 +32,7 @@ namespace RPD_API.Controllers
         }
 
         [HttpPost]
+        [Authorize(Roles = "Admin")]
         public async Task<IActionResult> PostAbilities(PostAbilitiesDTO model)
         {
 
@@ -41,12 +44,14 @@ namespace RPD_API.Controllers
 
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPut("{abID}")]
         public async Task<IActionResult> PutAbilities(Guid abID, [FromBody] PutAbilitiesDTO model)
         {
             return await _abSer.PutAbilities(abID, model) ? NoContent() : NotFound();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{abID}")]
         public async Task<IActionResult> DeleteAbilities([FromRoute] Guid abID)
         {

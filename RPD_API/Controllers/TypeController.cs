@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
 using RPD_API.Service.IService;
@@ -28,7 +29,7 @@ namespace RPD_API.Controllers
             var types = await _typesSer.GetTypesById(typesID);
             return types == null ? NotFound() : Ok(types);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostTypes(PostTypesDTO model)
         {
@@ -40,13 +41,13 @@ namespace RPD_API.Controllers
             return Ok(newTypes);
 
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPut("{typesID}")]
         public async Task<IActionResult> PutTypes(Guid typesID, [FromBody] PostTypesDTO model)
         {
             return await _typesSer.UpdateTypes(typesID, model) ? NoContent() : NotFound();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{typesID}")]
         public async Task<IActionResult> DeleteTypes([FromRoute] Guid typesID)
         {

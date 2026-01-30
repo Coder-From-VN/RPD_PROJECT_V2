@@ -1,7 +1,6 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
+﻿using Microsoft.EntityFrameworkCore;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
@@ -17,9 +16,37 @@ namespace RPD_API.Repo
             await _context.Abilities.AddAsync(model);
         }
 
-        public async Task<List<Abilities>> GetAllAsync()
+        public async Task<PagedResult<Abilities>> GetAllAsync(QueryParams queryParams)
         {
-            return await _context.Abilities!.AsNoTracking().ToListAsync();
+            var query = _context.Abilities!
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(queryParams.Search))
+            {
+                var search = queryParams.Search.ToLower();
+                query = query.Where(a =>
+                    a.abName.ToLower().Contains(search) ||
+                    a.abDescription.ToLower().Contains(search) ||
+                    a.abEffect.ToLower().Contains(search)
+                    );
+            }
+
+            query = queryParams.SortBy?.ToLower() switch
+            {
+                "abname" => queryParams.SortOrder == "desc"
+                    ? query.OrderByDescending(a => a.abName)
+                    : query.OrderBy(a => a.abName),
+
+                _ => query.OrderBy(a => a.abName)
+            };
+
+            return await ToPagedResultAsync(query, queryParams);
+        }
+
+        public async Task<List<Abilities>> GetPagedAsync()
+        {
+            return await _context.Abilities.ToListAsync();
         }
 
         public async Task<Abilities?> GetByIdAsync(Guid abID)

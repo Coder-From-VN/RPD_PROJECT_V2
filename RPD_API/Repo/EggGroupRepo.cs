@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
 using System.Xml.Linq;
 
@@ -18,9 +19,30 @@ namespace RPD_API.Repo
             await _context.EggGroup.AddAsync(model);
         }
 
-        public async Task<List<EggGroup>> GetAllAsync()
+        public async Task<PagedResult<EggGroup>> GetAllAsync(QueryParams queryParams)
         {
-            return await _context.EggGroup!.AsNoTracking().ToListAsync();
+            var query = _context.EggGroup!
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(queryParams.Search))
+            {
+                var search = queryParams.Search.ToLower();
+                query = query.Where(eg =>
+                    eg.egName.ToLower().Contains(search)
+                    );
+            }
+
+            query = queryParams.SortBy?.ToLower() switch
+            {
+                "egName" => queryParams.SortOrder == "desc"
+                    ? query.OrderByDescending(a => a.egName)
+                    : query.OrderBy(a => a.egName),
+
+                _ => query.OrderBy(a => a.egName)
+            };
+
+            return await ToPagedResultAsync(query, queryParams);
         }
 
         public async Task<EggGroup?> GetByIdAsync(Guid egID)

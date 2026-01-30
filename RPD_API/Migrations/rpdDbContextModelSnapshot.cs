@@ -394,6 +394,38 @@ namespace RPD_API.Migrations
                     b.ToTable("StatType");
                 });
 
+            modelBuilder.Entity("RPD_API.Models.Trainer", b =>
+                {
+                    b.Property<Guid>("TrainerId")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uniqueidentifier");
+
+                    b.Property<string>("FirebaseUid")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<DateTime>("tnCreatedAt")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("tnEmail")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("tnName")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("tnPhotoUrl")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("TrainerId");
+
+                    b.HasIndex("FirebaseUid")
+                        .IsUnique();
+
+                    b.ToTable("Trainers");
+                });
+
             modelBuilder.Entity("RPD_API.Models.Types", b =>
                 {
                     b.Property<Guid>("typesID")

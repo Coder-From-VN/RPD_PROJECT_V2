@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
 using RPD_API.Repo.IRepo;
@@ -29,7 +30,7 @@ namespace RPD_API.Controllers
             var result = await _stSer.GetStatTypeById(statTypeID);
             return result == null ? NotFound() : Ok(result);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostStatType(PostStatTypeDTO model)
         {
@@ -39,13 +40,13 @@ namespace RPD_API.Controllers
 
             return Ok(result);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPut("{statTypeID}")]
         public async Task<IActionResult> PutGrowthRate(Guid statTypeID, [FromBody] PostStatTypeDTO model)
         {
             return await _stSer.UpdateStatType(statTypeID, model) ? NoContent() : NotFound();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{statTypeID}")]
         public async Task<IActionResult> DeleteGrowthRate([FromRoute] Guid statTypeID)
         {

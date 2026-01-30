@@ -1,6 +1,8 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
+using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
 using RPD_API.Service.IService;
 
@@ -18,9 +20,9 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllGameVersion()
+        public async Task<IActionResult> GetAllGameVersion([FromQuery] QueryParams query)
         {
-            return Ok(await _gvSer.GetAllGameVersion());
+            return Ok(await _gvSer.GetAllGameVersion(query));
         }
 
         [HttpGet("{gvID:guid}")]
@@ -29,7 +31,7 @@ namespace RPD_API.Controllers
             var gameVersion = await _gvSer.GetGameVersionById(gvID);
             return gameVersion == null ? NotFound() : Ok(gameVersion);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostGameVersion(PostGameVersionDTO model)
         {
@@ -38,13 +40,13 @@ namespace RPD_API.Controllers
                 return Conflict("Ability already exists.");
             return Ok(result);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPut("{gvID}")]
         public async Task<IActionResult> PutGameVersion(Guid gvID, [FromBody] PutGameVersionDTO model)
         {
             return await _gvSer.UpdateGameVersion(gvID, model) ? NoContent() : NotFound();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{gvID}")]
         public async Task<IActionResult> DeleteGameVersion([FromRoute] Guid gvID)
         {

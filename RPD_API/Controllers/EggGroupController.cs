@@ -1,5 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
+using RPD_API.Pagination;
 using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
@@ -16,9 +18,9 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetEggGroup()
+        public async Task<IActionResult> GetEggGroup([FromQuery] QueryParams query)
         {
-            return Ok(await _egSer.GetAllEggGroup());
+            return Ok(await _egSer.GetAllEggGroup(query));
         }
 
         [HttpGet("{egID:guid}")]
@@ -27,7 +29,7 @@ namespace RPD_API.Controllers
             var result = await _egSer.GetEggGroupById(egID);
             return result == null ? NotFound() : Ok(result);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostEggGroup(PostEggGroupDTO model)
         {
@@ -38,13 +40,13 @@ namespace RPD_API.Controllers
             return Ok(result);
 
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPut("{egID}")]
         public async Task<IActionResult> PutEggGroup(Guid egID, [FromBody] PutEggGroupDTO model)
         {
             return await _egSer.UpdateEggGroup(egID, model) ? NoContent() : NotFound();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{egID}")]
         public async Task<IActionResult> DeleteEggGroup([FromRoute] Guid egID)
         {

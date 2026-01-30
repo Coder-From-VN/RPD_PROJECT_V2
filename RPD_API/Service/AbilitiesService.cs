@@ -1,6 +1,8 @@
 ﻿using AutoMapper;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 
@@ -8,9 +10,16 @@ namespace RPD_API.Service
 {
     public class AbilitiesService : BaseService, IAbilitiesService
     {
-        public AbilitiesService(IUnitOfWorkRepo uow, IMapper mapper)
+        private readonly ILogger<AbilitiesService> _logger;
+
+
+        public AbilitiesService(
+        IUnitOfWorkRepo uow,
+        IMapper mapper,
+         ILogger<AbilitiesService> logger)
         : base(uow, mapper)
         {
+            _logger = logger;
         }
 
         public async Task<AbilitiesDTO?> PostAbilities(PostAbilitiesDTO model)
@@ -25,21 +34,25 @@ namespace RPD_API.Service
             return await _uow.SaveAsync() > 0 ? _mapper.Map<AbilitiesDTO?>(newAbilities) : null;
         }
 
-        public async Task<AbilitiesDTO> GetAbilitiesById(Guid abID)
+        public async Task<AbilitiesDTO?> GetAbilitiesById(Guid abID)
         {
             var ability = await _uow.Abilities.GetByIdAsync(abID);
-
             if (ability == null)
                 return null;
 
-            return _mapper.Map<AbilitiesDTO>(ability);
+            var dto = _mapper.Map<AbilitiesDTO>(ability);
+
+            return dto;
         }
 
-        public async Task<List<AbilitiesDTO>> GetAllAbilities()
+        public Task<PagedResult<AbilitiesDTO>> GetAllAbilities(QueryParams queryParams)
         {
-            var abilities = await _uow.Abilities.GetAllAsync();
-            return _mapper.Map<List<AbilitiesDTO>>(abilities);
+            return GetPagedAsync<Abilities, AbilitiesDTO>(
+                queryParams,
+                _uow.Abilities.GetAllAsync
+            );
         }
+
 
         public async Task<bool> PutAbilities(Guid abID, PutAbilitiesDTO model)
         {

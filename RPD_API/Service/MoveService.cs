@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 
@@ -40,10 +41,12 @@ namespace RPD_API.Service
 
         }
 
-        public async Task<List<MoveDTO>> GetAllMove()
+        public Task<PagedResult<MoveDTO>> GetAllMove(QueryParams queryParams)
         {
-            var move = await _uow.Moves.GetAllAsync();
-            return _mapper.Map<List<MoveDTO>>(move);
+            return GetPagedAsync<Move, MoveDTO>(
+                queryParams,
+                _uow.Moves.GetAllAsync
+            );
         }
 
         public async Task<MoveDTO> GetMoveById(Guid moveID)

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
 using System.Xml.Linq;
 
@@ -18,9 +19,31 @@ namespace RPD_API.Repo
             await _context.GameVersion.AddAsync(model);
         }
 
-        public async Task<List<GameVersion>> GetAllAsync()
+        public async Task<PagedResult<GameVersion>> GetAllAsync(QueryParams queryParams)
         {
-            return await _context.GameVersion!.AsNoTracking().ToListAsync();
+            var query = _context.GameVersion!
+                .AsNoTracking()
+                .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(queryParams.Search))
+            {
+                var search = queryParams.Search.ToLower();
+                query = query.Where(a =>
+                    a.gvName.ToLower().Contains(search) ||
+                    a.gvGen.ToString().Contains(search)
+                    );
+            }
+
+            query = queryParams.SortBy?.ToLower() switch
+            {
+                "gvGen" => queryParams.SortOrder == "desc"
+                    ? query.OrderByDescending(a => a.gvGen)
+                    : query.OrderBy(a => a.gvGen),
+
+                _ => query.OrderBy(a => a.gvGen)
+            };
+
+            return await ToPagedResultAsync(query, queryParams);
         }
 
         public async Task<GameVersion?> GetByIdAsync(Guid gvID)

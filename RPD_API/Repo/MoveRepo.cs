@@ -1,5 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
@@ -16,12 +17,33 @@ namespace RPD_API.Repo
             await _context.Move.AddAsync(model);
         }
 
-        public async Task<List<Move>> GetAllAsync()
+        public async Task<PagedResult<Move>> GetAllAsync(QueryParams queryParams)
         {
-            return await _context.Move
+            var query = _context.Move
                 .Include(m => m.Types)
                 .AsNoTracking()
-                .ToListAsync();
+                .AsQueryable();
+
+
+            if (!string.IsNullOrWhiteSpace(queryParams.Search))
+            {
+                var search = queryParams.Search.ToLower();
+                query = query.Where(m =>
+                    m.moveName.ToLower().Contains(search) ||
+                    m.moveDescription.ToLower().Contains(search)
+                    );
+            }
+
+            query = queryParams.SortBy?.ToLower() switch
+            {
+                "moveName" => queryParams.SortOrder == "desc"
+                    ? query.OrderByDescending(a => a.moveName)
+                    : query.OrderBy(a => a.moveName),
+
+                _ => query.OrderBy(a => a.moveName)
+            };
+
+            return await ToPagedResultAsync(query, queryParams);
         }
 
         public async Task<Move?> GetByIdAsync(Guid moveID)

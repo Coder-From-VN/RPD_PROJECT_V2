@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Repo
@@ -23,13 +24,35 @@ namespace RPD_API.Repo
                 .AnyAsync(p => p.pokeNationalNumber == pokeNationalNumber);
         }
 
-        public async Task<List<Pokemons>> GetAllAsync()
+        public async Task<PagedResult<Pokemons>> GetAllAsync(QueryParams queryParams)
         {
-            return await _context.Pokemons
+            var query = _context.Pokemons
                     .Include(p => p.ImageLink)
                     .Include(p => p.PokemonType)
                     .ThenInclude(pt => pt.Types)
-                    .ToListAsync();
+                    .AsNoTracking()
+                    .AsQueryable();
+
+            if (!string.IsNullOrWhiteSpace(queryParams.Search))
+            {
+                var search = queryParams.Search.ToLower();
+                query = query.Where(poke =>
+                    poke.pokeName.ToLower().Contains(search) ||
+                    poke.pokeDescription.ToLower().Contains(search) ||
+                    poke.pokeNationalNumber.ToString().ToLower().Contains(search)
+                    );
+            }
+
+            query = queryParams.SortBy?.ToLower() switch
+            {
+                "pokeNationalNumber" => queryParams.SortOrder == "desc"
+                    ? query.OrderByDescending(poke => poke.pokeNationalNumber)
+                    : query.OrderBy(poke => poke.pokeNationalNumber),
+
+                _ => query.OrderBy(poke => poke.pokeNationalNumber)
+            };
+
+            return await ToPagedResultAsync(query, queryParams);
         }
 
         public async Task<Pokemons?> GetByIdAsync(Guid pokeID)

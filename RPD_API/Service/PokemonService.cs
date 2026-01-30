@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -12,12 +13,6 @@ namespace RPD_API.Service
         public PokemonService(IUnitOfWorkRepo uow, IMapper mapper)
         : base(uow, mapper)
         {
-        }
-
-        public async Task<List<PokemonsDTO>> GetAllPokemons()
-        {
-            var pokemons = await _uow.Pokemons.GetAllAsync();
-            return _mapper.Map<List<PokemonsDTO>>(pokemons);
         }
 
         public async Task<PokemonDetailDTO> GetPokemonsById(Guid pokeID)
@@ -60,6 +55,14 @@ namespace RPD_API.Service
 
             await _uow.Pokemons.UpdateAsync(pokemons);
             return await _uow.SaveAsync() > 0;
+        }
+
+        public Task<PagedResult<PokemonsDTO>> GetAllPokemons(QueryParams query)
+        {
+            return GetPagedAsync<Pokemons, PokemonsDTO>(
+                query,
+                _uow.Pokemons.GetAllAsync
+            );
         }
     }
 }

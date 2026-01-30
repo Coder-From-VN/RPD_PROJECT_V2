@@ -1,0 +1,7 @@
+services:
+  rpd_api:
+    image: ${DOCKER_REGISTRY-}rpdapi
+    build:
+      context: .
+      dockerfile: RPD_API/Dockerfile
+

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 
@@ -38,10 +39,12 @@ namespace RPD_API.Service
             return await _uow.SaveAsync() > 0;
         }
 
-        public async Task<List<EggGroupDTO>> GetAllEggGroup()
+        public Task<PagedResult<EggGroupDTO>> GetAllEggGroup(QueryParams queryParams)
         {
-            var eggGroup = await _uow.EggGroups.GetAllAsync();
-            return _mapper.Map<List<EggGroupDTO>>(eggGroup);
+            return GetPagedAsync<EggGroup, EggGroupDTO>(
+                queryParams,
+                _uow.EggGroups.GetAllAsync
+            );
         }
 
         public async Task<EggGroupDTO?> GetEggGroupById(Guid egID)

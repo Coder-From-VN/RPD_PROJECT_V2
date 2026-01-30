@@ -1,13 +1,14 @@
 ﻿using RPD_API.DTO;
+using RPD_API.Pagination;
 
 namespace RPD_API.Service.IService
 {
     public interface IGrowthRateService : IBaseService
     {
-        public Task<List<GrowthRateDTO>> GetAllGrowthRate();
-        public Task<GrowthRateDTO> GetGrowthRateById(Guid growthRateID);
-        public Task<GrowthRateDTO?> AddGrowthRate(PostGrowthRateDTO model);
-        public Task<bool> UpdateGrowthRate(Guid growthRateID, PutGrowthRateDTO model);
-        public Task<bool> DeleteGrowthRate(Guid growthRateID);
+        Task<PagedResult<GrowthRateDTO>> GetAllGrowthRate(QueryParams query);
+        Task<GrowthRateDTO> GetGrowthRateById(Guid growthRateID);
+        Task<GrowthRateDTO?> AddGrowthRate(PostGrowthRateDTO model);
+        Task<bool> UpdateGrowthRate(Guid growthRateID, PutGrowthRateDTO model);
+        Task<bool> DeleteGrowthRate(Guid growthRateID);
     }
 }

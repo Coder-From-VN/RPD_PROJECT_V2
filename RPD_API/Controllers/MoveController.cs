@@ -1,6 +1,7 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
-using RPD_API.Repo.IRepo;
+using RPD_API.Pagination;
 using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
@@ -17,9 +18,9 @@ namespace RPD_API.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAllMove()
+        public async Task<IActionResult> GetAllMove([FromQuery] QueryParams query)
         {
-            return Ok(await _moveSer.GetAllMove());
+            return Ok(await _moveSer.GetAllMove(query));
         }
 
         [HttpGet("{moveID}")]
@@ -28,7 +29,7 @@ namespace RPD_API.Controllers
             var result = await _moveSer.GetMoveById(moveID);
             return result == null ? NotFound() : Ok(result);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostImageLink(PostMoveDTO model)
         {
@@ -38,13 +39,13 @@ namespace RPD_API.Controllers
 
             return Ok(result);
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPut("{moveID}")]
         public async Task<IActionResult> PutMove(Guid moveID, [FromBody] PutMoveDTO model)
         {
             return await _moveSer.UpdateMove(moveID, model) ? NoContent() : NotFound();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{moveID}")]
         public async Task<IActionResult> DeleteMove([FromRoute] Guid moveID)
         {

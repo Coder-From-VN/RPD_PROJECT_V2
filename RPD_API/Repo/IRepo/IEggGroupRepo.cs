@@ -1,17 +1,17 @@
 ﻿using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 
 namespace RPD_API.Repo.IRepo
 {
     public interface IEggGroupRepo : IBaseRepository
     {
-        public Task AddAsync(EggGroup model);
-        public Task<List<EggGroup>> GetAllAsync();
-        public Task<EggGroup?> GetByIdAsync(Guid egID);
-        public Task UpdateAsync(EggGroup model);
-        public Task RemoveAsync(EggGroup model);
-
-        public Task<bool> ExistsByNameAsync(string egName);
+        Task AddAsync(EggGroup model);
+        Task<PagedResult<EggGroup>> GetAllAsync(QueryParams queryParams);
+        Task<EggGroup?> GetByIdAsync(Guid egID);
+        Task UpdateAsync(EggGroup model);
+        Task RemoveAsync(EggGroup model);
+        Task<bool> ExistsByNameAsync(string egName);
 
     }
 }

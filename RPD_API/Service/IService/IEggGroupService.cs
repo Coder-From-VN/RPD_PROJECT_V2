@@ -1,13 +1,14 @@
 ﻿using RPD_API.DTO;
+using RPD_API.Pagination;
 
 namespace RPD_API.Service.IService
 {
     public interface IEggGroupService : IBaseService
     {
-        public Task<List<EggGroupDTO>> GetAllEggGroup();
-        public Task<EggGroupDTO> GetEggGroupById(Guid egID);
-        public Task<EggGroupDTO?> AddEggGroup(PostEggGroupDTO model);
-        public Task<bool> UpdateEggGroup(Guid egID, PutEggGroupDTO model);
-        public Task<bool> DeleteEggGroup(Guid egID);
+        Task<PagedResult<EggGroupDTO>> GetAllEggGroup(QueryParams queryParams);
+        Task<EggGroupDTO> GetEggGroupById(Guid egID);
+        Task<EggGroupDTO?> AddEggGroup(PostEggGroupDTO model);
+        Task<bool> UpdateEggGroup(Guid egID, PutEggGroupDTO model);
+        Task<bool> DeleteEggGroup(Guid egID);
     }
 }

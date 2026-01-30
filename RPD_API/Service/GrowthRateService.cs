@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 using System;
@@ -37,10 +38,12 @@ namespace RPD_API.Service
             return await _uow.SaveAsync() > 0;
         }
 
-        public async Task<List<GrowthRateDTO>> GetAllGrowthRate()
+        public Task<PagedResult<GrowthRateDTO>> GetAllGrowthRate(QueryParams queryParams)
         {
-            var growthRate = await _uow.GrowthRates.GetAllAsync();
-            return _mapper.Map<List<GrowthRateDTO>>(growthRate);
+            return GetPagedAsync<GrowthRate, GrowthRateDTO>(
+                queryParams,
+                _uow.GrowthRates.GetAllAsync
+            );
         }
 
         public async Task<GrowthRateDTO> GetGrowthRateById(Guid growthRateID)

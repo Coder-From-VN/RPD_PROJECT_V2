@@ -27,6 +27,7 @@ namespace RPD_API.Models
         public DbSet<PokemonType> PokemonType { get; set; }
         public DbSet<StatType> StatType { get; set; }
         public DbSet<Types> Types { get; set; }
+        public DbSet<Trainer> Trainers { get; set; } = null!;
 
         //khai bao lien ket data
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -143,7 +144,10 @@ namespace RPD_API.Models
                 .HasOne(pm => pm.Move)
                 .WithMany(m => m.PokemonMove)
                 .HasForeignKey(pm => pm.moveID).OnDelete(DeleteBehavior.Restrict);
-
+            //trainner
+            modelBuilder.Entity<Trainer>()
+                .HasIndex(t => t.FirebaseUid)
+                .IsUnique();
         }
 
     }

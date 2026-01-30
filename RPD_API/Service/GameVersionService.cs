@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
+using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 
@@ -36,10 +37,12 @@ namespace RPD_API.Service
             return await _uow.SaveAsync() > 0;
         }
 
-        public async Task<List<GameVersionDTO>> GetAllGameVersion()
+        public Task<PagedResult<GameVersionDTO>> GetAllGameVersion(QueryParams queryParams)
         {
-            var gameVersion = await _uow.GameVersions.GetAllAsync();
-            return _mapper.Map<List<GameVersionDTO>>(gameVersion);
+            return GetPagedAsync<GameVersion, GameVersionDTO>(
+                queryParams,
+                _uow.GameVersions.GetAllAsync
+            );
         }
 
         public async Task<GameVersionDTO> GetGameVersionById(Guid gvID)
