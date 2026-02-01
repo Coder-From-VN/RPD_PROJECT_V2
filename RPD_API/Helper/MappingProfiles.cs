@@ -58,8 +58,21 @@ namespace RPD_API.Helper
                 .ForMember(d => d.abName, o => o.MapFrom(s => s.Abilities.abName));
 
 
-            CreateMap<PokemonsDTO, Pokemons>();
-            CreateMap<Pokemons, PokemonsDTO>();
+            //CreateMap<PokemonsDTO, Pokemons>();
+            //CreateMap<Pokemons, PokemonsDTO>();
+            CreateMap<Pokemons, PokemonsDTO>()
+    .ForMember(
+        dest => dest.ImageLink,
+        opt => opt.MapFrom(src =>
+            src.ImageLink.Select(i => i.imgLink)
+        )
+    )
+    .ForMember(
+        dest => dest.TypeName,
+        opt => opt.MapFrom(src =>
+            src.PokemonType.Select(t => t.Types.typesName)
+        )
+    );
             CreateMap<Pokemons, PokemonDetailDTO>()
                 .ForMember(dest => dest.grName, opt => opt.MapFrom(src => src.GrowthRate.grName))
                 .ForMember(dest => dest.EvolutionChart, opt => opt.MapFrom(src => src.PreEvolutionChart))
