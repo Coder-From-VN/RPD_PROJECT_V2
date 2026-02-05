@@ -9,7 +9,6 @@ namespace RPD_API.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public Guid stID { get; set; }
         public string stName { get; set; }
-
         public ICollection<PokemonStats> PokemonStats { get; set; }
     }
 }

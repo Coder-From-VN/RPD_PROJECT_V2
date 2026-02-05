@@ -57,7 +57,7 @@ namespace RPD_API.Repo
 
         public async Task<Pokemons?> GetByIdAsync(Guid pokeID)
         {
-            return await _context.Pokemons
+            return await _context.Pokemons.AsNoTracking()
                 .Include(m => m.GrowthRate)
                 .Include(img => img.ImageLink)
                 .Include(ev => ev.EffortValues)

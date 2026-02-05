@@ -3,6 +3,7 @@ using System.Text.Json;
 
 namespace RPD_API.Caching
 {
+    //for docker
     public class RedisCacheService : ICacheService
     {
         private readonly IDistributedCache _cache;

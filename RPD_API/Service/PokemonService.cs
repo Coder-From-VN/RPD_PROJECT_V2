@@ -1,26 +1,48 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Pagination;
-using RPD_API.Repo.IRepo;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace RPD_API.Service
 {
     public class PokemonService : BaseService, IPokemonService
     {
-        public PokemonService(IUnitOfWorkRepo uow, IMapper mapper)
-        : base(uow, mapper)
+        public PokemonService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
+        : base(uow, mapper, cache)
         {
         }
 
-        public async Task<PokemonDetailDTO> GetPokemonsById(Guid pokeID)
+        public async Task<PokemonDetailDTO?> GetPokemonsById(Guid pokeID)
         {
-            var pokemons = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (pokemons == null)
+            var cacheKey = $"Pokemons:pokeid:{pokeID}";
+
+            var cached = await _cache.GetStringAsync(cacheKey);
+
+            if (cached != null)
+            {
+                return JsonSerializer.Deserialize<PokemonDetailDTO>(cached)!; 
+            }
+
+            var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
+
+            if (pokemon == null)
                 return null;
-            return _mapper.Map<PokemonDetailDTO>(pokemons);
+            var dto = _mapper.Map<PokemonDetailDTO>(pokemon);
+
+            await _cache.SetStringAsync(
+        cacheKey,
+        JsonSerializer.Serialize(dto), 
+        new DistributedCacheEntryOptions
+        {
+            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+        });
+
+            return dto;
         }
 
         public async Task<bool> DeletePokemons(Guid pokeID)
@@ -57,12 +79,31 @@ namespace RPD_API.Service
             return await _uow.SaveAsync() > 0;
         }
 
-        public Task<PagedResult<PokemonsDTO>> GetAllPokemons(QueryParams query)
+        public async Task<PagedResult<PokemonsDTO>> GetAllPokemons(QueryParams query)
         {
-            return GetPagedAsync<Pokemons, PokemonsDTO>(
+            var cacheKey = $"Pokemons:all:page:{query.PageNumber}";
+
+            var cached = await _cache.GetStringAsync(cacheKey);
+
+            if (cached != null)
+            {
+                return JsonSerializer.Deserialize<PagedResult<PokemonsDTO>>(cached)!;
+            }
+
+            var result = await GetPagedAsync<Pokemons, PokemonsDTO>(
                 query,
                 _uow.Pokemons.GetAllAsync
             );
+
+            await _cache.SetStringAsync(
+          cacheKey,
+          JsonSerializer.Serialize(result),
+          new DistributedCacheEntryOptions
+          {
+              AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+          });
+
+            return result;
         }
     }
 }

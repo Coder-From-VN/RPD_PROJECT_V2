@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Service.IService;
@@ -8,8 +9,8 @@ namespace RPD_API.Service
 {
     public class StatTypeService : BaseService, IStatTypeService
     {
-        public StatTypeService(IUnitOfWorkRepo uow, IMapper mapper)
-        : base(uow, mapper)
+        public StatTypeService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
+        : base(uow, mapper, cache)
         {
         }
 

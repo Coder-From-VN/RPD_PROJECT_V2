@@ -1,16 +1,18 @@
 ﻿using AutoMapper;
+using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using System.Text.Json;
 
 namespace RPD_API.Service
 {
     public class MoveService : BaseService, IMoveService
     {
-        public MoveService(IUnitOfWorkRepo uow, IMapper mapper)
-        : base(uow, mapper)
+        public MoveService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
+        : base(uow, mapper, cache)
         {
         }
 
@@ -41,12 +43,31 @@ namespace RPD_API.Service
 
         }
 
-        public Task<PagedResult<MoveDTO>> GetAllMove(QueryParams queryParams)
+        public async Task<PagedResult<MoveDTO>> GetAllMove(QueryParams queryParams)
         {
-            return GetPagedAsync<Move, MoveDTO>(
+            var cacheKey = $"Move:all:page:{queryParams.PageNumber}";
+
+            var cached = await _cache.GetStringAsync(cacheKey);
+
+            if (cached != null)
+            {
+                return JsonSerializer.Deserialize<PagedResult<MoveDTO>>(cached)!;
+            }
+
+            var result = await GetPagedAsync<Move, MoveDTO>(
                 queryParams,
                 _uow.Moves.GetAllAsync
             );
+
+            await _cache.SetStringAsync(
+           cacheKey,
+           JsonSerializer.Serialize(result),
+           new DistributedCacheEntryOptions
+           {
+               AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+           });
+
+            return result;
         }
 
         public async Task<MoveDTO> GetMoveById(Guid moveID)

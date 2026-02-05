@@ -1,25 +1,23 @@
 ﻿using AutoMapper;
-using RPD_API.Caching;
+using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using System.Text.Json;
 
 namespace RPD_API.Service
 {
     public class AbilitiesService : BaseService, IAbilitiesService
     {
-        private readonly ILogger<AbilitiesService> _logger;
-
 
         public AbilitiesService(
         IUnitOfWorkRepo uow,
         IMapper mapper,
-         ILogger<AbilitiesService> logger)
-        : base(uow, mapper)
+        IDistributedCache cache)
+        : base(uow, mapper, cache)
         {
-            _logger = logger;
         }
 
         public async Task<AbilitiesDTO?> PostAbilities(PostAbilitiesDTO model)
@@ -45,12 +43,31 @@ namespace RPD_API.Service
             return dto;
         }
 
-        public Task<PagedResult<AbilitiesDTO>> GetAllAbilities(QueryParams queryParams)
+        public async Task<PagedResult<AbilitiesDTO>> GetAllAbilities(QueryParams queryParams)
         {
-            return GetPagedAsync<Abilities, AbilitiesDTO>(
+            var cacheKey = $"abilities:all:page:{queryParams.PageNumber}";
+
+            var cached = await _cache.GetStringAsync(cacheKey);
+
+            if (cached != null)
+            {
+                return JsonSerializer.Deserialize<PagedResult<AbilitiesDTO>>(cached)!;
+            }
+
+            var result = await GetPagedAsync<Abilities, AbilitiesDTO>(
                 queryParams,
                 _uow.Abilities.GetAllAsync
             );
+
+            await _cache.SetStringAsync(
+           cacheKey,
+           JsonSerializer.Serialize(result),
+           new DistributedCacheEntryOptions
+           {
+               AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+           });
+
+            return result;
         }
 
 

@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata.Builders;
+using System;
 
 namespace RPD_API.Models
 {
@@ -148,7 +150,9 @@ namespace RPD_API.Models
             modelBuilder.Entity<Trainer>()
                 .HasIndex(t => t.FirebaseUid)
                 .IsUnique();
-        }
+            //stastype
 
+        }
+        
     }
 }

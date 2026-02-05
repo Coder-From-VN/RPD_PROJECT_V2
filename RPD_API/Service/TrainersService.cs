@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using FirebaseAdmin.Auth;
+using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using RPD_API.DTO.Admin;
 using RPD_API.DTO.Trainer;
@@ -16,8 +17,8 @@ namespace RPD_API.Service
     {
         private readonly IConfiguration _config;
 
-        public TrainersService(IUnitOfWorkRepo uow, IMapper mapper, IConfiguration config)
-        : base(uow, mapper)
+        public TrainersService(IUnitOfWorkRepo uow, IMapper mapper, IConfiguration config, IDistributedCache cache)
+        : base(uow, mapper, cache)
         {
             _config = config;
         }

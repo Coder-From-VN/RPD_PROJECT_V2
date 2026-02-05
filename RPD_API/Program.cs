@@ -11,6 +11,7 @@ using RPD_API.Models;
 using RPD_API.Service;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using StackExchange.Redis;
 using System.Security.Claims;
 using System.Text;
 
@@ -71,12 +72,18 @@ builder.Services.AddDbContext<rpdDbContext>(op =>
         sql => sql.EnableRetryOnFailure()
     );
 });
+//run on docker
+//builder.Services.AddStackExchangeRedisCache(options =>
+//{
+//    options.Configuration = builder.Configuration["Redis:ConnectionString"];
+//    options.InstanceName = builder.Configuration["Redis:InstanceName"];
+//});
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration["Redis:ConnectionString"];
-    options.InstanceName = builder.Configuration["Redis:InstanceName"];
 });
+
 
 FirebaseApp.Create(new AppOptions
 {

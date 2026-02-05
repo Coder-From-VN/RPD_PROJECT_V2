@@ -1,5 +1,6 @@
 ﻿namespace RPD_API.Caching
 {
+    //for docker
     public interface ICacheService
     {
         Task<T?> GetAsync<T>(string key);

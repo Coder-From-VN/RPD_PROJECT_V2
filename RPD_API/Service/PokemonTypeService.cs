@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO.Types;
 using RPD_API.Models;
 using RPD_API.Service.IService;
@@ -9,8 +10,8 @@ namespace RPD_API.Service
 {
     public class PokemonTypeService : BaseService, IPokemonTypeService
     {
-        public PokemonTypeService(IUnitOfWorkRepo uow, IMapper mapper)
-        : base(uow, mapper)
+        public PokemonTypeService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
+        : base(uow, mapper, cache)
         {
         }
 
