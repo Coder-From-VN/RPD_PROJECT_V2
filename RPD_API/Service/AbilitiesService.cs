@@ -6,6 +6,7 @@ using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using Serilog;
 using System.Text.Json;
 
 namespace RPD_API.Service
@@ -59,7 +60,7 @@ namespace RPD_API.Service
             catch(Exception ex)
             {
                 // Optional: log cache read failure
-                
+                Log.Error($"cache read Fail {ex}");
             }
             
 
@@ -78,6 +79,7 @@ namespace RPD_API.Service
             catch(Exception ex)
             {
                 // Optional: log cache write failure
+                Log.Error($"Cache write Fail {ex}");
             }
             return result;
         }

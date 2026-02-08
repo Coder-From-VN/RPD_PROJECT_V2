@@ -6,6 +6,7 @@ using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using Serilog;
 using System.Text.Json;
 
 namespace RPD_API.Service
@@ -56,7 +57,7 @@ namespace RPD_API.Service
             }
             catch (Exception ex)
             {
-
+                Log.Error($"cache read Fail {ex}");
             }
 
             var result = await GetPagedAsync<Move, MoveDTO>(
@@ -74,7 +75,7 @@ namespace RPD_API.Service
             }
             catch (Exception ex)
             {
-                // Optional: log cache write failure
+                Log.Error($"cache write Fail {ex}");
             }
             return result;
         }

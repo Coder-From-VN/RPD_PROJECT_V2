@@ -6,6 +6,7 @@ using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using Serilog;
 using System.Text.Json;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
@@ -31,7 +32,7 @@ namespace RPD_API.Service
                     return JsonSerializer.Deserialize<PokemonDetailDTO>(cached)!;
                 }
             }
-            catch (Exception ex) { }
+            catch (Exception ex) { Log.Error($"cache read Fail {ex}"); }
 
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
 
@@ -50,7 +51,7 @@ namespace RPD_API.Service
             }
             catch (Exception ex)
             {
-                // Optional: log cache write failure
+                Log.Error($"cache write Fail {ex}");
             }
             return result;
         }
@@ -102,7 +103,7 @@ namespace RPD_API.Service
                     return JsonSerializer.Deserialize<PagedResult<PokemonsDTO>>(cached)!;
                 }
             }
-            catch (Exception ex) { }
+            catch (Exception ex) { Log.Error($"cache read Fail {ex}"); }
 
             var result = await GetPagedAsync<Pokemons, PokemonsDTO>(
                 query,
@@ -119,7 +120,7 @@ namespace RPD_API.Service
             }
             catch (Exception ex)
             {
-                // Optional: log cache write failure
+                Log.Error($"cache write Fail {ex}");
             }
             return result;
         }

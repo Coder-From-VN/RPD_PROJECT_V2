@@ -14,6 +14,8 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+builder.Host.ConfigureSeriLog();
+
 builder.Services.AddControllers();
 //Add autoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
@@ -74,7 +76,6 @@ builder.Services.AddStackExchangeRedisCache(options =>
     options.Configuration = builder.Configuration["Redis:ConnectionString"];
 });
 
-
 FirebaseApp.Create(new AppOptions
 {
     Credential = GoogleCredential.FromFile("firebase/rpd-fbsv-firebase.json")
@@ -118,8 +119,11 @@ var app = builder.Build();
 app.UseGlobalExceptionHandler();
 
 app.UseCors("AllowFrontend");
+
+
 app.UseAuthentication();
 app.UseAuthorization();
+
 app.UseSwagger();
 app.UseSwaggerUI();
 
@@ -128,3 +132,4 @@ app.UseHttpsRedirection();
 app.MapControllers();
 
 app.Run();
+
