@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -19,12 +20,14 @@ namespace RPD_API.Service
         {
             var statsCheck = await _uow.StatTypes.GetByIdAsync(model.stID);
             var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (statsCheck == null || pokeIdCheck == null)
-                return false;
+            if (pokeIdCheck == null)
+                throw new NotFoundException($"Pokemon id {pokeID} does not exist");
+            if (statsCheck == null)
+                throw new NotFoundException($"Stat Type id {model.stID} does not exist");
 
             var exists = await _uow.PokemonStats.GetLinkAsync(pokeID, model.stID);
             if (exists != null)
-                return false;
+                throw new BadRequestException($"Pokemon Alreddy have this Stat");
 
 
             PokemonStats newPokemonStats = new PokemonStats
@@ -47,7 +50,7 @@ namespace RPD_API.Service
         {
             var entry = await _uow.PokemonStats.GetLinkAsync(pokeID, stID);
             if (entry == null)
-                return false;
+                throw new NotFoundException($"Can't Find Stat id {stID} in Pokemon id {pokeID}");
 
             await _uow.PokemonStats.RemoveAsync(entry);
             return await _uow.SaveAsync() > 0;
@@ -57,7 +60,7 @@ namespace RPD_API.Service
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
-                return false;
+                throw new NotFoundException($"Can't Find Pokemon id {pokeID}");
 
             var existingLinks = pokemon.PokemonStats.ToList();
             foreach (var link in existingLinks)

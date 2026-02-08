@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -19,12 +19,14 @@ namespace RPD_API.Service
         {
             var eggGroupCheck = await _uow.EggGroups.GetByIdAsync(egID);
             var pokeCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (eggGroupCheck == null || pokeCheck == null)
-                return false;
+            if (eggGroupCheck == null)
+                throw new NotFoundException($"Can't find EggGroups {egID}");
+            if (pokeCheck == null)
+                throw new NotFoundException($"Can't find Pokemons {pokeID}");
 
             var exists = await _uow.PokemonEggGroups.GetLinkAsync(pokeID, egID);
             if (exists != null)
-                return false;
+                throw new BadHttpRequestException("Pokemon Alredy have this Egg Group");
 
             PokemonEggGroup newPokemonEggGroup = new PokemonEggGroup
             {
@@ -42,7 +44,7 @@ namespace RPD_API.Service
         {
             var entry = await _uow.PokemonEggGroups.GetLinkAsync(pokeID, egID);
             if (entry == null)
-                return false;
+                throw new NotFoundException("Pokemon Don't have this Egg Group");
 
             await _uow.PokemonEggGroups.RemoveAsync(entry);
             return await _uow.SaveAsync() > 0;
@@ -52,7 +54,7 @@ namespace RPD_API.Service
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
-                return false;
+                throw new NotFoundException($"Can't find Pokemons id {pokeID}");
 
             // Remove any egg groups not in the new list
             var existingLinks = pokemon.PokemonEggGroup.ToList();
@@ -64,7 +66,7 @@ namespace RPD_API.Service
             {
                 var abilityExists = await _uow.EggGroups.GetByIdAsync(dto.egID);
                 if (abilityExists == null)
-                    return false;
+                    throw new NotFoundException($"Can't find EggGroups id {dto.egID}");
 
                 pokemon.PokemonEggGroup.Add(new PokemonEggGroup
                 {

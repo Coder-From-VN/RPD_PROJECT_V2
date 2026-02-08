@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
@@ -16,26 +17,23 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task<MoveDTO> AddMove(PostMoveDTO model)
+        public async Task<MoveDTO?> AddMove(PostMoveDTO model)
         {
             if (await _uow.Moves.ExistsByNameAsync(model.moveName))
-                return null;
+                throw new BadRequestException("Move already exists");
 
             var newMove = _mapper.Map<Move>(model);
+
             await _uow.Moves.AddAsync(newMove);
 
-            if (await _uow.SaveAsync() <= 0)
-                return null;
-
-            var moveWithType = await _uow.Moves.GetByIdAsync(newMove.moveID);
-            return _mapper.Map<MoveDTO>(moveWithType);
+            return await _uow.SaveAsync() > 0 ? _mapper.Map<MoveDTO?>(newMove) : null;
         }
 
         public async Task<bool> DeleteMove(Guid moveID)
         {
             var move = await _uow.Moves.GetByIdAsync(moveID);
             if (move == null)
-                return false;
+                throw new NotFoundException($"Moves id {moveID} not found");
 
             await _uow.Moves.RemoveAsync(move);
 
@@ -47,11 +45,18 @@ namespace RPD_API.Service
         {
             var cacheKey = $"Move:all:page:{queryParams.PageNumber}";
 
-            var cached = await _cache.GetStringAsync(cacheKey);
-
-            if (cached != null)
+            try
             {
-                return JsonSerializer.Deserialize<PagedResult<MoveDTO>>(cached)!;
+                var cached = await _cache.GetStringAsync(cacheKey);
+
+                if (cached != null)
+                {
+                    return JsonSerializer.Deserialize<PagedResult<MoveDTO>>(cached)!;
+                }
+            }
+            catch (Exception ex)
+            {
+
             }
 
             var result = await GetPagedAsync<Move, MoveDTO>(
@@ -59,14 +64,18 @@ namespace RPD_API.Service
                 _uow.Moves.GetAllAsync
             );
 
-            await _cache.SetStringAsync(
-           cacheKey,
-           JsonSerializer.Serialize(result),
-           new DistributedCacheEntryOptions
-           {
-               AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-           });
-
+            try
+            {
+                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(result),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+                    });
+            }
+            catch (Exception ex)
+            {
+                // Optional: log cache write failure
+            }
             return result;
         }
 
@@ -75,7 +84,7 @@ namespace RPD_API.Service
             var Move = await _uow.Moves.GetByIdAsync(moveID);
 
             if (Move == null)
-                return null;
+                throw new NotFoundException($"Move with id {moveID} not found");
 
             return _mapper.Map<MoveDTO>(Move);
         }
@@ -84,7 +93,7 @@ namespace RPD_API.Service
         {
             var move = await _uow.Moves.GetByIdAsync(moveID);
             if (move == null)
-                return false;
+                throw new NotFoundException($"Move with id {moveID} not found");
 
             _mapper.Map(model, move);
 

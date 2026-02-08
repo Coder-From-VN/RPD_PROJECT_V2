@@ -4,14 +4,11 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
-using RPD_API.Caching;
 using RPD_API.Extensions;
-using RPD_API.Middleware;
 using RPD_API.Models;
 using RPD_API.Service;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
-using StackExchange.Redis;
 using System.Security.Claims;
 using System.Text;
 
@@ -25,7 +22,6 @@ builder.Services.AddRepositories();
 builder.Services.AddServices();
 
 builder.Services.AddScoped<IUnitOfWorkRepo, UnitOfWorkRepo>();
-builder.Services.AddScoped<ICacheService, RedisCacheService>();
 builder.Services.AddScoped<ITrainersService, TrainersService>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -72,12 +68,6 @@ builder.Services.AddDbContext<rpdDbContext>(op =>
         sql => sql.EnableRetryOnFailure()
     );
 });
-//run on docker
-//builder.Services.AddStackExchangeRedisCache(options =>
-//{
-//    options.Configuration = builder.Configuration["Redis:ConnectionString"];
-//    options.InstanceName = builder.Configuration["Redis:InstanceName"];
-//});
 
 builder.Services.AddStackExchangeRedisCache(options =>
 {
@@ -125,7 +115,7 @@ builder.Services.AddCors(options =>
 
 var app = builder.Build();
 
-app.UseMiddleware<ExceptionHandlingMiddleware>();
+app.UseGlobalExceptionHandler();
 
 app.UseCors("AllowFrontend");
 app.UseAuthentication();

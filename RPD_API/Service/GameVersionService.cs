@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using System.Text.Json;
 
 namespace RPD_API.Service
 {
@@ -18,7 +20,7 @@ namespace RPD_API.Service
         public async Task<GameVersionDTO?> AddGameVersion(PostGameVersionDTO model)
         {
             if (await _uow.GameVersions.ExistsByNameAsync(model.gvName))
-                return null;
+                throw new BadRequestException("GameVersions name already exists");
 
             var newGameVersion = _mapper.Map<GameVersion>(model);
             await _uow.GameVersions.AddAsync(newGameVersion);
@@ -30,19 +32,47 @@ namespace RPD_API.Service
         {
             var gameVersion = await _uow.GameVersions.GetByIdAsync(gvID);
             if (gameVersion == null)
-                return false;
+                throw new NotFoundException($"GameVersions id {gvID} not found");
 
             await _uow.GameVersions.RemoveAsync(gameVersion);
 
             return await _uow.SaveAsync() > 0;
         }
 
-        public Task<PagedResult<GameVersionDTO>> GetAllGameVersion(QueryParams queryParams)
+        public async Task<PagedResult<GameVersionDTO>> GetAllGameVersion(QueryParams queryParams)
         {
-            return GetPagedAsync<GameVersion, GameVersionDTO>(
+            var cacheKey = $"GameVersions:all:page:{queryParams.PageNumber}";
+            try
+            {
+                var cached = await _cache.GetStringAsync(cacheKey);
+
+                if (!string.IsNullOrEmpty(cached))
+                {
+                    return JsonSerializer.Deserialize<PagedResult<GameVersionDTO>>(cached)!;
+                }
+            }
+            catch (Exception ex)
+            {
+                // Optional: log cache read failure
+
+            }
+            var result = await GetPagedAsync<GameVersion, GameVersionDTO>(
                 queryParams,
                 _uow.GameVersions.GetAllAsync
             );
+            try
+            {
+                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(result),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+                    });
+            }
+            catch (Exception ex)
+            {
+                // Optional: log cache write failure
+            }
+            return result;
         }
 
         public async Task<GameVersionDTO> GetGameVersionById(Guid gvID)
@@ -50,7 +80,7 @@ namespace RPD_API.Service
             var gameVersion = await _uow.GameVersions.GetByIdAsync(gvID);
 
             if (gameVersion == null)
-                return null;
+                throw new NotFoundException($"GameVersions with id {gvID} not found");
 
             return _mapper.Map<GameVersionDTO>(gameVersion);
         }
@@ -60,7 +90,7 @@ namespace RPD_API.Service
             var gameVersion = await _uow.GameVersions.GetByIdAsync(gvID);
 
             if (gameVersion == null)
-                return false;
+                throw new NotFoundException($"GameVersions id {gvID} not found");
 
             if (!string.IsNullOrWhiteSpace(model.gvName))
                 gameVersion.gvName = model.gvName;

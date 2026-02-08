@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -18,13 +19,14 @@ namespace RPD_API.Service
         {
             var gameVersionCheck = await _uow.GameVersions.GetByIdAsync(model.gvID);
             var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (gameVersionCheck == null || pokeIdCheck == null)
-                return false;
+            if (gameVersionCheck == null)
+                throw new NotFoundException($"Can't find GameVersions id {model.gvID}");
+            if (pokeIdCheck == null)
+                throw new NotFoundException($"Can't find Pokemons id {pokeID}");
 
             var exists = await _uow.PokemonGameVersions.GetLinkAsync(pokeID, model.gvID);
             if (exists != null)
-                return false;
-
+                throw new BadRequestException("GameVersion Alredy Add To this Pokemon");
 
             PokemonGameVersion newPokemonGameVersion = new PokemonGameVersion
             {
@@ -44,7 +46,7 @@ namespace RPD_API.Service
         {
             var entry = await _uow.PokemonGameVersions.GetLinkAsync(pokeID, gvID);
             if (entry == null)
-                return false;
+                throw new NotFoundException("GameVersion Not Add To Pokemon Yet");
 
             await _uow.PokemonGameVersions.RemoveAsync(entry);
             return await _uow.SaveAsync() > 0;
@@ -54,7 +56,7 @@ namespace RPD_API.Service
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
-                return false;
+                throw new NotFoundException($"Can't find Pokemons id {pokeID}");
 
             var existingLinks = pokemon.PokemonGameVersion.ToList();
             foreach (var link in existingLinks)

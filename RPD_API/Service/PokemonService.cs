@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
@@ -21,35 +22,44 @@ namespace RPD_API.Service
         {
             var cacheKey = $"Pokemons:pokeid:{pokeID}";
 
-            var cached = await _cache.GetStringAsync(cacheKey);
-
-            if (cached != null)
+            try
             {
-                return JsonSerializer.Deserialize<PokemonDetailDTO>(cached)!; 
+                var cached = await _cache.GetStringAsync(cacheKey);
+
+                if (cached != null)
+                {
+                    return JsonSerializer.Deserialize<PokemonDetailDTO>(cached)!;
+                }
             }
+            catch (Exception ex) { }
 
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
 
             if (pokemon == null)
-                return null;
-            var dto = _mapper.Map<PokemonDetailDTO>(pokemon);
+                throw new NotFoundException($"Pokemons with id {pokeID} not found");
 
-            await _cache.SetStringAsync(
-        cacheKey,
-        JsonSerializer.Serialize(dto), 
-        new DistributedCacheEntryOptions
-        {
-            AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-        });
+            var result = _mapper.Map<PokemonDetailDTO>(pokemon);
 
-            return dto;
+            try
+            {
+                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(result),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+                    });
+            }
+            catch (Exception ex)
+            {
+                // Optional: log cache write failure
+            }
+            return result;
         }
 
         public async Task<bool> DeletePokemons(Guid pokeID)
         {
             var Pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (Pokemon == null)
-                return false;
+                throw new NotFoundException($"Pokemons with id {pokeID} not found");
 
             await _uow.Pokemons.RemoveAsync(Pokemon);
 
@@ -59,7 +69,7 @@ namespace RPD_API.Service
         public async Task<PokemonsDTO?> PostPokemons(PostPokemonDTO model)
         {
             if (await _uow.Pokemons.ExistsByNationalNumberAsync(model.pokeNationalNumber))
-                return null;
+                throw new BadRequestException($"Pokemons with NationalNumber {model.pokeNationalNumber} Exits");
 
             var newPokemons = _mapper.Map<Pokemons>(model);
             await _uow.Pokemons.AddAsync(newPokemons);
@@ -71,7 +81,7 @@ namespace RPD_API.Service
         {
             var pokemons = await _uow.Pokemons.GetByIdAsync(pokeId);
             if (pokemons == null)
-                return false;
+                throw new NotFoundException($"Pokemons with id {pokeId} not found");
 
             _mapper.Map(model, pokemons);
 
@@ -83,26 +93,34 @@ namespace RPD_API.Service
         {
             var cacheKey = $"Pokemons:all:page:{query.PageNumber}";
 
-            var cached = await _cache.GetStringAsync(cacheKey);
-
-            if (cached != null)
+            try
             {
-                return JsonSerializer.Deserialize<PagedResult<PokemonsDTO>>(cached)!;
+                var cached = await _cache.GetStringAsync(cacheKey);
+
+                if (cached != null)
+                {
+                    return JsonSerializer.Deserialize<PagedResult<PokemonsDTO>>(cached)!;
+                }
             }
+            catch (Exception ex) { }
 
             var result = await GetPagedAsync<Pokemons, PokemonsDTO>(
                 query,
                 _uow.Pokemons.GetAllAsync
             );
 
-            await _cache.SetStringAsync(
-          cacheKey,
-          JsonSerializer.Serialize(result),
-          new DistributedCacheEntryOptions
-          {
-              AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-          });
-
+            try
+            {
+                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(result),
+                    new DistributedCacheEntryOptions
+                    {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+                    });
+            }
+            catch (Exception ex)
+            {
+                // Optional: log cache write failure
+            }
             return result;
         }
     }

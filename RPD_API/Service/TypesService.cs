@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -17,7 +18,7 @@ namespace RPD_API.Service
         public async Task<TypesDTO?> AddTypes(PostTypesDTO model)
         {
             if (await _uow.Types.ExistsByNameAsync(model.typesName))
-                return null;
+                throw new BadRequestException("Types name already exists");
 
             var newType = _mapper.Map<Types>(model);
             await _uow.Types.AddAsync(newType);
@@ -29,7 +30,7 @@ namespace RPD_API.Service
         {
             var type = await _uow.Types.GetByIdAsync(typeID);
             if (type == null)
-                return false;
+                throw new NotFoundException($"Types with id {typeID} not found");
 
             await _uow.Types.RemoveAsync(type);
             return await _uow.SaveAsync() > 0;
@@ -46,7 +47,7 @@ namespace RPD_API.Service
             var type = await _uow.Types.GetByIdAsync(typeID);
 
             if (type == null)
-                return null;
+                throw new NotFoundException($"Types with id {typeID} not found");
 
             return _mapper.Map<TypesDTO>(type);
         }
@@ -55,7 +56,7 @@ namespace RPD_API.Service
         {
             var type = await _uow.Types.GetByIdAsync(typeID);
             if (type == null)
-                return false;
+                throw new NotFoundException($"Types with id {typeID} not found");
 
             if (model.typesName != "")
                 type.typesName = model.typesName;

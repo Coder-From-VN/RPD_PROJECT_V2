@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -19,7 +19,7 @@ namespace RPD_API.Service
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
-                return false;
+                throw new NotFoundException($"Pokemons with id {pokeID} not found");
 
             EffortValues newEffortValues = new EffortValues
             {
@@ -38,7 +38,7 @@ namespace RPD_API.Service
         {
             var effortValues = await _uow.EffortValues.GetByIdAsync(evID);
             if (effortValues == null)
-                return false;
+                throw new NotFoundException("Effort Values not found");
 
             await _uow.EffortValues.RemoveAsync(effortValues);
 
@@ -49,7 +49,7 @@ namespace RPD_API.Service
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
-                return false;
+                throw new NotFoundException($"Pokemons with id {pokeID} not found");
 
             var evLookup = model.ToDictionary(m => m.evStatName);
 

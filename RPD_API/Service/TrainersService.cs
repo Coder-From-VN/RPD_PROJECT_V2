@@ -4,6 +4,7 @@ using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
 using RPD_API.DTO.Admin;
 using RPD_API.DTO.Trainer;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -86,7 +87,7 @@ namespace RPD_API.Service
             var password = _config["AdminAuth:Password"];
 
             if (dto.Username != username || dto.Password != password)
-                return null;
+                throw new BadRequestException("User name and password can not be empty");
 
             var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
             var expireDays = int.Parse(_config["Jwt:ExpireDays"]!);

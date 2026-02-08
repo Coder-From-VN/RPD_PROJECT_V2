@@ -1,4 +1,5 @@
-﻿using RPD_API.Repo.IRepo;
+﻿using Api.Middlewares;
+using RPD_API.Repo.IRepo;
 using RPD_API.Service.IService;
 
 namespace RPD_API.Extensions
@@ -25,6 +26,12 @@ namespace RPD_API.Extensions
                 .WithScopedLifetime());
 
             return services;
+        }
+
+        public static IApplicationBuilder UseGlobalExceptionHandler(
+        this IApplicationBuilder app)
+        {
+            return app.UseMiddleware<GlobalExceptionMiddleware>();
         }
     }
 }

@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO.Types;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -19,13 +20,14 @@ namespace RPD_API.Service
         {
             var typesCheck = await _uow.Types.GetByIdAsync(typesID);
             var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (typesCheck == null || pokeIdCheck == null)
-                return false;
+            if (typesCheck == null)
+                throw new NotFoundException($"Type with ID {typesID} Not Found");
+            if (pokeIdCheck == null)
+                throw new NotFoundException($"Pokemons with ID {pokeID} Not Found");
 
             var exists = await _uow.PokemonTypes.GetLinkAsync(pokeID, typesID);
             if (exists != null)
-                return false;
-
+                throw new BadRequestException("Pokemon Alredy Have This Type");
 
             PokemonType newPokemonType = new PokemonType
             {
@@ -43,7 +45,7 @@ namespace RPD_API.Service
         {
             var entry = await _uow.PokemonTypes.GetLinkAsync(pokeID, typesID);
             if (entry == null)
-                return false;
+                throw new NotFoundException("Pokemon Don't Have This Type");
 
             await _uow.PokemonTypes.RemoveAsync(entry);
             return await _uow.SaveAsync() > 0;
@@ -53,7 +55,7 @@ namespace RPD_API.Service
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
-                return false;
+                throw new NotFoundException($"Pokemons with ID {pokeID} Not Found");
 
             var existingLinks = pokemon.PokemonType.ToList();
             foreach (var link in existingLinks)

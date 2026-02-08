@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -18,12 +19,14 @@ namespace RPD_API.Service
         {
             var moveCheck = await _uow.Moves.GetByIdAsync(model.moveID);
             var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(model.pokeID);
-            if (moveCheck == null || pokeIdCheck == null)
-                return false;
+            if (moveCheck == null)
+                throw new NotFoundException($"Can't find Moves id {model.moveID}");
+            if ( pokeIdCheck == null)
+                throw new NotFoundException($"Can't find Pokemons id {model.pokeID}");
 
             var exists = await _uow.PokemonMoves.GetLinkAsync(model.pokeID, model.moveID);
             if (exists != null)
-                return false;
+                throw new BadRequestException("Pokemon Alredy Learn This Move");
 
 
             PokemonMove newPokemonMove = new PokemonMove
@@ -44,7 +47,7 @@ namespace RPD_API.Service
         {
             var entry = await _uow.PokemonMoves.GetLinkAsync(pokeID, moveID);
             if (entry == null)
-                return false;
+                throw new NotFoundException($"Pokemon id {pokeID} does not exist");
 
             await _uow.PokemonMoves.RemoveAsync(entry);
             return await _uow.SaveAsync() > 0;
@@ -54,7 +57,7 @@ namespace RPD_API.Service
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
-                return false;
+                throw new NotFoundException($"Pokemon id {pokeID} does not exist");
 
             var existingLinks = pokemon.PokemonMove.ToList();
             foreach (var link in existingLinks)

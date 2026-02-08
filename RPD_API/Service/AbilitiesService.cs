@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
@@ -23,50 +24,61 @@ namespace RPD_API.Service
         public async Task<AbilitiesDTO?> PostAbilities(PostAbilitiesDTO model)
         {
             if (await _uow.Abilities.ExistsByNameAsync(model.abName))
-                return null;
+                throw new BadRequestException("Ability name already exists");
 
             var newAbilities = _mapper.Map<Abilities>(model);
 
             await _uow.Abilities.AddAsync(newAbilities);
 
             return await _uow.SaveAsync() > 0 ? _mapper.Map<AbilitiesDTO?>(newAbilities) : null;
+
         }
 
         public async Task<AbilitiesDTO?> GetAbilitiesById(Guid abID)
         {
             var ability = await _uow.Abilities.GetByIdAsync(abID);
             if (ability == null)
-                return null;
+                throw new NotFoundException($"Ability with id {abID} not found");
 
-            var dto = _mapper.Map<AbilitiesDTO>(ability);
-
-            return dto;
+            return _mapper.Map<AbilitiesDTO>(ability);
         }
 
         public async Task<PagedResult<AbilitiesDTO>> GetAllAbilities(QueryParams queryParams)
         {
             var cacheKey = $"abilities:all:page:{queryParams.PageNumber}";
 
-            var cached = await _cache.GetStringAsync(cacheKey);
-
-            if (cached != null)
+            try
             {
-                return JsonSerializer.Deserialize<PagedResult<AbilitiesDTO>>(cached)!;
+                var cached = await _cache.GetStringAsync(cacheKey);
+
+                if (!string.IsNullOrEmpty(cached))
+                {
+                    return JsonSerializer.Deserialize<PagedResult<AbilitiesDTO>>(cached)!;
+                }
             }
+            catch(Exception ex)
+            {
+                // Optional: log cache read failure
+                
+            }
+            
 
             var result = await GetPagedAsync<Abilities, AbilitiesDTO>(
                 queryParams,
                 _uow.Abilities.GetAllAsync
             );
 
-            await _cache.SetStringAsync(
-           cacheKey,
-           JsonSerializer.Serialize(result),
-           new DistributedCacheEntryOptions
-           {
-               AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-           });
-
+            try
+            {
+                await _cache.SetStringAsync(cacheKey,JsonSerializer.Serialize(result), 
+                    new DistributedCacheEntryOptions {
+                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
+                    });
+            }
+            catch(Exception ex)
+            {
+                // Optional: log cache write failure
+            }
             return result;
         }
 
@@ -88,14 +100,15 @@ namespace RPD_API.Service
                 await _uow.Abilities.UpdateAsync(abilities);
                 return await _uow.SaveAsync() > 0;
             }
-            return false;
+
+            throw new NotFoundException("Ability not found");
         }
 
         public async Task<bool> DeleteAbilities(Guid guid)
         {
             var deleteThisAbilities = await _uow.Abilities.GetByIdAsync(guid);
             if (deleteThisAbilities == null)
-                return false;
+                throw new NotFoundException("Ability not found");
 
             await _uow.Abilities.RemoveAsync(deleteThisAbilities);
             return await _uow.SaveAsync() > 0;

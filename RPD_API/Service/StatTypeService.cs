@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -17,7 +18,7 @@ namespace RPD_API.Service
         public async Task<StatTypeDTO?> AddStatType(PostStatTypeDTO model)
         {
             if (await _uow.StatTypes.ExistsByNameAsync(model.stName))
-                return null;
+                throw new BadRequestException("StatTypes name already exists");
 
             var newStatType = _mapper.Map<StatType>(model);
             await _uow.StatTypes.AddAsync(newStatType);
@@ -29,7 +30,7 @@ namespace RPD_API.Service
         {
             var statType = await _uow.StatTypes.GetByIdAsync(statTypeID);
             if (statType == null)
-                return false;
+                throw new NotFoundException($"StatTypes with id {statTypeID} not found");
 
             await _uow.StatTypes.RemoveAsync(statType);
             return await _uow.SaveAsync() > 0;
@@ -46,6 +47,8 @@ namespace RPD_API.Service
         public async Task<StatTypeDTO> GetStatTypeById(Guid statTypeID)
         {
             var statType = await _uow.StatTypes.GetByIdAsync(statTypeID);
+            if (statType == null)
+                throw new NotFoundException($"StatTypes with id {statTypeID} not found");
             return _mapper.Map<StatTypeDTO>(statType);
         }
 
@@ -53,7 +56,7 @@ namespace RPD_API.Service
         {
             var statType = await _uow.StatTypes.GetByIdAsync(statTypeID);
             if (statType == null)
-                return false;
+                throw new NotFoundException($"StatTypes with id {statTypeID} not found");
 
             if (!string.IsNullOrWhiteSpace(model.stName))
                 statType.stName = model.stName;

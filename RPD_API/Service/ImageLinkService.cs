@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -19,7 +20,7 @@ namespace RPD_API.Service
         {
             var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokeIdCheck == null)
-                return false;
+                throw new NotFoundException($"Pokemon with id {pokeID} Not Found");
 
             var imageLink = _mapper.Map<ImageLink>(model);
             imageLink.pokeID = pokeID;
@@ -33,7 +34,7 @@ namespace RPD_API.Service
         {
             var imageLink = await _uow.ImageLinks.GetByIdAsync(imgID);
             if (imageLink == null)
-                return false;
+                throw new NotFoundException($"Image with id {imgID} Not Found");
 
             await _uow.ImageLinks.RemoveAsync(imageLink);
             return await _uow.SaveAsync() > 0;
@@ -43,7 +44,7 @@ namespace RPD_API.Service
         {
             var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokeIdCheck == null)
-                return false;
+                throw new NotFoundException($"Pokemon with id {pokeID} Not Found");
 
             foreach (var dto in model)
             {
