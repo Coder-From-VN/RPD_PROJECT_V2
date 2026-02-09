@@ -22,6 +22,7 @@ namespace RPD_API.UnitOfWork
         IPokemonMoveRepo PokemonMoves { get; }
         IEvolutionChartRepo EvolutionCharts { get; }
         ITrainerRepo Trainers { get; }
+        IRefreshTokenRepo RefreshTokens { get; }
         Task<int> SaveAsync();
     }
 }

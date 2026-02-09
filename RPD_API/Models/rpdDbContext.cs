@@ -12,6 +12,7 @@ namespace RPD_API.Models
 
         }
         //khai baos dbset
+        public DbSet<RefreshToken> RefreshTokens { get; set; }
         public DbSet<Abilities> Abilities { get; set; }
         public DbSet<EffortValues> EffortValues { get; set; }
         public DbSet<EggGroup> EggGroup { get; set; }

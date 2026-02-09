@@ -12,7 +12,6 @@ namespace RPD_API.Controllers
     {
         private readonly ITrainersService _tnSer;
 
-
         public AuthController(
             ITrainersService firebaseAuth)
         {
@@ -31,6 +30,13 @@ namespace RPD_API.Controllers
         {
             var token = await _tnSer.GenerateAdminJwt(dto);
             return token == null ? Unauthorized("Invalid admin credentials") : Ok(token);
+        }
+
+        [HttpPost("trainer/refresh")]
+        public async Task<IActionResult> Refresh([FromBody] RefreshTokenDTO dto)
+        {
+            var result = await _tnSer.RefreshAsync(dto.RefreshToken);
+            return Ok(result);
         }
     }
 }

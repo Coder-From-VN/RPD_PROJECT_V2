@@ -8,5 +8,6 @@ namespace RPD_API.Service.IService
     {
         Task<TrainerLoginResponseDTO> LoginAsync(string firebaseIdToken);
         Task<TrainerLoginResponseDTO> GenerateAdminJwt(AdminLoginDTO dto);
+        Task<TrainerLoginResponseDTO> RefreshAsync(string refreshToken);
     }
 }

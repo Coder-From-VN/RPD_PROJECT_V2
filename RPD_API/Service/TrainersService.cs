@@ -26,60 +26,46 @@ namespace RPD_API.Service
 
         public async Task<TrainerLoginResponseDTO> LoginAsync(string firebaseIdToken)
         {
-            // 1️⃣ Verify Firebase token
-            FirebaseToken decoded =
-                await FirebaseAuth.DefaultInstance.VerifyIdTokenAsync(firebaseIdToken);
+            var decoded = await FirebaseAuth.DefaultInstance
+        .VerifyIdTokenAsync(firebaseIdToken);
 
-            var uid = decoded.Uid;
-            var email = decoded.Claims["email"]?.ToString() ?? "temp eamil";
-
-            // 2️⃣ Find / create trainer
-            var trainer = await _uow.Trainers.GetByFirebaseUidAsync(uid);
+            var trainer = await _uow.Trainers.GetByFirebaseUidAsync(decoded.Uid);
 
             if (trainer == null)
             {
                 trainer = new Trainer
                 {
-                    FirebaseUid = uid,
-                    tnEmail = email,
-                    tnName = decoded.Claims["name"]?.ToString() ?? "tmp name",
-                    tnPhotoUrl = decoded.Claims["picture"]?.ToString() ?? "https://upload.wikimedia.org/wikipedia/en/d/d4/Pokemon-Ditto-Artwork.png",
+                    FirebaseUid = decoded.Uid,
+                    tnEmail = decoded.Claims["email"]?.ToString(),
+                    tnName = decoded.Claims["name"]?.ToString()
                 };
 
                 await _uow.Trainers.AddAsync(trainer);
                 await _uow.SaveAsync();
             }
 
-            // 3️⃣ Generate API JWT
-            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
-            var expireDays = int.Parse(_config["Jwt:ExpireDays"]!);
+            var accessExpire = DateTime.UtcNow.AddMinutes(10);
+            var refreshExpire = DateTime.UtcNow.AddDays(7);
 
-            var claims = new[]
+            var accessToken = GenerateAccessToken(trainer, accessExpire);
+            var refreshToken = GenerateRefreshToken();
+
+            await _uow.RefreshTokens.AddAsync(new RefreshToken
             {
-            new Claim("TrainerId", trainer.TrainerId.ToString()),
-            new Claim(ClaimTypes.Email, trainer.tnEmail),
-            new Claim(ClaimTypes.Role, "Trainer")
-        };
+                TrainerId = trainer.TrainerId,
+                Token = refreshToken,
+                ExpiresAt = refreshExpire
+            });
 
-            var tokenDescriptor = new SecurityTokenDescriptor
-            {
-                Subject = new ClaimsIdentity(claims),
-                Expires = DateTime.UtcNow.AddDays(expireDays),
-                SigningCredentials = new SigningCredentials(
-                    new SymmetricSecurityKey(key),
-                    SecurityAlgorithms.HmacSha256)
-            };
-
-            var tokenHandler = new JwtSecurityTokenHandler();
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+            await _uow.SaveAsync();
 
             return new TrainerLoginResponseDTO
             {
-                AccessToken = tokenHandler.WriteToken(token),
-                ExpiresAt = tokenDescriptor.Expires!.Value
+                AccessToken = accessToken,
+                ExpiresAt = accessExpire,
+                RefreshToken = refreshToken
             };
         }
-
 
         public async Task<TrainerLoginResponseDTO> GenerateAdminJwt(AdminLoginDTO dto)
         {
@@ -115,5 +101,69 @@ namespace RPD_API.Service
                 ExpiresAt = tokenDescriptor.Expires!.Value
             };
         }
+
+        public async Task<TrainerLoginResponseDTO> RefreshAsync(string refreshToken)
+        {
+            var stored = await _uow.RefreshTokens.GetValidAsync(refreshToken);
+
+            if (stored == null)
+                throw new ForbiddenException("Invalid refresh token");
+
+            stored.IsRevoked = true;
+
+            var trainer = await _uow.Trainers.GetByIdAsync(stored.TrainerId);
+
+            var newAccessExpire = DateTime.UtcNow.AddMinutes(10);
+            var newRefreshToken = GenerateRefreshToken();
+
+            await _uow.RefreshTokens.AddAsync(new RefreshToken
+            {
+                TrainerId = trainer!.TrainerId,
+                Token = newRefreshToken,
+                ExpiresAt = DateTime.UtcNow.AddDays(7)
+            });
+
+            await _uow.SaveAsync();
+
+            return new TrainerLoginResponseDTO
+            {
+                AccessToken = GenerateAccessToken(trainer, newAccessExpire),
+                ExpiresAt = newAccessExpire,
+                RefreshToken = newRefreshToken
+            };
+        }
+
+
+        private string GenerateRefreshToken()
+        {
+            return Convert.ToBase64String(
+                System.Security.Cryptography.RandomNumberGenerator.GetBytes(64)
+            );
+        }
+
+        private string GenerateAccessToken(Trainer trainer, DateTime expiresAt)
+        {
+            var claims = new[]
+            {
+        new Claim("TrainerId", trainer.TrainerId.ToString()),
+        new Claim(ClaimTypes.Email, trainer.tnEmail),
+        new Claim(ClaimTypes.Role, "Trainer")
+    };
+
+            var key = Encoding.UTF8.GetBytes(_config["Jwt:Key"]!);
+
+            var tokenDescriptor = new SecurityTokenDescriptor
+            {
+                Subject = new ClaimsIdentity(claims),
+                Expires = expiresAt,
+                SigningCredentials = new SigningCredentials(
+                    new SymmetricSecurityKey(key),
+                    SecurityAlgorithms.HmacSha256)
+            };
+
+            var handler = new JwtSecurityTokenHandler();
+            return handler.WriteToken(handler.CreateToken(tokenDescriptor));
+        }
+
     }
 }

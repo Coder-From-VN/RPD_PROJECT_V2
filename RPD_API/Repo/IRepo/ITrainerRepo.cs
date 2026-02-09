@@ -6,5 +6,6 @@ namespace RPD_API.Repo.IRepo
     {
         Task AddAsync(Trainer trainer);
         Task<Trainer?> GetByFirebaseUidAsync(string firebaseUid);
+        Task<Trainer?> GetByIdAsync(Guid trainerID);
     }
 }

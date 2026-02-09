@@ -20,5 +20,11 @@ namespace RPD_API.Repo
             return await _context.Trainers
                 .FirstOrDefaultAsync(t => t.FirebaseUid == firebaseUid);
         }
+
+        public async Task<Trainer?> GetByIdAsync(Guid trainerID)
+        {
+            return await _context.Trainers
+                .FirstOrDefaultAsync(t => t.TrainerId == trainerID);
+        }
     }
 }

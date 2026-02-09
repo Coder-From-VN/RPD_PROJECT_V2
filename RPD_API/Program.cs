@@ -6,6 +6,8 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using RPD_API.Extensions;
 using RPD_API.Models;
+using RPD_API.Repo;
+using RPD_API.Repo.IRepo;
 using RPD_API.Service;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
@@ -25,6 +27,7 @@ builder.Services.AddServices();
 
 builder.Services.AddScoped<IUnitOfWorkRepo, UnitOfWorkRepo>();
 builder.Services.AddScoped<ITrainersService, TrainersService>();
+builder.Services.AddScoped<IRefreshTokenRepo, RefreshTokenRepo>();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -36,7 +39,6 @@ builder.Services.AddSwaggerGen(c =>
         Version = "v1"
     });
 
-    // 🔒 Add Bearer token support
     c.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
     {
         Name = "Authorization",

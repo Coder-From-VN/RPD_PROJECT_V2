@@ -34,6 +34,7 @@ namespace RPD_API.UnitOfWork
         private IPokemonMoveRepo? _pokemonMoves;
         private IEvolutionChartRepo? _evolutionCharts;
         private ITrainerRepo? _trainers;
+        private IRefreshTokenRepo? _refreshToken;
 
         public IGrowthRateRepo GrowthRates =>
             _growthRates ??= new GrowthRateRepo(_context);
@@ -87,6 +88,8 @@ namespace RPD_API.UnitOfWork
             _evolutionCharts ??= new EvolutionChartRepo(_context);
 
         public ITrainerRepo Trainers => _trainers ??= new TrainerRepo(_context);
+
+        public IRefreshTokenRepo RefreshTokens => _refreshToken ??= new RefreshTokenRepo(_context);
 
         public async Task<int> SaveAsync()
         {
