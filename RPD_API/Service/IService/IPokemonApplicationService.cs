@@ -4,8 +4,8 @@ namespace RPD_API.Service.IService
 {
     public interface IPokemonApplicationService : IBaseService
     {
-        public Task<PokemonDetailDTO?> PostPokemons(PostFullPokemonsDTO model);
-        public Task<bool> PutPokemons(Guid pokeId, PutFullPokemonsDTO model);
-        public Task<bool> DeleteFullPokemons(Guid pokeID);
+        Task<PokemonDetailDTO?> PostFullPokemons(PostFullPokemonsDTO model);
+        Task<bool> PutPokemons(Guid pokeId, PutFullPokemonsDTO model);
+        Task<bool> DeleteFullPokemons(Guid pokeID);
     }
 }

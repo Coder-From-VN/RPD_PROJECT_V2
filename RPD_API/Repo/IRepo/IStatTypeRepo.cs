@@ -10,7 +10,8 @@ namespace RPD_API.Repo.IRepo
         public Task<StatType?> GetByIdAsync(Guid stID);
         public Task UpdateAsync(StatType model);
         public Task RemoveAsync(StatType model);
-
+        Task AddRangeAsync(List<StatType> stList);
+        Task<List<string>> GetExistingNamesAsync(List<string> names);
         public Task<bool> ExistsByNameAsync(string stName);
     }
 }

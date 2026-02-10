@@ -1,8 +1,12 @@
 ﻿using AutoMapper;
+using CsvHelper;
 using RPD_API.DTO;
+using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using System.Globalization;
+using System.Text.Json;
 
 namespace RPD_API.Service
 {
@@ -45,118 +49,99 @@ namespace RPD_API.Service
         }
 
 
-        public async Task<PokemonDetailDTO> PostPokemons(PostFullPokemonsDTO model)
+        public async Task<PokemonDetailDTO> PostFullPokemons(PostFullPokemonsDTO model)
         {
             if (await _uow.Pokemons.ExistsByNationalNumberAsync(model.pokeNationalNumber))
-                return null;
+                throw new BadRequestException("Pokemon alredy exits");
 
-            var newPokemonDTO = _mapper.Map<PostPokemonDTO>(model);
-            var newPokemons = _mapper.Map<Pokemons>(newPokemonDTO);
+            using var tx = await _uow.BeginTransactionAsync();
 
-            await _uow.Pokemons.AddAsync(newPokemons);
-            await _uow.SaveAsync();
+            try
+            {
+                var newPokemonDTO = await _pokemonService.PostPokemons(_mapper.Map<PostPokemonDTO>(model));
 
-            Guid newPokemonID = newPokemons.pokeID;
+                Guid newPokemonID = newPokemonDTO.pokeID;
+                //Add PokemonEggGroup
+                foreach (var pg in model.PokemonEggGroup)
+                {
+                    await _eggGroupService.AddPokemonEggGroup(pg.egID, newPokemonID);
+                }
+                //Add PokemonGameVersion
+                foreach (var gv in model.PokemonGameVersion)
+                {
+                    await _gameVersionService.AddPokemonGameVersion(gv, newPokemonID);
+                }
+                //Add PokemonTypes
+                foreach (var t in model.PokemonType)
+                {
+                    await _typeService.AddPokemonType(t.typesID, newPokemonID);
+                }
+                //Add PokemonStats
+                foreach (var pst in model.PokemonStats)
+                {
+                    await _statsService.AddPokemonStats(pst, newPokemonID);
+                }
+                //Add PokemonAbilities
+                foreach (var ab in model.PokemonAbilities)
+                {
+                    await _abilitiesService.AddPokemonAbilities(ab, newPokemonID);
+                }
+                //Add ImageLink
+                foreach (var img in model.ImageLink)
+                {
+                    await _imageService.AddImageLink(img, newPokemonID);
+                }
+                //Add EffortValues
+                foreach (var ev in model.EffortValues)
+                {
+                    await _evService.AddEffortValues(ev, newPokemonID);
+                }
 
-            //Add PokemonEggGroup
-            var checkPokemonEG = false;
-            foreach (var pg in model.PokemonEggGroup)
-            {
-                checkPokemonEG = await _eggGroupService.AddPokemonEggGroup(pg.egID, newPokemonID);
+                await _uow.SaveAsync();
+                await tx.CommitAsync();
+                return await _pokemonService.GetPokemonsById(newPokemonID);
             }
-            if (!checkPokemonEG)
+            catch (Exception ex)
             {
-                await _uow.Pokemons.RemoveAsync(newPokemons);
-                return null;
-            }
-            //Add PokemonGameVersion
-            var checkPokemonGV = false;
-            foreach (var gv in model.PokemonGameVersion)
-            {
-                checkPokemonGV = await _gameVersionService.AddPokemonGameVersion(gv, newPokemonID);
-            }
-            if (!checkPokemonGV)
-            {
-                await _uow.Pokemons.RemoveAsync(newPokemons);
-                return null;
-            }
-            //Add PokemonTypes
-            var checkPokemonTypes = false;
-            foreach (var t in model.PokemonType)
-            {
-                checkPokemonTypes = await _typeService.AddPokemonType(t.typesID, newPokemonID);
-            }
-            if (!checkPokemonTypes)
-            {
-                await _uow.Pokemons.RemoveAsync(newPokemons);
-                return null;
-            }
-            //Add PokemonStats
-            var checkPokemonST = false;
-            foreach (var pst in model.PokemonStats)
-            {
-                checkPokemonST = await _statsService.AddPokemonStats(pst, newPokemonID);
-            }
-            if (!checkPokemonST)
-            {
-                await _uow.Pokemons.RemoveAsync(newPokemons);
-                return null;
-            }
-            //Add PokemonAbilities
-            var checkPokemonA = false;
-            foreach (var a in model.PokemonAbilities)
-            {
-                checkPokemonA = await _abilitiesService.AddPokemonAbilities(a, newPokemonID);
-            }
-            if (!checkPokemonST)
-            {
-                await _uow.Pokemons.RemoveAsync(newPokemons);
-                return null;
-            }
-            //Add ImageLink
-            var checkImage = false;
-            foreach (var a in model.ImageLink)
-            {
-                checkImage = await _imageService.AddImageLink(a, newPokemonID);
-            }
-            if (!checkImage)
-            {
-                await _uow.Pokemons.RemoveAsync(newPokemons);
-                return null;
-            }
-            //Add EffortValues
-            var checkEV = false;
-            foreach (var ev in model.EffortValues)
-            {
-                checkEV = await _evService.AddEffortValues(ev, newPokemonID);
-            }
-            if (!checkEV)
-            {
-                await _uow.Pokemons.RemoveAsync(newPokemons);
-                return null;
+                await tx.RollbackAsync();
+                throw new BadRequestException($"Add full pokemon failed: {ex}");
             }
 
-            return await _pokemonService.GetPokemonsById(newPokemonID);
+
         }
 
         public async Task<bool> PutPokemons(Guid pokeId, PutFullPokemonsDTO model)
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeId);
             if (pokemon == null)
-                return false;
+                throw new NotFoundException($"Pokemon with id {pokeId} not found");
 
-            await _imageService.UpdateImageLink(pokeId, model.ImageLink);
-            await _evService.UpdateEffortValues(pokeId, model.EffortValues);
-            await _statsService.UpdatePokemonStats(pokeId, model.PokemonStats);
-            await _abilitiesService.UpdatePokemonAbilities(pokeId, model.PokemonAbilities);
-            await _eggGroupService.UpdatePokemonEggGroup(pokeId, model.PokemonEggGroup);
-            await _typeService.UpdatePokemonType(pokeId, model.PokemonType);
-            await _moveService.UpdatePokemonMove(pokeId, model.PokemonMove);
+            using var tx = await _uow.BeginTransactionAsync();
 
-            return await _pokemonService.PutPokemons(
-                pokeId,
-                _mapper.Map<PutPokemonDTO>(model)
-            );
+            try
+            {
+                await _imageService.UpdateImageLink(pokeId, model.ImageLink);
+                await _evService.UpdateEffortValues(pokeId, model.EffortValues);
+                await _statsService.UpdatePokemonStats(pokeId, model.PokemonStats);
+                await _abilitiesService.UpdatePokemonAbilities(pokeId, model.PokemonAbilities);
+                await _eggGroupService.UpdatePokemonEggGroup(pokeId, model.PokemonEggGroup);
+                await _typeService.UpdatePokemonType(pokeId, model.PokemonType);
+
+                await _pokemonService.PutPokemons(
+                    pokeId,
+                    _mapper.Map<PutPokemonDTO>(model)
+                );
+
+                await _uow.SaveAsync(); 
+                await tx.CommitAsync();
+
+                return true;
+            }
+            catch
+            {
+                await tx.RollbackAsync();
+                throw;
+            }
         }
 
         public async Task<bool> DeleteFullPokemons(Guid pokeID)
@@ -168,6 +153,5 @@ namespace RPD_API.Service
             await _uow.Pokemons.RemoveAsync(pokemon);
             return await _uow.SaveAsync() > 0;
         }
-
     }
 }

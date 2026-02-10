@@ -16,7 +16,7 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task<bool> AddPokemonStats(PostPokemonStatsDTO model, Guid pokeID)
+        public async Task AddPokemonStats(PostPokemonStatsDTO model, Guid pokeID)
         {
             var statsCheck = await _uow.StatTypes.GetByIdAsync(model.stID);
             var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
@@ -43,20 +43,20 @@ namespace RPD_API.Service
             };
 
             await _uow.PokemonStats.AddAsync(newPokemonStats);
-            return await _uow.SaveAsync() > 0;
+           
         }
 
-        public async Task<bool> DeletePokemonStats(Guid pokeID, Guid stID)
-        {
-            var entry = await _uow.PokemonStats.GetLinkAsync(pokeID, stID);
-            if (entry == null)
-                throw new NotFoundException($"Can't Find Stat id {stID} in Pokemon id {pokeID}");
+        //public async Task<bool> DeletePokemonStats(Guid pokeID, Guid stID)
+        //{
+        //    var entry = await _uow.PokemonStats.GetLinkAsync(pokeID, stID);
+        //    if (entry == null)
+        //        throw new NotFoundException($"Can't Find Stat id {stID} in Pokemon id {pokeID}");
 
-            await _uow.PokemonStats.RemoveAsync(entry);
-            return await _uow.SaveAsync() > 0;
-        }
+        //    await _uow.PokemonStats.RemoveAsync(entry);
+        //    return await _uow.SaveAsync() > 0;
+        //}
 
-        public async Task<bool> UpdatePokemonStats(Guid pokeID, ICollection<PutPokemonStatsDTO> model)
+        public async Task UpdatePokemonStats(Guid pokeID, ICollection<PutPokemonStatsDTO> model)
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
@@ -76,8 +76,6 @@ namespace RPD_API.Service
                     stat.MaxValue = dto.MaxValue;
                 }
             }
-
-            return await _uow.SaveAsync() > 0;
         }
     }
 }

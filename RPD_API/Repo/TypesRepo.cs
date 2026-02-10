@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using Google.Apis.Util;
 using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
@@ -19,6 +20,11 @@ namespace RPD_API.Repo
             await _context.Types.AddAsync(model);
         }
 
+        public async Task AddRangeAsync(List<Types> typesList)
+        {
+            await _context.Types.AddRangeAsync(typesList);
+        }
+
         public async Task<bool> ExistsByNameAsync(string typesName)
         {
             return await _context.Types!
@@ -34,6 +40,14 @@ namespace RPD_API.Repo
         {
             return await _context.Types!
                 .FirstOrDefaultAsync(t => t.typesID == typesID);
+        }
+
+        public async Task<List<string>> GetExistingNamesAsync(List<string> names)
+        {
+            return await _context.Types
+                .Where(tn => names.Contains(tn.typesName))
+                .Select(tn => tn.typesName)
+                .ToListAsync();
         }
 
         public Task RemoveAsync(Types model)

@@ -69,5 +69,18 @@ namespace RPD_API.Repo
             return await _context.GameVersion!
                 .AnyAsync(gv => gv.gvName == gvName);
         }
+
+        public async Task AddRangeAsync(List<GameVersion> gameVersions)
+        {
+            await _context.GameVersion.AddRangeAsync(gameVersions);
+        }
+
+        public async Task<List<string>> GetExistingNamesAsync(List<string> names)
+        {
+            return await _context.GameVersion
+                .Where(gv => names.Contains(gv.gvName))
+                .Select(gv => gv.gvName)
+                .ToListAsync();
+        }
     }
 }

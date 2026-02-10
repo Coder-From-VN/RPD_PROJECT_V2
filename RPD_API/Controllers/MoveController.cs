@@ -51,5 +51,13 @@ namespace RPD_API.Controllers
         {
             return await _moveSer.DeleteMove(moveID) ? NoContent() : NotFound();
         }
+
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadMove(IFormFile file)
+        {
+            var count = await _moveSer.ImportMoveAsync(file);
+            return Ok(new { imported = count });
+        }
     }
 }

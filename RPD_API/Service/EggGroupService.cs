@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CsvHelper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
@@ -8,6 +9,7 @@ using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using System.Globalization;
 using System.Text.Json;
 
 namespace RPD_API.Service
@@ -28,6 +30,47 @@ namespace RPD_API.Service
             await _uow.EggGroups.AddAsync(newEggGroup);
 
             return await _uow.SaveAsync() > 0 ? _mapper.Map<EggGroupDTO?>(newEggGroup) : null;
+        }
+
+        public async Task<int> ImportEggGroupAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new BadRequestException("File is empty");
+
+            using var stream = new StreamReader(file.OpenReadStream());
+            using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
+
+            var egDtos = csv.GetRecords<PostEggGroupDTO>().ToList();
+
+            var normalizedDtos = egDtos
+                .Where(x => !string.IsNullOrWhiteSpace(x.egName))
+                .Select(x => new PostEggGroupDTO
+                {
+                    egName = x.egName.Trim(),
+                })
+                .GroupBy(x => x.egName.ToLower())
+                .Select(g => g.First())
+                .ToList();
+
+            var names = normalizedDtos
+                .Select(x => x.egName)
+                .ToList();
+
+            var existingNames = await _uow.EggGroups
+                .GetExistingNamesAsync(names);
+
+            var newDtos = normalizedDtos
+                .Where(x => !existingNames.Contains(x.egName))
+                .ToList();
+
+            var eggGroups = _mapper.Map<List<EggGroup>>(newDtos);
+
+            if (!eggGroups.Any())
+                return 0;
+
+            await _uow.EggGroups.AddRangeAsync(eggGroups);
+
+            return await _uow.SaveAsync() > 0 ? eggGroups.Count : throw new BadRequestException("Something wrong with eggroup list");
         }
 
         public async Task<bool> DeleteEggGroup(Guid egID)

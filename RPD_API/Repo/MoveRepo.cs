@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using Google.Apis.Util;
+using Microsoft.EntityFrameworkCore;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
@@ -71,5 +72,24 @@ namespace RPD_API.Repo
                 .AnyAsync(move => move.moveName == moveName);
         }
 
+        public async Task AddRangeAsync(List<Move> mList)
+        {
+            await _context.Move.AddRangeAsync(mList);
+        }
+
+        public async Task<List<string>> GetExistingNamesAsync(List<string> names)
+        {
+            return await _context.Move
+                .Where(m => names.Contains(m.moveName))
+                .Select(m => m.moveName)
+                .ToListAsync();
+        }
+
+        public async Task<List<Move>> GetByIdsAsync(List<Guid> ids)
+        {
+            return await _context.Move
+                .Where(m => ids.Contains(m.moveID))
+                .ToListAsync();
+        }
     }
 }

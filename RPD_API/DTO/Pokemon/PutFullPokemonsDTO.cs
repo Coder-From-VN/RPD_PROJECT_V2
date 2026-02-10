@@ -32,7 +32,5 @@ namespace RPD_API.DTO
         public ICollection<PutPokemonEggGroupDTO> PokemonEggGroup { get; set; }
         //PokemonType 
         public ICollection<PutPokemonTypeDTO> PokemonType { get; set; }
-        //PokemonMove
-        public ICollection<PutPokemonMoveDTO> PokemonMove { get; set; }
     }
 }

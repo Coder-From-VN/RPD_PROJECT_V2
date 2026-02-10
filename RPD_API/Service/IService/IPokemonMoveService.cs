@@ -5,8 +5,9 @@ namespace RPD_API.Service.IService
 {
     public interface IPokemonMoveService : IBaseRepository
     {
-        public Task<bool> AddPokemonMove(PostPokemonMoveDTO model);
-        public Task<bool> UpdatePokemonMove(Guid pokeID, ICollection<PutPokemonMoveDTO> model);
-        public Task<bool> DeletePokemonMove(Guid pokeID, Guid moveID);
+        Task<int> AddPokemonMove(PostPokemonMoveListDTO model);
+        Task<bool> UpdatePokemonMove(Guid pokeID, Guid moveID,PutPokemonMoveDTO model);
+        Task<bool> DeletePokemonMove(Guid pokeID, Guid moveID);
+        Task<int> ImportPokemonMoveAsync(IFormFile file);
     }
 }

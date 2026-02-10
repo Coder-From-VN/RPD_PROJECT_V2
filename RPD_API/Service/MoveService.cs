@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
@@ -7,6 +8,7 @@ using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 using Serilog;
+using System.Globalization;
 using System.Text.Json;
 
 namespace RPD_API.Service
@@ -88,6 +90,54 @@ namespace RPD_API.Service
                 throw new NotFoundException($"Move with id {moveID} not found");
 
             return _mapper.Map<MoveDTO>(Move);
+        }
+
+        public async Task<int> ImportMoveAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new BadRequestException("File is empty");
+
+            using var stream = new StreamReader(file.OpenReadStream());
+            using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
+
+            var mDtos = csv.GetRecords<PostMoveDTO>().ToList();
+
+            var normalizedDtos = mDtos
+                .Where(x => !string.IsNullOrWhiteSpace(x.moveName))
+                .Select(x => new PostMoveDTO
+                {
+                    moveName = x.moveName,
+                    moveAccuracy = x.moveAccuracy,
+                    moveDamageClass = x.moveDamageClass,
+                    moveDescription = x.moveDescription,
+                    movePower = x.movePower,
+                    movePP = x.movePP,
+                    movePriority = x.movePriority,
+                    typesID = x.typesID
+                })
+                .GroupBy(x => x.moveName.ToLower())
+                .Select(g => g.First())
+                .ToList();
+
+            var names = normalizedDtos
+                .Select(x => x.moveName)
+                .ToList();
+
+            var existingNames = await _uow.Moves
+                .GetExistingNamesAsync(names);
+
+            var newDtos = normalizedDtos
+                .Where(x => !existingNames.Contains(x.moveName))
+                .ToList();
+
+            var moves= _mapper.Map<List<Move>>(newDtos);
+
+            if (!moves.Any())
+                return 0;
+
+            await _uow.Moves.AddRangeAsync(moves);
+
+            return await _uow.SaveAsync() > 0 ? moves.Count : throw new BadRequestException("something worng with abilities list");
         }
 
         public async Task<bool> UpdateMove(Guid moveID, PutMoveDTO model)

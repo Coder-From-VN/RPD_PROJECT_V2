@@ -10,5 +10,7 @@ namespace RPD_API.Service.IService
         Task<MoveDTO> AddMove(PostMoveDTO model);
         Task<bool> UpdateMove(Guid moveID, PutMoveDTO model);
         Task<bool> DeleteMove(Guid moveID);
+
+        Task<int> ImportMoveAsync(IFormFile file);
     }
 }

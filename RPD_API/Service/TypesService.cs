@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using System.Globalization;
 
 namespace RPD_API.Service
 {
@@ -50,6 +52,47 @@ namespace RPD_API.Service
                 throw new NotFoundException($"Types with id {typeID} not found");
 
             return _mapper.Map<TypesDTO>(type);
+        }
+
+        public async Task<int> ImportTypesAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new BadRequestException("File is empty");
+
+            using var stream = new StreamReader(file.OpenReadStream());
+            using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
+
+            var typeDtos = csv.GetRecords<PostTypesDTO>().ToList();
+
+            var normalizedDtos = typeDtos
+                .Where(x => !string.IsNullOrWhiteSpace(x.typesName))
+                .Select(x => new PostTypesDTO
+                {
+                    typesName = x.typesName,
+                })
+                .GroupBy(x => x.typesName.ToLower())
+                .Select(g => g.First())
+                .ToList();
+
+            var names = normalizedDtos
+                .Select(x => x.typesName)
+                .ToList();
+
+            var existingNames = await _uow.Types
+                .GetExistingNamesAsync(names);
+
+            var newDtos = normalizedDtos
+                .Where(x => !existingNames.Contains(x.typesName))
+                .ToList();
+
+            var types = _mapper.Map<List<Types>>(newDtos);
+
+            if (!types.Any())
+                return 0;
+
+            await _uow.Types.AddRangeAsync(types);
+
+            return await _uow.SaveAsync() > 0 ? types.Count : throw new BadRequestException("something worng with abilities list");
         }
 
         public async Task<bool> UpdateTypes(Guid typeID, PostTypesDTO model)

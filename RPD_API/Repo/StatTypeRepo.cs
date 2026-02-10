@@ -45,5 +45,18 @@ namespace RPD_API.Repo
             return await _context.StatType!
                 .AnyAsync(st => st.stName == stName);
         }
+
+        public async Task<List<string>> GetExistingNamesAsync(List<string> names)
+        {
+            return await _context.StatType
+                .Where(st => names.Contains(st.stName))
+                .Select(st => st.stName)
+                .ToListAsync();
+        }
+
+        public async Task AddRangeAsync(List<StatType> stList)
+        {
+            await _context.StatType.AddRangeAsync(stList);
+        }
     }
 }

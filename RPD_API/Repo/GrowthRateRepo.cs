@@ -67,5 +67,18 @@ namespace RPD_API.Repo
             return await _context.GrowthRate!
                 .AnyAsync(gr => gr.grName == grName);
         }
+
+        public async Task AddRangeAsync(List<GrowthRate> grList)
+        {
+            await _context.GrowthRate.AddRangeAsync(grList);
+        }
+
+        public async Task<List<string>> GetExistingNamesAsync(List<string> names)
+        {
+            return await _context.GrowthRate
+                .Where(a => names.Contains(a.grName))
+                .Select(a => a.grName)
+                .ToListAsync();
+        }
     }
 }

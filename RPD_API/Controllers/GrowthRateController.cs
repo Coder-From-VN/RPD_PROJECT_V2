@@ -51,5 +51,12 @@ namespace RPD_API.Controllers
         {
             return await _grSer.DeleteGrowthRate(growthRateID) ? NoContent() : NotFound();
         }
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadGrowthRate(IFormFile file)
+        {
+            var count = await _grSer.ImportGrowthRateAsync(file);
+            return Ok(new { imported = count });
+        }
     }
 }

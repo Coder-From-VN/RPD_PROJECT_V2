@@ -9,5 +9,6 @@ namespace RPD_API.Service.IService
         public Task<StatTypeDTO> AddStatType(PostStatTypeDTO model);
         public Task<bool> UpdateStatType(Guid statTypeID, PostStatTypeDTO model);
         public Task<bool> DeleteStatType(Guid statTypeID);
+        Task<int> ImportStatTypeAsync(IFormFile file);
     }
 }

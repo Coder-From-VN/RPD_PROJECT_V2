@@ -1,4 +1,5 @@
 ﻿using AutoMapper;
+using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
@@ -6,6 +7,7 @@ using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using System.Globalization;
 using System.Text.Json;
 
 namespace RPD_API.Service
@@ -83,6 +85,48 @@ namespace RPD_API.Service
                 throw new NotFoundException($"GameVersions with id {gvID} not found");
 
             return _mapper.Map<GameVersionDTO>(gameVersion);
+        }
+
+        public async Task<int> ImportGameVersionAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new BadRequestException("File is empty");
+
+            using var stream = new StreamReader(file.OpenReadStream());
+            using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
+
+            var gvDtos = csv.GetRecords<PostGameVersionDTO>().ToList();
+
+            var normalizedDtos = gvDtos
+                .Where(x => !string.IsNullOrWhiteSpace(x.gvName))
+                .Select(x => new PostGameVersionDTO
+                {
+                    gvGen = x.gvGen,
+                    gvName = x.gvName,
+                })
+                .GroupBy(x => x.gvName.ToLower())
+                .Select(g => g.First())
+                .ToList();
+
+            var names = normalizedDtos
+                .Select(x => x.gvName)
+                .ToList();
+
+            var existingNames = await _uow.GameVersions
+                .GetExistingNamesAsync(names);
+
+            var newDtos = normalizedDtos
+                .Where(x => !existingNames.Contains(x.gvName))
+                .ToList();
+
+            var gameVersions = _mapper.Map<List<GameVersion>>(newDtos);
+
+            if (!gameVersions.Any())
+                return 0;
+
+            await _uow.GameVersions.AddRangeAsync(gameVersions);
+
+            return await _uow.SaveAsync() > 0 ? gameVersions.Count : throw new BadRequestException("something worng with abilities list");
         }
 
         public async Task<bool> UpdateGameVersion(Guid gvID, PutGameVersionDTO model)

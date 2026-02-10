@@ -1,4 +1,5 @@
-﻿using RPD_API.Repo.IRepo;
+﻿using Microsoft.EntityFrameworkCore.Storage;
+using RPD_API.Repo.IRepo;
 
 namespace RPD_API.UnitOfWork
 {
@@ -23,6 +24,7 @@ namespace RPD_API.UnitOfWork
         IEvolutionChartRepo EvolutionCharts { get; }
         ITrainerRepo Trainers { get; }
         IRefreshTokenRepo RefreshTokens { get; }
+        Task<IDbContextTransaction> BeginTransactionAsync();
         Task<int> SaveAsync();
     }
 }

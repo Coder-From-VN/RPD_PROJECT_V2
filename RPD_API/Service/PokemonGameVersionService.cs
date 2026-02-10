@@ -15,7 +15,7 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task<bool> AddPokemonGameVersion(PostPokemonGameVersionDTO model, Guid pokeID)
+        public async Task AddPokemonGameVersion(PostPokemonGameVersionDTO model, Guid pokeID)
         {
             var gameVersionCheck = await _uow.GameVersions.GetByIdAsync(model.gvID);
             var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
@@ -39,7 +39,6 @@ namespace RPD_API.Service
             };
 
             await _uow.PokemonGameVersions.AddAsync(newPokemonGameVersion);
-            return await _uow.SaveAsync() > 0;
         }
 
         public async Task<bool> DeletePokemonGameVersion(Guid pokeID, Guid gvID)

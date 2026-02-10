@@ -36,9 +36,9 @@ namespace RPD_API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostPokemons([FromBody] PostFullPokemonsDTO model)
         {
-            var result = await _pokeFullService.PostPokemons(model);
+            var result = await _pokeFullService.PostFullPokemons(model);
             if (result == null)
-                return Conflict("Move already exists.");
+                return Conflict("Pokemon already exists.");
 
             return Ok(result);
         }
@@ -54,6 +54,5 @@ namespace RPD_API.Controllers
         {
             return await _pokeFullService.DeleteFullPokemons(pokeID) ? NoContent() : NotFound();
         }
-
     }
 }

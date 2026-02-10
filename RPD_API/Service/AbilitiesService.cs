@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
+using Microsoft.IdentityModel.Tokens;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -7,6 +9,7 @@ using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 using Serilog;
+using System.Globalization;
 using System.Text.Json;
 
 namespace RPD_API.Service
@@ -34,6 +37,50 @@ namespace RPD_API.Service
             return await _uow.SaveAsync() > 0 ? _mapper.Map<AbilitiesDTO?>(newAbilities) : null;
 
         }
+
+        public async Task<int> ImportAbilitiesAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new BadRequestException("File is empty");
+
+            using var stream = new StreamReader(file.OpenReadStream());
+            using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
+
+            var abilityDtos = csv.GetRecords<PostAbilitiesDTO>().ToList();
+
+            var normalizedDtos = abilityDtos
+                .Where(x => !string.IsNullOrWhiteSpace(x.abName))
+                .Select(x => new PostAbilitiesDTO
+                {
+                    abName = x.abName.Trim(),
+                    abDescription = x.abDescription,
+                    abEffect = x.abEffect
+                })
+                .GroupBy(x => x.abName.ToLower())
+                .Select(g => g.First())
+                .ToList();
+
+            var names = normalizedDtos
+                .Select(x => x.abName)
+                .ToList();
+
+            var existingNames = await _uow.Abilities
+                .GetExistingNamesAsync(names);
+
+            var newDtos = normalizedDtos
+                .Where(x => !existingNames.Contains(x.abName))
+                .ToList();
+
+            var abilities = _mapper.Map<List<Abilities>>(newDtos);
+
+            if (!abilities.Any())
+                return 0;
+
+            await _uow.Abilities.AddRangeAsync(abilities);
+
+            return await _uow.SaveAsync() > 0 ?  abilities.Count : throw new BadRequestException("something worng with abilities list");
+        }
+
 
         public async Task<AbilitiesDTO?> GetAbilitiesById(Guid abID)
         {

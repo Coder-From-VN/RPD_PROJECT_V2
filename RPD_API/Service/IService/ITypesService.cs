@@ -9,5 +9,6 @@ namespace RPD_API.Service.IService
         public Task<TypesDTO> AddTypes(PostTypesDTO model);
         public Task<bool> UpdateTypes(Guid typesID, PostTypesDTO model);
         public Task<bool> DeleteTypes(Guid typesID);
+        Task<int> ImportTypesAsync(IFormFile file);
     }
 }

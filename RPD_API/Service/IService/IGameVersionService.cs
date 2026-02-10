@@ -10,5 +10,6 @@ namespace RPD_API.Service.IService
         Task<GameVersionDTO?> AddGameVersion(PostGameVersionDTO model);
         Task<bool> UpdateGameVersion(Guid gvID, PutGameVersionDTO model);
         Task<bool> DeleteGameVersion(Guid gvID);
+        Task<int> ImportGameVersionAsync(IFormFile file);
     }
 }

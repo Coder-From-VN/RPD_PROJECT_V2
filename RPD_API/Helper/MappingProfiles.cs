@@ -18,6 +18,9 @@ namespace RPD_API.Helper
             CreateMap<PostStatTypeDTO, StatType>();
 
             CreateMap<Abilities, AbilitiesDTO>().ReverseMap();
+            CreateMap<PostAbilitiesDTO, Abilities>()
+    .ForMember(d => d.abName,
+        o => o.MapFrom(s => s.abName.Trim()));
             CreateMap<PostAbilitiesDTO, Abilities>();
 
             CreateMap<EggGroup, EggGroupDTO>().ReverseMap();

@@ -19,6 +19,11 @@ namespace RPD_API.Repo
             await _context.EggGroup.AddAsync(model);
         }
 
+        public async Task AddRangeAsync(List<EggGroup> eggGroups)
+        {
+            await _context.EggGroup.AddRangeAsync(eggGroups);
+        }
+
         public async Task<PagedResult<EggGroup>> GetAllAsync(QueryParams queryParams)
         {
             var query = _context.EggGroup!
@@ -67,6 +72,14 @@ namespace RPD_API.Repo
         {
             return await _context.EggGroup!
                 .AnyAsync(ab => ab.egName == egName);
+        }
+
+        public async Task<List<string>> GetExistingNamesAsync(List<string> names)
+        {
+            return await _context.EggGroup
+                .Where(a => names.Contains(a.egName))
+                .Select(a => a.egName)
+                .ToListAsync();
         }
     }
 }

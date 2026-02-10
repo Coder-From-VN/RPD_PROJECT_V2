@@ -15,7 +15,7 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task<bool> AddPokemonEggGroup(Guid egID, Guid pokeID)
+        public async Task AddPokemonEggGroup(Guid egID, Guid pokeID)
         {
             var eggGroupCheck = await _uow.EggGroups.GetByIdAsync(egID);
             var pokeCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
@@ -37,20 +37,19 @@ namespace RPD_API.Service
             };
 
             await _uow.PokemonEggGroups.AddAsync(newPokemonEggGroup);
-            return await _uow.SaveAsync() > 0;
         }
 
-        public async Task<bool> DeletePokemonEggGroup(Guid egID, Guid pokeID)
-        {
-            var entry = await _uow.PokemonEggGroups.GetLinkAsync(pokeID, egID);
-            if (entry == null)
-                throw new NotFoundException("Pokemon Don't have this Egg Group");
+        //public async Task<bool> DeletePokemonEggGroup(Guid egID, Guid pokeID)
+        //{
+        //    var entry = await _uow.PokemonEggGroups.GetLinkAsync(pokeID, egID);
+        //    if (entry == null)
+        //        throw new NotFoundException("Pokemon Don't have this Egg Group");
 
-            await _uow.PokemonEggGroups.RemoveAsync(entry);
-            return await _uow.SaveAsync() > 0;
-        }
+        //    await _uow.PokemonEggGroups.RemoveAsync(entry);
+        //    return await _uow.SaveAsync() > 0;
+        //}
 
-        public async Task<bool> UpdatePokemonEggGroup(Guid pokeID, ICollection<PutPokemonEggGroupDTO> model)
+        public async Task UpdatePokemonEggGroup(Guid pokeID, ICollection<PutPokemonEggGroupDTO> model)
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
@@ -75,7 +74,6 @@ namespace RPD_API.Service
                 });
 
             }
-            return await _uow.SaveAsync() > 0;
         }
     }
 }

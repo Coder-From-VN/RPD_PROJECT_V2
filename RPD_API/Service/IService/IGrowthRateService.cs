@@ -10,5 +10,6 @@ namespace RPD_API.Service.IService
         Task<GrowthRateDTO?> AddGrowthRate(PostGrowthRateDTO model);
         Task<bool> UpdateGrowthRate(Guid growthRateID, PutGrowthRateDTO model);
         Task<bool> DeleteGrowthRate(Guid growthRateID);
+        Task<int> ImportGrowthRateAsync(IFormFile file);
     }
 }

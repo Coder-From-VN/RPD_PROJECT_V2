@@ -1,7 +1,8 @@
-﻿using RPD_API.Models;
-using RPD_API.Repo.IRepo;
+﻿using AutoMapper;
+using Microsoft.EntityFrameworkCore.Storage;
+using RPD_API.Models;
 using RPD_API.Repo;
-using AutoMapper;
+using RPD_API.Repo.IRepo;
 
 namespace RPD_API.UnitOfWork
 {
@@ -94,6 +95,11 @@ namespace RPD_API.UnitOfWork
         public async Task<int> SaveAsync()
         {
             return await _context.SaveChangesAsync();
+        }
+
+        public async Task<IDbContextTransaction> BeginTransactionAsync()
+        {
+            return await _context.Database.BeginTransactionAsync();
         }
     }
 }

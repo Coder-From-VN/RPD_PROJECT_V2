@@ -1,10 +1,12 @@
 ﻿using AutoMapper;
+using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using System.Globalization;
 
 namespace RPD_API.Service
 {
@@ -50,6 +52,47 @@ namespace RPD_API.Service
             if (statType == null)
                 throw new NotFoundException($"StatTypes with id {statTypeID} not found");
             return _mapper.Map<StatTypeDTO>(statType);
+        }
+
+        public async Task<int> ImportStatTypeAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new BadRequestException("File is empty");
+
+            using var stream = new StreamReader(file.OpenReadStream());
+            using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
+
+            var stDtos = csv.GetRecords<PostStatTypeDTO>().ToList();
+
+            var normalizedDtos = stDtos
+                .Where(x => !string.IsNullOrWhiteSpace(x.stName))
+                .Select(x => new PostStatTypeDTO
+                {
+                    stName = x.stName,
+                })
+                .GroupBy(x => x.stName.ToLower())
+                .Select(g => g.First())
+                .ToList();
+
+            var names = normalizedDtos
+                .Select(x => x.stName)
+                .ToList();
+
+            var existingNames = await _uow.StatTypes
+                .GetExistingNamesAsync(names);
+
+            var newDtos = normalizedDtos
+                .Where(x => !existingNames.Contains(x.stName))
+                .ToList();
+
+            var statTypes = _mapper.Map<List<StatType>>(newDtos);
+
+            if (!statTypes.Any())
+                return 0;
+
+            await _uow.StatTypes.AddRangeAsync(statTypes);
+
+            return await _uow.SaveAsync() > 0 ? statTypes.Count : throw new BadRequestException("something worng with abilities list");
         }
 
         public async Task<bool> UpdateStatType(Guid statTypeID, PostStatTypeDTO model)

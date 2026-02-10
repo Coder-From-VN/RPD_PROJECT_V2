@@ -16,7 +16,7 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task<bool> AddPokemonType(Guid typesID, Guid pokeID)
+        public async Task AddPokemonType(Guid typesID, Guid pokeID)
         {
             var typesCheck = await _uow.Types.GetByIdAsync(typesID);
             var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
@@ -38,20 +38,19 @@ namespace RPD_API.Service
             };
 
             await _uow.PokemonTypes.AddAsync(newPokemonType);
-            return await _uow.SaveAsync() > 0;
         }
 
-        public async Task<bool> DeletePokemonType(Guid typesID, Guid pokeID)
-        {
-            var entry = await _uow.PokemonTypes.GetLinkAsync(pokeID, typesID);
-            if (entry == null)
-                throw new NotFoundException("Pokemon Don't Have This Type");
+        //public async Task<bool> DeletePokemonType(Guid typesID, Guid pokeID)
+        //{
+        //    var entry = await _uow.PokemonTypes.GetLinkAsync(pokeID, typesID);
+        //    if (entry == null)
+        //        throw new NotFoundException("Pokemon Don't Have This Type");
 
-            await _uow.PokemonTypes.RemoveAsync(entry);
-            return await _uow.SaveAsync() > 0;
-        }
+        //    await _uow.PokemonTypes.RemoveAsync(entry);
+        //    return await _uow.SaveAsync() > 0;
+        //}
 
-        public async Task<bool> UpdatePokemonType(Guid pokeID, ICollection<PutPokemonTypeDTO> model)
+        public async Task UpdatePokemonType(Guid pokeID, ICollection<PutPokemonTypeDTO> model)
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
@@ -74,8 +73,6 @@ namespace RPD_API.Service
                     });
                 }
             }
-
-            return await _uow.SaveAsync() > 0;
         }
     }
 }

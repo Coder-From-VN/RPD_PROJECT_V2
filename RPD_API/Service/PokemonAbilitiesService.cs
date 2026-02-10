@@ -16,7 +16,7 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task<bool> AddPokemonAbilities(PostPokemonAbilitiesDTO model, Guid pokeID)
+        public async Task AddPokemonAbilities(PostPokemonAbilitiesDTO model, Guid pokeID)
         {
             var abIdCheck = await _uow.Abilities.GetByIdAsync(model.abID);
             var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
@@ -39,20 +39,19 @@ namespace RPD_API.Service
             };
 
             await _uow.PokemonAbilities.AddAsync(newPokemonAbilities);
-            return await _uow.SaveAsync() > 0;
         }
 
-        public async Task<bool> DeletePokemonAbilities(Guid pokeID, Guid abID)
-        {
-            var entry = await _uow.PokemonAbilities.GetLinkAsync(pokeID, abID);
-            if (entry == null)
-                throw new NotFoundException("Pokemon Don't have this Abilities");
+        //public async Task<bool> DeletePokemonAbilities(Guid pokeID, Guid abID)
+        //{
+        //    var entry = await _uow.PokemonAbilities.GetLinkAsync(pokeID, abID);
+        //    if (entry == null)
+        //        throw new NotFoundException("Pokemon Don't have this Abilities");
 
-            await _uow.PokemonAbilities.RemoveAsync(entry);
-            return await _uow.SaveAsync() > 0;
-        }
+        //    await _uow.PokemonAbilities.RemoveAsync(entry);
+        //    return await _uow.SaveAsync() > 0;
+        //}
 
-        public async Task<bool> UpdatePokemonAbilities(Guid pokeID, ICollection<PutPokemonAbilitiesDTO> model)
+        public async Task UpdatePokemonAbilities(Guid pokeID, ICollection<PutPokemonAbilitiesDTO> model)
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (pokemon == null)
@@ -75,8 +74,6 @@ namespace RPD_API.Service
                     paHiddenCheck = dto.paHiddenCheck
                 });
             }
-
-            return await _uow.SaveAsync() > 0;
         }
     }
 }

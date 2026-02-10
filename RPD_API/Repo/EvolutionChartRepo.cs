@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
+﻿using Microsoft.EntityFrameworkCore;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 
@@ -47,5 +45,20 @@ namespace RPD_API.Repo
                     ec.pokeID == pokeID &&
                     ec.prePokeID == prePokeID);
         }
+
+        public async Task AddRangeAsync(List<EvolutionChart> evoList)
+        {
+            await _context.EvolutionChart.AddRangeAsync(evoList);
+        }
+
+        public async Task<List<EvolutionChart>> GetExistingPairsAsync( List<Guid> pokeIds, List<Guid> prePokeIds)
+        {
+            return await _context.EvolutionChart
+                .Where(e =>
+                    pokeIds.Contains(e.pokeID) &&
+                    prePokeIds.Contains(e.prePokeID))
+                .ToListAsync();
+        }
+
     }
 }

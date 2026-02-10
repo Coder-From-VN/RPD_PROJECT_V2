@@ -10,5 +10,6 @@ namespace RPD_API.Service.IService
         Task<EggGroupDTO?> AddEggGroup(PostEggGroupDTO model);
         Task<bool> UpdateEggGroup(Guid egID, PutEggGroupDTO model);
         Task<bool> DeleteEggGroup(Guid egID);
+        Task<int> ImportEggGroupAsync(IFormFile file);
     }
 }

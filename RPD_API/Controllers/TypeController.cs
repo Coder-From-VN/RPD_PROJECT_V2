@@ -54,5 +54,12 @@ namespace RPD_API.Controllers
             return await _typesSer.DeleteTypes(typesID) ? NoContent() : NotFound();
         }
 
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadTypes(IFormFile file)
+        {
+            var count = await _typesSer.ImportTypesAsync(file);
+            return Ok(new { imported = count });
+        }
     }
 }

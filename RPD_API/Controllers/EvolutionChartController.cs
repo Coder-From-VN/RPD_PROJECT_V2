@@ -18,6 +18,7 @@ namespace RPD_API.Controllers
         {
             _evoSer = evoSer;
         }
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostEvolutionChart(PostEvolutionChartDTO model)
@@ -28,12 +29,21 @@ namespace RPD_API.Controllers
 
             return Ok(result);
         }
+
         [Authorize(Roles = "Admin")]
         [HttpDelete("{pokeID}/{prePokeID}")]
         public async Task<IActionResult> DeleteEggGroup([FromRoute] Guid pokeID, [FromRoute] Guid prePokeID)
         {
             return await _evoSer.DeleteEvolutionChart(pokeID, prePokeID) ? NoContent() : NotFound();
 
+        }
+
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadEvolutionChart(IFormFile file)
+        {
+            var count = await _evoSer.ImportEvolutionChartAsync(file);
+            return Ok(new { imported = count });
         }
     }
 }

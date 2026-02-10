@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
+﻿using Microsoft.EntityFrameworkCore;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
@@ -9,8 +7,10 @@ namespace RPD_API.Repo
 {
     public class PokemonsRepo : BaseRepository<Pokemons>, IPokemonsRepo
     {
+
         public PokemonsRepo(rpdDbContext context) : base(context)
         {
+
         }
 
         public async Task AddAsync(Pokemons model)
@@ -83,5 +83,6 @@ namespace RPD_API.Repo
             _context.Pokemons!.Update(model);
             return Task.CompletedTask;
         }
+
     }
 }

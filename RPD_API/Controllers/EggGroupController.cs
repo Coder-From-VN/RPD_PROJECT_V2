@@ -46,11 +46,20 @@ namespace RPD_API.Controllers
         {
             return await _egSer.UpdateEggGroup(egID, model) ? NoContent() : NotFound();
         }
+
         [Authorize(Roles = "Admin")]
         [HttpDelete("{egID}")]
         public async Task<IActionResult> DeleteEggGroup([FromRoute] Guid egID)
         {
             return await _egSer.DeleteEggGroup(egID) ? NoContent() : NotFound();
+        }
+
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadEggGroup(IFormFile file)
+        {
+            var count = await _egSer.ImportEggGroupAsync(file);
+            return Ok(new { imported = count });
         }
     }
 }

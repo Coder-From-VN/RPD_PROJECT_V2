@@ -11,7 +11,8 @@ namespace RPD_API.Repo.IRepo
         Task<GrowthRate?> GetByIdAsync(Guid growthRateID);
         Task UpdateAsync(GrowthRate model);
         Task RemoveAsync(GrowthRate model);
-
+        Task AddRangeAsync(List<GrowthRate> abilities);
+        Task<List<string>> GetExistingNamesAsync(List<string> names);
         Task<bool> ExistsByNameAsync(string grName);
     }
 }

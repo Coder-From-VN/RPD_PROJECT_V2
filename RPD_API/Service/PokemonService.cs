@@ -8,7 +8,6 @@ using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 using Serilog;
 using System.Text.Json;
-using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace RPD_API.Service
 {
@@ -75,7 +74,7 @@ namespace RPD_API.Service
             var newPokemons = _mapper.Map<Pokemons>(model);
             await _uow.Pokemons.AddAsync(newPokemons);
 
-            return await _uow.SaveAsync() > 0 ? _mapper.Map<PokemonsDTO?>(newPokemons) : null;
+            return await _uow.SaveAsync() > 0 ? _mapper.Map<PokemonsDTO?>(newPokemons) : throw new BadRequestException("Something wrong when add new Pokemon");
         }
 
         public async Task<bool> PutPokemons(Guid pokeId, PutPokemonDTO model)
@@ -124,5 +123,6 @@ namespace RPD_API.Service
             }
             return result;
         }
+
     }
 }

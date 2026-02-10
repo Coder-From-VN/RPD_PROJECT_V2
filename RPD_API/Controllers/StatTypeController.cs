@@ -42,15 +42,23 @@ namespace RPD_API.Controllers
         }
         [Authorize(Roles = "Admin")]
         [HttpPut("{statTypeID}")]
-        public async Task<IActionResult> PutGrowthRate(Guid statTypeID, [FromBody] PostStatTypeDTO model)
+        public async Task<IActionResult> PutStatType(Guid statTypeID, [FromBody] PostStatTypeDTO model)
         {
             return await _stSer.UpdateStatType(statTypeID, model) ? NoContent() : NotFound();
         }
         [Authorize(Roles = "Admin")]
         [HttpDelete("{statTypeID}")]
-        public async Task<IActionResult> DeleteGrowthRate([FromRoute] Guid statTypeID)
+        public async Task<IActionResult> DeleteStatType([FromRoute] Guid statTypeID)
         {
             return await _stSer.DeleteStatType(statTypeID) ? NoContent() : NotFound();
+        }
+
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadStatType(IFormFile file)
+        {
+            var count = await _stSer.ImportStatTypeAsync(file);
+            return Ok(new { imported = count });
         }
     }
 }

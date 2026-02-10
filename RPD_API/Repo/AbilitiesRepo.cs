@@ -73,5 +73,17 @@ namespace RPD_API.Repo
                 .AnyAsync(ab => ab.abName == abName);
         }
 
+        public async Task<List<string>> GetExistingNamesAsync(List<string> names)
+        {
+            return await _context.Abilities
+                .Where(a => names.Contains(a.abName))
+                .Select(a => a.abName)
+                .ToListAsync();
+        }
+
+        public async Task AddRangeAsync(List<Abilities> abilities)
+        {
+            await _context.Abilities.AddRangeAsync(abilities);
+        }
     }
 }
