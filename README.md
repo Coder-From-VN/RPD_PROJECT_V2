@@ -54,7 +54,7 @@ maintainability, testability, and scalability.
     -   Service & Application Service Layers
 -   **Pagination & filtering**
 -   **Caching** : Redis + Docker
--   
+-   **File Upload Input (.cvs)**
 ------------------------------------------------------------------------
 
 ## 🏗 Architecture Overview
