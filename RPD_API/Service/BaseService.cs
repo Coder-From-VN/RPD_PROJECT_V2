@@ -1,6 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
-using RPD_API.DTO;
+using RPD_API.Caching;
 using RPD_API.Pagination;
 using RPD_API.UnitOfWork;
 
@@ -11,12 +11,14 @@ namespace RPD_API.Service
         protected readonly IUnitOfWorkRepo _uow;
         protected readonly IMapper _mapper;
         protected readonly IDistributedCache _cache;
+        protected readonly ICacheService _cached;
 
-        protected BaseService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
+        protected BaseService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache, ICacheService cached)
         {
             _uow = uow;
             _mapper = mapper;
             _cache = cache;
+            _cached = cached;
         }
 
         protected async Task<PagedResult<TDto>> GetPagedAsync<TEntity, TDto>(

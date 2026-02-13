@@ -1,12 +1,14 @@
 ﻿using AutoMapper;
 using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using Serilog;
 using System.Globalization;
 using System.Text.Json;
 
@@ -14,8 +16,12 @@ namespace RPD_API.Service
 {
     public class GameVersionService : BaseService, IGameVersionService
     {
-        public GameVersionService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public GameVersionService(
+            IUnitOfWorkRepo uow, 
+            IMapper mapper, 
+            IDistributedCache cache,
+            ICacheService cached)
+        : base(uow, mapper, cache,cached)
         {
         }
 
@@ -27,7 +33,17 @@ namespace RPD_API.Service
             var newGameVersion = _mapper.Map<GameVersion>(model);
             await _uow.GameVersions.AddAsync(newGameVersion);
 
-            return await _uow.SaveAsync() > 0 ? _mapper.Map<GameVersionDTO>(newGameVersion) : null;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"GameVersions:all:");
+            }
+            else
+            {
+                throw new BadRequestException("GameVersion Post Fail");
+            }
+
+            return _mapper.Map<GameVersionDTO>(newGameVersion);
         }
 
         public async Task<bool> DeleteGameVersion(Guid gvID)
@@ -38,12 +54,18 @@ namespace RPD_API.Service
 
             await _uow.GameVersions.RemoveAsync(gameVersion);
 
-            return await _uow.SaveAsync() > 0;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"GameVersions:all:");
+            }
+
+            return saved;
         }
 
         public async Task<PagedResult<GameVersionDTO>> GetAllGameVersion(QueryParams queryParams)
         {
-            var cacheKey = $"GameVersions:all:page:{queryParams.PageNumber}";
+            var cacheKey = $"GameVersions:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}";
             try
             {
                 var cached = await _cache.GetStringAsync(cacheKey);
@@ -55,7 +77,7 @@ namespace RPD_API.Service
             }
             catch (Exception ex)
             {
-                // Optional: log cache read failure
+                Log.Error($"cache conect Fail {ex}");
 
             }
             var result = await GetPagedAsync<GameVersion, GameVersionDTO>(
@@ -72,7 +94,7 @@ namespace RPD_API.Service
             }
             catch (Exception ex)
             {
-                // Optional: log cache write failure
+                Log.Error($"cache write Fail {ex}");
             }
             return result;
         }
@@ -99,12 +121,7 @@ namespace RPD_API.Service
 
             var normalizedDtos = gvDtos
                 .Where(x => !string.IsNullOrWhiteSpace(x.gvName))
-                .Select(x => new PostGameVersionDTO
-                {
-                    gvGen = x.gvGen,
-                    gvName = x.gvName,
-                })
-                .GroupBy(x => x.gvName.ToLower())
+                .GroupBy(x => x.gvName.Trim().ToLower())
                 .Select(g => g.First())
                 .ToList();
 
@@ -126,7 +143,17 @@ namespace RPD_API.Service
 
             await _uow.GameVersions.AddRangeAsync(gameVersions);
 
-            return await _uow.SaveAsync() > 0 ? gameVersions.Count : throw new BadRequestException("something worng with abilities list");
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"GameVersions:all:");
+            }
+            else
+            {
+                throw new BadRequestException("something worng with abilities list");
+            }
+
+            return gameVersions.Count;
         }
 
         public async Task<bool> UpdateGameVersion(Guid gvID, PutGameVersionDTO model)
@@ -136,13 +163,17 @@ namespace RPD_API.Service
             if (gameVersion == null)
                 throw new NotFoundException($"GameVersions id {gvID} not found");
 
-            if (!string.IsNullOrWhiteSpace(model.gvName))
-                gameVersion.gvName = model.gvName;
-            if (model.gvGen != 0)
-                gameVersion.gvGen = model.gvGen;
+            _mapper.Map(model, gameVersion);
 
             await _uow.GameVersions.UpdateAsync(gameVersion);
-            return await _uow.SaveAsync() > 0;
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"GameVersions:all:");
+            }
+
+            return saved;
         }
     }
 }

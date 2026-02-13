@@ -2,6 +2,7 @@
 using FirebaseAdmin.Auth;
 using Microsoft.Extensions.Caching.Distributed;
 using Microsoft.IdentityModel.Tokens;
+using RPD_API.Caching;
 using RPD_API.DTO.Admin;
 using RPD_API.DTO.Trainer;
 using RPD_API.Middleware.Exceptions;
@@ -18,8 +19,14 @@ namespace RPD_API.Service
     {
         private readonly IConfiguration _config;
 
-        public TrainersService(IUnitOfWorkRepo uow, IMapper mapper, IConfiguration config, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public TrainersService(
+            IUnitOfWorkRepo uow, 
+            IMapper mapper, 
+            IConfiguration config, 
+            IDistributedCache cache,
+            ICacheService cached
+            )
+        : base(uow, mapper, cache, cached)
         {
             _config = config;
         }

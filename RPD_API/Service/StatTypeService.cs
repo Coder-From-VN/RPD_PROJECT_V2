@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -12,8 +13,8 @@ namespace RPD_API.Service
 {
     public class StatTypeService : BaseService, IStatTypeService
     {
-        public StatTypeService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public StatTypeService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache, ICacheService cached)
+        : base(uow, mapper, cache,cached)
         {
         }
 
@@ -25,7 +26,7 @@ namespace RPD_API.Service
             var newStatType = _mapper.Map<StatType>(model);
             await _uow.StatTypes.AddAsync(newStatType);
 
-            return await _uow.SaveAsync() > 0 ? _mapper.Map<StatTypeDTO>(newStatType) : null;
+            return await _uow.SaveAsync() > 0 ? _mapper.Map<StatTypeDTO>(newStatType) : throw new BadRequestException("StatTypes Add Fail"); ;
         }
 
         public async Task<bool> DeleteStatType(Guid statTypeID)
@@ -36,8 +37,6 @@ namespace RPD_API.Service
 
             await _uow.StatTypes.RemoveAsync(statType);
             return await _uow.SaveAsync() > 0;
-
-
         }
 
         public async Task<List<StatTypeDTO>> GetAllStatType()
@@ -95,14 +94,13 @@ namespace RPD_API.Service
             return await _uow.SaveAsync() > 0 ? statTypes.Count : throw new BadRequestException("something worng with abilities list");
         }
 
-        public async Task<bool> UpdateStatType(Guid statTypeID, PostStatTypeDTO model)
+        public async Task<bool> UpdateStatType(Guid statTypeID, PutStatTypeDTO model)
         {
             var statType = await _uow.StatTypes.GetByIdAsync(statTypeID);
             if (statType == null)
                 throw new NotFoundException($"StatTypes with id {statTypeID} not found");
 
-            if (!string.IsNullOrWhiteSpace(model.stName))
-                statType.stName = model.stName;
+            _mapper.Map(model, statType);
 
             await _uow.StatTypes.UpdateAsync(statType);
             return await _uow.SaveAsync() > 0;

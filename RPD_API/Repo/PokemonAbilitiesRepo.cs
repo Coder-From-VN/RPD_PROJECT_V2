@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
+using System.Linq.Expressions;
 
 namespace RPD_API.Repo
 {
@@ -34,5 +35,17 @@ namespace RPD_API.Repo
             _context.PokemonAbilities!.Update(model);
             return Task.CompletedTask;
         }
+
+        public Task RemoveRange(IEnumerable<PokemonAbilities> entities)
+        {
+            _context.PokemonAbilities.RemoveRange(entities);
+            return Task.CompletedTask;
+        }
+
+        public async Task AddRangeAsync(List<PokemonAbilities> abilities)
+        {
+            await _context.PokemonAbilities.AddRangeAsync(abilities);
+        }
+
     }
 }

@@ -1,6 +1,4 @@
-﻿using RPD_API.DTO;
-using RPD_API.DTO.Types;
-using RPD_API.Models;
+﻿using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
@@ -10,5 +8,8 @@ namespace RPD_API.Repo.IRepo
         public Task<PokemonType?> GetLinkAsync(Guid pokeID, Guid typesID);
         public Task UpdateAsync(PokemonType model);
         public Task RemoveAsync(PokemonType model);
+
+        Task RemoveRange(IEnumerable<PokemonType> entities);
+        Task AddRangeAsync(List<PokemonType> types);
     }
 }

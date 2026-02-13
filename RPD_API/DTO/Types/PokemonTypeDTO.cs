@@ -6,5 +6,6 @@ namespace RPD_API.DTO
     {
         public Guid typesID { get; set; }
         public TypesDTO Types { get; set; }
+        public int MainOrSubType { get; set; }
     }
 }

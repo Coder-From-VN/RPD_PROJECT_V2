@@ -14,5 +14,6 @@ namespace RPD_API.Repo.IRepo
 
         Task<List<string>> GetExistingNamesAsync(List<string> names);
         Task<bool> ExistsByNameAsync(string gvName);
+        Task<bool> ExistsByIdAsync(Guid gvID);
     }
 }

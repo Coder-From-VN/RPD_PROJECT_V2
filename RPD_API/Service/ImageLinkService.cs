@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -11,20 +12,15 @@ namespace RPD_API.Service
 {
     public class ImageLinkService : BaseService, IImageLinkService
     {
-        public ImageLinkService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public ImageLinkService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache, ICacheService cached)
+        : base(uow, mapper, cache, cached)
         {
         }
 
         public async Task AddImageLink(PostImageLinkDTO model, Guid pokeID)
         {
-            var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (pokeIdCheck == null)
-                throw new NotFoundException($"Pokemon with id {pokeID} Not Found");
-
             var imageLink = _mapper.Map<ImageLink>(model);
             imageLink.pokeID = pokeID;
-            imageLink.Pokemons = pokeIdCheck;
 
             await _uow.ImageLinks.AddAsync(imageLink);
         }

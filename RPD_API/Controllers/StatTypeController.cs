@@ -42,7 +42,7 @@ namespace RPD_API.Controllers
         }
         [Authorize(Roles = "Admin")]
         [HttpPut("{statTypeID}")]
-        public async Task<IActionResult> PutStatType(Guid statTypeID, [FromBody] PostStatTypeDTO model)
+        public async Task<IActionResult> PutStatType(Guid statTypeID, [FromBody] PutStatTypeDTO model)
         {
             return await _stSer.UpdateStatType(statTypeID, model) ? NoContent() : NotFound();
         }
@@ -52,7 +52,7 @@ namespace RPD_API.Controllers
         {
             return await _stSer.DeleteStatType(statTypeID) ? NoContent() : NotFound();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadStatType(IFormFile file)

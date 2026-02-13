@@ -1,6 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
+﻿using Microsoft.EntityFrameworkCore;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 
@@ -33,6 +31,17 @@ namespace RPD_API.Repo
         {
             _context.PokemonEggGroup!.Update(model);
             return Task.CompletedTask;
+        }
+
+        public Task RemoveRange(IEnumerable<PokemonEggGroup> entities)
+        {
+            _context.PokemonEggGroup.RemoveRange(entities);
+            return Task.CompletedTask;
+        }
+
+        public async Task AddRangeAsync(List<PokemonEggGroup> entities)
+        {
+            await _context.PokemonEggGroup.AddRangeAsync(entities);
         }
     }
 }

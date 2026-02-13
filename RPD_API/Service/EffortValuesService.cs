@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -10,23 +11,19 @@ namespace RPD_API.Service
 {
     public class EffortValuesService : BaseService, IEffortValuesService
     {
-        public EffortValuesService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public EffortValuesService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache, ICacheService cached)
+        : base(uow, mapper, cache,cached)
         {
         }
 
         public async Task AddEffortValues(PostPokemonsEffortValuesDTO model, Guid pokeID)
         {
-            var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (pokemon == null)
-                throw new NotFoundException($"Pokemons with id {pokeID} not found");
 
             EffortValues newEffortValues = new EffortValues
             {
                 evStatName = model.evStatName,
                 eValues = model.eValues,
-                pokeID = pokemon.pokeID,
-                Pokemons = pokemon
+                pokeID = pokeID,
             };
 
             await _uow.EffortValues.AddAsync(newEffortValues);

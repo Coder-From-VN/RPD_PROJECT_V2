@@ -84,5 +84,60 @@ namespace RPD_API.Repo
             return Task.CompletedTask;
         }
 
+        public async Task AddRangeAsync(List<Pokemons> pokeList)
+        {
+            await _context.Pokemons.AddRangeAsync(pokeList);
+        }
+
+        public async Task<List<int>> GetExistingpokeNationalNumberAsync(List<int> pokeNationalNumber)
+        {
+            return await _context.Pokemons
+                .Where(p => pokeNationalNumber.Contains(p.pokeNationalNumber))
+                .Select(p => p.pokeNationalNumber)
+                .ToListAsync();
+        }
+
+        public async Task<bool> ExistsByPokemonByIdAsync(Guid pokeID)
+        {
+            return await _context.Pokemons!.AnyAsync(p => p.pokeID == pokeID);
+        }
+
+        //get with Abilities
+        public async Task<Pokemons?> GetPokemonWithAbilitiesAsync(Guid pokeID)
+        {
+            return await _context.Pokemons
+                .Include(p => p.PokemonAbilities)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+        }
+        //get with EggGroup
+        public async Task<Pokemons?> GetPokemonWithEggGroupsAsync(Guid pokeID)
+        {
+            return await _context.Pokemons
+                .Include(p => p.PokemonEggGroup)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+        }
+        //get with Gameversion
+        public async Task<Pokemons?> GetPokemonWithGameVersionAsync(Guid pokeID)
+        {
+            return await _context.Pokemons
+                .Include(p => p.PokemonGameVersion)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+        }
+        //get with Stats
+        public async Task<Pokemons?> GetPokemonWithStatsAsync(Guid pokeID)
+        {
+            return await _context.Pokemons
+                .Include(p => p.PokemonStats)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+        }
+
+        //get with Stats
+        public async Task<Pokemons?> GetPokemonWithTypesAsync(Guid pokeID)
+        {
+            return await _context.Pokemons
+                .Include(p => p.PokemonType)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+        }
+
     }
 }

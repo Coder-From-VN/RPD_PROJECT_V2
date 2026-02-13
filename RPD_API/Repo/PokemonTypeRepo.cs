@@ -1,7 +1,4 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
-using RPD_API.DTO.Types;
+﻿using Microsoft.EntityFrameworkCore;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
 
@@ -34,6 +31,17 @@ namespace RPD_API.Repo
         {
             _context.PokemonType!.Update(model);
             return Task.CompletedTask;
+        }
+
+        public Task RemoveRange(IEnumerable<PokemonType> entities)
+        {
+            _context.PokemonType.RemoveRange(entities);
+            return Task.CompletedTask;
+        }
+
+        public async Task AddRangeAsync(List<PokemonType> types)
+        {
+            await _context.PokemonType.AddRangeAsync(types);
         }
     }
 }

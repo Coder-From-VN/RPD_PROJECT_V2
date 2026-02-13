@@ -1,9 +1,8 @@
-﻿using AutoMapper;
-using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
+﻿using Microsoft.EntityFrameworkCore;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
+using System.Linq.Expressions;
 using System.Xml.Linq;
 
 namespace RPD_API.Repo
@@ -80,6 +79,12 @@ namespace RPD_API.Repo
                 .Where(a => names.Contains(a.egName))
                 .Select(a => a.egName)
                 .ToListAsync();
+        }
+
+        public async Task<bool> ExistsByIdAsync(Guid egID)
+        {
+            return await _context.EggGroup!
+                .AnyAsync(eg => eg.egID == egID);
         }
     }
 }

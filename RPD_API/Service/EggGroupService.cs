@@ -1,14 +1,14 @@
 ﻿using AutoMapper;
 using CsvHelper;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.IdentityModel.Tokens;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using Serilog;
 using System.Globalization;
 using System.Text.Json;
 
@@ -16,8 +16,8 @@ namespace RPD_API.Service
 {
     public class EggGroupService : BaseService, IEggGroupService
     {
-        public EggGroupService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public EggGroupService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache, ICacheService cached)
+        : base(uow, mapper, cache, cached)
         {
         }
 
@@ -29,7 +29,17 @@ namespace RPD_API.Service
             var newEggGroup = _mapper.Map<EggGroup>(model);
             await _uow.EggGroups.AddAsync(newEggGroup);
 
-            return await _uow.SaveAsync() > 0 ? _mapper.Map<EggGroupDTO?>(newEggGroup) : null;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"EggGroup:all:");
+            }
+            else
+            {
+                throw new BadRequestException("EggGroup Post Fail");
+            }
+
+            return _mapper.Map<EggGroupDTO?>(newEggGroup);
         }
 
         public async Task<int> ImportEggGroupAsync(IFormFile file)
@@ -40,28 +50,17 @@ namespace RPD_API.Service
             using var stream = new StreamReader(file.OpenReadStream());
             using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
 
-            var egDtos = csv.GetRecords<PostEggGroupDTO>().ToList();
+            var egDtos = csv.GetRecords<PostEggGroupDTO>()
+            .Where(x => !string.IsNullOrWhiteSpace(x.egName))
+            .GroupBy(x => x.egName.Trim().ToLower())
+            .Select(g => g.First())
+            .ToList();
 
-            var normalizedDtos = egDtos
-                .Where(x => !string.IsNullOrWhiteSpace(x.egName))
-                .Select(x => new PostEggGroupDTO
-                {
-                    egName = x.egName.Trim(),
-                })
-                .GroupBy(x => x.egName.ToLower())
-                .Select(g => g.First())
-                .ToList();
+            var names = egDtos.Select(x => x.egName.Trim()).ToList();
 
-            var names = normalizedDtos
-                .Select(x => x.egName)
-                .ToList();
+            var existingNames = await _uow.EggGroups.GetExistingNamesAsync(names);
 
-            var existingNames = await _uow.EggGroups
-                .GetExistingNamesAsync(names);
-
-            var newDtos = normalizedDtos
-                .Where(x => !existingNames.Contains(x.egName))
-                .ToList();
+            var newDtos = egDtos.Where(x => !existingNames.Contains(x.egName.Trim())).ToList();
 
             var eggGroups = _mapper.Map<List<EggGroup>>(newDtos);
 
@@ -70,7 +69,17 @@ namespace RPD_API.Service
 
             await _uow.EggGroups.AddRangeAsync(eggGroups);
 
-            return await _uow.SaveAsync() > 0 ? eggGroups.Count : throw new BadRequestException("Something wrong with eggroup list");
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"EggGroup:all:");
+            }
+            else
+            {
+                throw new BadRequestException("Something wrong with eggroup list");
+            }
+
+            return eggGroups.Count;
         }
 
         public async Task<bool> DeleteEggGroup(Guid egID)
@@ -81,13 +90,18 @@ namespace RPD_API.Service
                 throw new NotFoundException($"Egg Group with id {egID} not found");
 
             await _uow.EggGroups.RemoveAsync(eggGroup);
-            return await _uow.SaveAsync() > 0;
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"EggGroup:all:");
+            }
+            return saved;
         }
 
         public async Task<PagedResult<EggGroupDTO>> GetAllEggGroup(QueryParams queryParams)
-        {
-            var cacheKey = $"EggGroup:all:page:{queryParams.PageNumber}";
-
+        { 
+            var cacheKey = $"EggGroup:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}";
             try
             {
                 var cached = await _cache.GetStringAsync(cacheKey);
@@ -97,9 +111,9 @@ namespace RPD_API.Service
                     return JsonSerializer.Deserialize<PagedResult<EggGroupDTO>>(cached)!;
                 }
             }
-            catch
+            catch(Exception ex)
             {
-                //ignore cache errors
+                Log.Error($"cache Save Fail {ex}");
             }
 
             var result = await GetPagedAsync<EggGroup, EggGroupDTO>(
@@ -117,16 +131,16 @@ namespace RPD_API.Service
             }
             catch(Exception ex)
             {
-                //ignore cache errors
+                Log.Error($"cache write Fail {ex}");
             }
             return result;
         }
 
-        public async Task<EggGroupDTO?> GetEggGroupById(Guid egID)
+        public async Task<EggGroupDTO> GetEggGroupById(Guid egID)
         {
             var eggGroup = await _uow.EggGroups.GetByIdAsync(egID);
             if (eggGroup == null)
-                throw new NotFoundException($"Ability with id {egID} not found");
+                throw new NotFoundException($"Egg Group with id {egID} not found");
 
             return _mapper.Map<EggGroupDTO>(eggGroup);
         }
@@ -138,12 +152,17 @@ namespace RPD_API.Service
             if (eggGroup == null)
                 throw new NotFoundException($"Egg Group with id {egID} not found");
 
-            if (!string.IsNullOrWhiteSpace(model.egName))
-                eggGroup.egName = model.egName;
+            _mapper.Map(model, eggGroup);
 
             await _uow.EggGroups.UpdateAsync(eggGroup);
 
-            return await _uow.SaveAsync() > 0;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"EggGroup:all:");
+            }
+
+            return saved;
 
         }
     }

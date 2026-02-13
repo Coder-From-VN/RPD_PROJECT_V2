@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
-using Microsoft.IdentityModel.Tokens;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -20,8 +20,9 @@ namespace RPD_API.Service
         public AbilitiesService(
         IUnitOfWorkRepo uow,
         IMapper mapper,
-        IDistributedCache cache)
-        : base(uow, mapper, cache)
+        IDistributedCache cache,
+         ICacheService cached)
+        : base(uow, mapper, cache,cached)
         {
         }
 
@@ -34,40 +35,42 @@ namespace RPD_API.Service
 
             await _uow.Abilities.AddAsync(newAbilities);
 
-            return await _uow.SaveAsync() > 0 ? _mapper.Map<AbilitiesDTO?>(newAbilities) : null;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"abilities:all:");
+            }
+            else
+            {
+                throw new BadRequestException("Ability Post Fail");
+            }
+
+            return _mapper.Map<AbilitiesDTO?>(newAbilities);
 
         }
 
         public async Task<int> ImportAbilitiesAsync(IFormFile file)
         {
             if (file == null || file.Length == 0)
-                throw new BadRequestException("File is empty");
+                throw new BadRequestException("Abilities File is empty");
 
             using var stream = new StreamReader(file.OpenReadStream());
             using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
 
-            var abilityDtos = csv.GetRecords<PostAbilitiesDTO>().ToList();
+            var abilityDtos = csv.GetRecords<PostAbilitiesDTO>()
+                                    .Where(x => !string.IsNullOrWhiteSpace(x.abName))
+                                    .GroupBy(x => x.abName.Trim().ToLower())
+                                    .Select(g => g.First())
+                                    .ToList();
 
-            var normalizedDtos = abilityDtos
-                .Where(x => !string.IsNullOrWhiteSpace(x.abName))
-                .Select(x => new PostAbilitiesDTO
-                {
-                    abName = x.abName.Trim(),
-                    abDescription = x.abDescription,
-                    abEffect = x.abEffect
-                })
-                .GroupBy(x => x.abName.ToLower())
-                .Select(g => g.First())
-                .ToList();
-
-            var names = normalizedDtos
-                .Select(x => x.abName)
+            var names = abilityDtos
+                .Select(x => x.abName.Trim())
                 .ToList();
 
             var existingNames = await _uow.Abilities
                 .GetExistingNamesAsync(names);
 
-            var newDtos = normalizedDtos
+            var newDtos = abilityDtos
                 .Where(x => !existingNames.Contains(x.abName))
                 .ToList();
 
@@ -78,9 +81,18 @@ namespace RPD_API.Service
 
             await _uow.Abilities.AddRangeAsync(abilities);
 
-            return await _uow.SaveAsync() > 0 ?  abilities.Count : throw new BadRequestException("something worng with abilities list");
-        }
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"abilities:all:");
+            }
+            else
+            {
+                throw new BadRequestException("something worng with abilities list");
+            }
 
+            return abilities.Count;
+        }
 
         public async Task<AbilitiesDTO?> GetAbilitiesById(Guid abID)
         {
@@ -93,8 +105,7 @@ namespace RPD_API.Service
 
         public async Task<PagedResult<AbilitiesDTO>> GetAllAbilities(QueryParams queryParams)
         {
-            var cacheKey = $"abilities:all:page:{queryParams.PageNumber}";
-
+            var cacheKey = $"abilities:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}";
             try
             {
                 var cached = await _cache.GetStringAsync(cacheKey);
@@ -106,7 +117,6 @@ namespace RPD_API.Service
             }
             catch(Exception ex)
             {
-                // Optional: log cache read failure
                 Log.Error($"cache read Fail {ex}");
             }
             
@@ -125,32 +135,28 @@ namespace RPD_API.Service
             }
             catch(Exception ex)
             {
-                // Optional: log cache write failure
                 Log.Error($"Cache write Fail {ex}");
             }
             return result;
         }
 
-
         public async Task<bool> PutAbilities(Guid abID, PutAbilitiesDTO model)
         {
             var abilities = await _uow.Abilities.GetByIdAsync(abID);
-            if (abilities != null)
+            if (abilities == null)
+                throw new NotFoundException("Ability not found");
+
+            _mapper.Map(model, abilities);
+
+            await _uow.Abilities.UpdateAsync(abilities);
+            
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
             {
-                if (!string.IsNullOrWhiteSpace(model.abName))
-                    abilities.abName = model.abName;
-
-                if (!string.IsNullOrWhiteSpace(model.abDescription))
-                    abilities.abDescription = model.abDescription;
-
-                if (!string.IsNullOrWhiteSpace(model.abEffect))
-                    abilities.abEffect = model.abEffect;
-
-                await _uow.Abilities.UpdateAsync(abilities);
-                return await _uow.SaveAsync() > 0;
+                await _cached.RemoveByPrefixAsync($"abilities:all:");
             }
 
-            throw new NotFoundException("Ability not found");
+            return saved;
         }
 
         public async Task<bool> DeleteAbilities(Guid guid)
@@ -160,7 +166,14 @@ namespace RPD_API.Service
                 throw new NotFoundException("Ability not found");
 
             await _uow.Abilities.RemoveAsync(deleteThisAbilities);
-            return await _uow.SaveAsync() > 0;
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"abilities:all:");
+            }
+
+            return saved;
         }
 
 

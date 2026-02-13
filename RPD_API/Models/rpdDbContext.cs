@@ -41,10 +41,24 @@ namespace RPD_API.Models
                 .WithMany(t => t.Move)
                 .HasForeignKey(m => m.typesID);
             //GrowthRate 1 to Many Pokemons
-            modelBuilder.Entity<Pokemons>()
-                .HasOne(p => p.GrowthRate)
-                .WithMany(gr => gr.Pokemons)
-                .HasForeignKey(gr => gr.growthRateID);
+            modelBuilder.Entity<Pokemons>(entity =>
+            {
+                // Relationships
+                entity.HasOne(p => p.GrowthRate)
+                      .WithMany(gr => gr.Pokemons)
+                      .HasForeignKey(p => p.growthRateID);
+
+                // Precision configs
+                entity.Property(p => p.pokeHeight)
+                      .HasPrecision(6, 2);
+
+                entity.Property(p => p.pokeWidth)
+                      .HasPrecision(6, 2);
+
+                // ✅ UNIQUE constraint
+                entity.HasIndex(p => p.pokeNationalNumber)
+                      .IsUnique();
+            });
             //ImageLink Many to 1 Pokemon
             modelBuilder.Entity<ImageLink>()
                 .HasOne(img => img.Pokemons)
@@ -58,8 +72,6 @@ namespace RPD_API.Models
                 .HasForeignKey(p => p.pokeID)
                 .OnDelete(DeleteBehavior.Cascade);
             //One Pokémon can evolve into many others
-            //modelBuilder.Entity<EvolutionChart>()
-            //    .HasKey(ec => new { ec.pokeID, ec.prePokeID });
             modelBuilder.Entity<EvolutionChart>()
                 .HasIndex(ec => new { ec.pokeID, ec.prePokeID })
                 .IsUnique();

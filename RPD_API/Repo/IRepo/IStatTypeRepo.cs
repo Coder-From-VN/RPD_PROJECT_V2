@@ -1,5 +1,4 @@
-﻿using RPD_API.DTO;
-using RPD_API.Models;
+﻿using RPD_API.Models;
 
 namespace RPD_API.Repo.IRepo
 {
@@ -11,7 +10,9 @@ namespace RPD_API.Repo.IRepo
         public Task UpdateAsync(StatType model);
         public Task RemoveAsync(StatType model);
         Task AddRangeAsync(List<StatType> stList);
+
         Task<List<string>> GetExistingNamesAsync(List<string> names);
         public Task<bool> ExistsByNameAsync(string stName);
+        public Task<bool> ExistsByIdAsync(Guid stID);
     }
 }

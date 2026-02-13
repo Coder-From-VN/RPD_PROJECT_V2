@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Repo.IRepo;
+using System.Xml.Linq;
 
 namespace RPD_API.Repo
 {
@@ -57,6 +58,12 @@ namespace RPD_API.Repo
         public async Task AddRangeAsync(List<StatType> stList)
         {
             await _context.StatType.AddRangeAsync(stList);
+        }
+
+        public async Task<bool> ExistsByIdAsync(Guid stID)
+        {
+            return await _context.StatType!
+                .AnyAsync(st => st.stID == stID);
         }
     }
 }

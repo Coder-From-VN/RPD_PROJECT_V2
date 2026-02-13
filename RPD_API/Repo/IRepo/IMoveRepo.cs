@@ -13,6 +13,7 @@ namespace RPD_API.Repo.IRepo
         Task UpdateAsync(Move model);
         Task RemoveAsync(Move model);
         Task AddRangeAsync(List<Move> mList);
+
         Task<List<string>> GetExistingNamesAsync(List<string> names);
         Task<bool> ExistsByNameAsync(string moveName);
     }

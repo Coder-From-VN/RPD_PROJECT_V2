@@ -25,6 +25,12 @@ namespace RPD_API.Repo
             await _context.Types.AddRangeAsync(typesList);
         }
 
+        public async Task<bool> ExistsByIdAsync(Guid typesID)
+        {
+            return await _context.Types!
+                .AnyAsync(t => t.typesID == typesID);
+        }
+
         public async Task<bool> ExistsByNameAsync(string typesName)
         {
             return await _context.Types!

@@ -9,5 +9,8 @@ namespace RPD_API.Repo.IRepo
         public Task<PokemonGameVersion?> GetLinkAsync(Guid pokeID, Guid gvID);
         public Task UpdateAsync(PokemonGameVersion model);
         public Task RemoveAsync(PokemonGameVersion model);
+
+        Task AddRangeAsync(List<PokemonGameVersion> pokeGVs);
+        Task RemoveRange(IEnumerable<PokemonGameVersion> entities);
     }
 }

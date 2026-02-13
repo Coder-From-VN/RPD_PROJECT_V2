@@ -52,7 +52,7 @@ namespace RPD_API.Controllers
         {
             return await _gvSer.DeleteGameVersion(gvID) ? NoContent() : NotFound();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadGameVersion(IFormFile file)

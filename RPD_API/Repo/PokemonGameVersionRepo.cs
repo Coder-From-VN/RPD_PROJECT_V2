@@ -34,5 +34,16 @@ namespace RPD_API.Repo
             _context.PokemonGameVersion!.Update(model);
             return Task.CompletedTask;
         }
+
+        public Task RemoveRange(IEnumerable<PokemonGameVersion> entities)
+        {
+            _context.PokemonGameVersion.RemoveRange(entities);
+            return Task.CompletedTask;
+        }
+
+        public async Task AddRangeAsync(List<PokemonGameVersion> pokeGVs)
+        {
+            await _context.PokemonGameVersion.AddRangeAsync(pokeGVs);
+        }
     }
 }

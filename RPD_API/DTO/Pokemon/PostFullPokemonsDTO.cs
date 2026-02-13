@@ -7,7 +7,7 @@
         public string pokeDescription { get; set; }
         public string pokeSpecies { get; set; }
         public decimal pokeHeight { get; set; }
-        public decimal pokeWeight { get; set; }
+        public decimal pokeWidth { get; set; }
         public double pokeCatchRate { get; set; }
         public int pokeBaseFriendship { get; set; }
         public int pokeBaseExp { get; set; }

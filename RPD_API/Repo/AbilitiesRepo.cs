@@ -2,6 +2,7 @@
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
+using System.Linq.Expressions;
 
 namespace RPD_API.Repo
 {
@@ -72,6 +73,13 @@ namespace RPD_API.Repo
             return await _context.Abilities!
                 .AnyAsync(ab => ab.abName == abName);
         }
+
+        public async Task<bool> ExistsByIdAsync(Guid abID)
+        {
+            return await _context.Abilities!
+                .AnyAsync(ab => ab.abID == abID);
+        }
+
 
         public async Task<List<string>> GetExistingNamesAsync(List<string> names)
         {

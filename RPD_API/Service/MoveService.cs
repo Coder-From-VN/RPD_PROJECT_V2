@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -15,8 +16,8 @@ namespace RPD_API.Service
 {
     public class MoveService : BaseService, IMoveService
     {
-        public MoveService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public MoveService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache, ICacheService cached)
+        : base(uow, mapper, cache, cached)
         {
         }
 
@@ -29,7 +30,17 @@ namespace RPD_API.Service
 
             await _uow.Moves.AddAsync(newMove);
 
-            return await _uow.SaveAsync() > 0 ? _mapper.Map<MoveDTO?>(newMove) : null;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"Moves:all:page:");
+            }
+            else
+            {
+                throw new BadRequestException("Move ADD Fail");
+            }
+
+            return _mapper.Map<MoveDTO?>(newMove);
         }
 
         public async Task<bool> DeleteMove(Guid moveID)
@@ -40,13 +51,18 @@ namespace RPD_API.Service
 
             await _uow.Moves.RemoveAsync(move);
 
-            return await _uow.SaveAsync() > 0;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"Moves:all:page:");
+            }
 
+            return saved;
         }
 
         public async Task<PagedResult<MoveDTO>> GetAllMove(QueryParams queryParams)
         {
-            var cacheKey = $"Move:all:page:{queryParams.PageNumber}";
+            var cacheKey = $"Moves:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}";
 
             try
             {
@@ -102,22 +118,21 @@ namespace RPD_API.Service
 
             var mDtos = csv.GetRecords<PostMoveDTO>().ToList();
 
+            if (!mDtos.Any())
+                return 0;
+
             var normalizedDtos = mDtos
                 .Where(x => !string.IsNullOrWhiteSpace(x.moveName))
-                .Select(x => new PostMoveDTO
-                {
-                    moveName = x.moveName,
-                    moveAccuracy = x.moveAccuracy,
-                    moveDamageClass = x.moveDamageClass,
-                    moveDescription = x.moveDescription,
-                    movePower = x.movePower,
-                    movePP = x.movePP,
-                    movePriority = x.movePriority,
-                    typesID = x.typesID
-                })
+                .Select(x =>{
+                        x.moveName = x.moveName.Trim();
+                        return x;
+                        })
                 .GroupBy(x => x.moveName.ToLower())
                 .Select(g => g.First())
                 .ToList();
+
+            if (!normalizedDtos.Any())
+                return 0;
 
             var names = normalizedDtos
                 .Select(x => x.moveName)
@@ -137,7 +152,17 @@ namespace RPD_API.Service
 
             await _uow.Moves.AddRangeAsync(moves);
 
-            return await _uow.SaveAsync() > 0 ? moves.Count : throw new BadRequestException("something worng with abilities list");
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"Moves:all:page:");
+            }
+            else
+            {
+                throw new BadRequestException("something worng with abilities list");
+            }
+
+            return moves.Count;
         }
 
         public async Task<bool> UpdateMove(Guid moveID, PutMoveDTO model)
@@ -149,7 +174,14 @@ namespace RPD_API.Service
             _mapper.Map(model, move);
 
             await _uow.Moves.UpdateAsync(move);
-            return await _uow.SaveAsync() > 0;
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"Moves:all:page:");
+            }
+
+            return saved;
 
         }
     }

@@ -311,7 +311,8 @@ namespace RPD_API.Migrations
                         .HasColumnType("float");
 
                     b.Property<decimal>("pokeHeight")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(6, 2)
+                        .HasColumnType("decimal(6,2)");
 
                     b.Property<double>("pokeMaleRate")
                         .HasColumnType("float");
@@ -331,11 +332,15 @@ namespace RPD_API.Migrations
                         .HasColumnType("int");
 
                     b.Property<decimal>("pokeWidth")
-                        .HasColumnType("decimal(18,2)");
+                        .HasPrecision(6, 2)
+                        .HasColumnType("decimal(6,2)");
 
                     b.HasKey("pokeID");
 
                     b.HasIndex("growthRateID");
+
+                    b.HasIndex("pokeNationalNumber")
+                        .IsUnique();
 
                     b.ToTable("Pokemons");
                 });
@@ -371,6 +376,9 @@ namespace RPD_API.Migrations
 
                     b.Property<Guid>("typesID")
                         .HasColumnType("uniqueidentifier");
+
+                    b.Property<int>("MainOrSubType")
+                        .HasColumnType("int");
 
                     b.HasKey("pokeID", "typesID");
 

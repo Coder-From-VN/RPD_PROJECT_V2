@@ -12,5 +12,6 @@ namespace RPD_API.Repo.IRepo
         Task AddRangeAsync(List<Types> typesList);
         Task<List<string>> GetExistingNamesAsync(List<string> names);
         public Task<bool> ExistsByNameAsync(string typesName);
+        public Task<bool> ExistsByIdAsync(Guid typesID);
     }
 }

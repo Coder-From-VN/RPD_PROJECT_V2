@@ -43,7 +43,7 @@ namespace RPD_API.Controllers
         }
         [Authorize(Roles = "Admin")]
         [HttpPut("{typesID}")]
-        public async Task<IActionResult> PutTypes(Guid typesID, [FromBody] PostTypesDTO model)
+        public async Task<IActionResult> PutTypes(Guid typesID, [FromBody] PutTypesDTO model)
         {
             return await _typesSer.UpdateTypes(typesID, model) ? NoContent() : NotFound();
         }
@@ -54,6 +54,7 @@ namespace RPD_API.Controllers
             return await _typesSer.DeleteTypes(typesID) ? NoContent() : NotFound();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadTypes(IFormFile file)

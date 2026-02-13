@@ -6,7 +6,7 @@ using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
 {
-    [Route("api/[controller]")]
+    [Route("api/Pokemons")]
     [ApiController]
     public class PokemonsController : ControllerBase
     {
@@ -32,6 +32,7 @@ namespace RPD_API.Controllers
             var result = await _pokemonService.GetPokemonsById(pokeID);
             return result == null ? NotFound() : Ok(result);
         }
+        
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostPokemons([FromBody] PostFullPokemonsDTO model)
@@ -54,5 +55,13 @@ namespace RPD_API.Controllers
         {
             return await _pokeFullService.DeleteFullPokemons(pokeID) ? NoContent() : NotFound();
         }
+
+        //[HttpPost("upload")]
+        //[Consumes("multipart/form-data")]
+        //public async Task<IActionResult> UploadPokemons(IFormFile pokemonFile,List<IFormFile> addOnFileList)
+        //{
+        //    var count = await _pokeFullService.ImportFullPokemonsAsync(pokemonFile, addOnFileList);
+        //    return Ok(new { imported = count });
+        //}
     }
 }

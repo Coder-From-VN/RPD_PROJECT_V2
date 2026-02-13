@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using RPD_API.DTO;
+using RPD_API.DTO.Types;
 using RPD_API.Models;
 
 namespace RPD_API.Helper
@@ -8,37 +9,84 @@ namespace RPD_API.Helper
     {
         public MappingProfiles()
         {
-            CreateMap<GrowthRate, GrowthRateDTO>().ReverseMap();
-            CreateMap<PostGrowthRateDTO, GrowthRate>();
-
-            CreateMap<Types, TypesDTO>().ReverseMap();
-            CreateMap<PostTypesDTO, Types>();
-
-            CreateMap<StatType, StatTypeDTO>().ReverseMap();
-            CreateMap<PostStatTypeDTO, StatType>();
-
-            CreateMap<Abilities, AbilitiesDTO>().ReverseMap();
-            CreateMap<PostAbilitiesDTO, Abilities>()
-    .ForMember(d => d.abName,
-        o => o.MapFrom(s => s.abName.Trim()));
+            //Abilities
+            CreateMap<Abilities, AbilitiesDTO>();
             CreateMap<PostAbilitiesDTO, Abilities>();
+            CreateMap<PutAbilitiesDTO, Abilities>();
+            // PokemonAbilities
+            CreateMap<PokemonAbilities, PokemonAbilitiesDTO>()
+                .ForMember(d => d.abName,o => o.MapFrom(s => s.Abilities.abName));
+            CreateMap<PostPokemonAbilitiesDTO, PokemonAbilities>();
+            CreateMap<PutPokemonAbilitiesDTO, PokemonAbilities>();
 
-            CreateMap<EggGroup, EggGroupDTO>().ReverseMap();
+            //EggGroup
+            CreateMap<EggGroup, EggGroupDTO>();
             CreateMap<PostEggGroupDTO, EggGroup>();
+            CreateMap<PutEggGroupDTO, EggGroup>(); ;
+            //PokemonEggGroup
+            CreateMap<PokemonEggGroup, PokemonEggGroupDTO>()
+                .ForMember(d => d.egName,o => o.MapFrom(s => s.EggGroup.egName));
+            CreateMap<PostPokemonEggGroupDTO, PokemonEggGroup>();
+            CreateMap<PutPokemonEggGroupDTO, PokemonEggGroup>();
+
+            //GameVersion
+            CreateMap<GameVersion, GameVersionDTO>();
+            CreateMap<PostGameVersionDTO, GameVersion>();
+            CreateMap<PutGameVersionDTO, GameVersion>();
+            //PokemonGameVersion
+            CreateMap<PokemonGameVersion, PokemonGameVersionDTO>();
+            CreateMap<PostPokemonGameVersionDTO, PokemonGameVersion>();
+            CreateMap<PutPokemonGameVersionDTO, PokemonGameVersion>();
+
+            //MOVE
+            CreateMap<Move, MoveDTO>()
+                .ForMember(dest => dest.TypesName, opt => opt.MapFrom(src => src.Types.typesName));
+            CreateMap<PostMoveDTO, Move>();
+            CreateMap<PutMoveDTO, Move>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+            //POKEMON MOVE
+            CreateMap<PokemonMove, PokemonMoveDTO>();
+            CreateMap<PostPokemonMoveDTO, PokemonMove>();
+            CreateMap<PutPokemonMoveDTO, PokemonMove>()
+                .ForAllMembers(opt =>opt.Condition((src, dest, srcMember) => srcMember != null));
+
+            //StatType
+            CreateMap<StatType, StatTypeDTO>();
+            CreateMap<PostStatTypeDTO, StatType>();
+            CreateMap<PutStatTypeDTO, StatType>()
+                .ForAllMembers(opts =>opts.Condition((src, dest, srcMember) => srcMember != null));
+            //PokemonStats
+            CreateMap<PokemonStats, PokemonStatsDTO>();
+            CreateMap<PostPokemonStatsDTO, PokemonStats>()
+                .ForMember(dest => dest.pokeID,opt => opt.Ignore());
+            CreateMap<PutPokemonStatsDTO, PokemonStats>();
+
+            // Types
+            CreateMap<Types, TypesDTO>();
+            CreateMap<PostTypesDTO, Types>();
+            CreateMap<PutTypesDTO, Types>()
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
+            // PokemonType
+            CreateMap<PokemonType, PokemonTypeDTO>();
+            CreateMap<PostPokemonTypeDTO, PokemonType>()
+                .ForMember(dest => dest.pokeID, opt => opt.Ignore())
+                .ForMember(dest => dest.Types, opt => opt.Ignore())
+                .ForMember(dest => dest.Pokemons, opt => opt.Ignore());
+            CreateMap<PutPokemonTypeDTO, PokemonType>()
+                .ForMember(dest => dest.pokeID, opt => opt.Ignore())
+                .ForMember(dest => dest.Types, opt => opt.Ignore())
+                .ForMember(dest => dest.Pokemons, opt => opt.Ignore());
+
 
             CreateMap<EffortValues, EffortValuesDTO>().ReverseMap();
             CreateMap<PostEffortValuesDTO, EffortValues>()
                 .ForMember(dest => dest.pokeID,
-                    opt => opt.Ignore())   // set in service
+                    opt => opt.Ignore())
                 .ForMember(dest => dest.Pokemons,
                     opt => opt.Ignore());
             CreateMap<PutEffortValuesDTO, EffortValues>()
                 .ForAllMembers(opt =>
                     opt.Condition((src, dest, srcMember) => srcMember != null));
-
-
-            CreateMap<GameVersion, GameVersionDTO>().ReverseMap();
-            CreateMap<PostGameVersionDTO, GameVersion>();
 
             CreateMap<ImageLink, ImageLinkDTO>().ReverseMap();
             CreateMap<PostImageLinkDTO, ImageLink>()
@@ -49,65 +97,47 @@ namespace RPD_API.Helper
                     .ForMember(d => d.Pokemons, o => o.Ignore())
                     .ForMember(d => d.pokeID, o => o.Ignore());
 
-
-            CreateMap<MoveDTO, Move>();
-            CreateMap<Move, MoveDTO>()
-                .ForMember(dest => dest.TypesName, opt => opt.MapFrom(src => src.Types.typesName));
-            CreateMap<PostMoveDTO, Move>();
-            CreateMap<PutMoveDTO, Move>()
-                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
-
-            CreateMap<PokemonAbilities, PokemonAbilitiesDTO>()
-                .ForMember(d => d.abName, o => o.MapFrom(s => s.Abilities.abName));
-
-
-            //CreateMap<PokemonsDTO, Pokemons>();
-            //CreateMap<Pokemons, PokemonsDTO>();
             CreateMap<Pokemons, PokemonsDTO>()
-    .ForMember(
-        dest => dest.ImageLink,
-        opt => opt.MapFrom(src =>
-            src.ImageLink.Select(i => i.imgLink)
-        )
-    )
-    .ForMember(
-        dest => dest.TypeName,
-        opt => opt.MapFrom(src =>
-            src.PokemonType.Select(t => t.Types.typesName)
-        )
-    );
+                    .ForMember(
+                        dest => dest.ImageLink,
+                        opt => opt.MapFrom(src =>
+                        src.ImageLink.Select(i => i.imgLink)
+                        )
+                    )
+                    .ForMember(
+                        dest => dest.TypeName,
+                        opt => opt.MapFrom(src =>
+                        src.PokemonType.Select(t => t.Types.typesName)
+                        )
+                    );
+
             CreateMap<Pokemons, PokemonDetailDTO>()
                 .ForMember(dest => dest.grName, opt => opt.MapFrom(src => src.GrowthRate.grName))
                 .ForMember(dest => dest.EvolutionChart, opt => opt.MapFrom(src => src.PreEvolutionChart))
                 .ForMember(dest => dest.PreEvolutionChart, opt => opt.MapFrom(src => src.EvolutionChart));
             CreateMap<PostPokemonDTO, Pokemons>();
             CreateMap<PostFullPokemonsDTO, PostPokemonDTO>();
-
             CreateMap<PutFullPokemonsDTO, PutPokemonDTO>().ReverseMap();
             CreateMap<PutPokemonDTO, Pokemons>()
                 .ForAllMembers(opt =>
                     opt.Condition((src, dest, srcMember) => srcMember != null));
-            CreateMap<PokemonStats, PokemonStatsDTO>().ReverseMap();
-            CreateMap<PokemonGameVersion, PokemonGameVersionDTO>().ReverseMap();
-            CreateMap<PokemonEggGroup, PokemonEggGroupDTO>().ReverseMap();
-            CreateMap<PokemonType, PokemonTypeDTO>().ReverseMap();
-            CreateMap<PokemonMove, PokemonMoveDTO>().ReverseMap();
 
+            
 
+            CreateMap<GrowthRate, GrowthRateDTO>().ReverseMap();
+            CreateMap<PostGrowthRateDTO, GrowthRate>();
 
             CreateMap<EvolutionChart, EvolutionChartDTO>()
-    .ForMember(d => d.prePokemonName,
-        o => o.MapFrom(s => s.PrePokemons.pokeName))
-    .ForMember(d => d.prePokemonImagelink,
-        o => o.MapFrom(s =>
-            s.PrePokemons.ImageLink
+                .ForMember(d => d.prePokemonName,
+                    o => o.MapFrom(s => s.PrePokemons.pokeName))
+                .ForMember(d => d.prePokemonImagelink,
+                    o => o.MapFrom(s =>s.PrePokemons.ImageLink
                 .Select(i => i.imgLink)
                 .FirstOrDefault()))
-    .ForMember(d => d.PokemonName,
-        o => o.MapFrom(s => s.Pokemons.pokeName))
-    .ForMember(d => d.PokemonImagelink,
-        o => o.MapFrom(s =>
-            s.Pokemons.ImageLink
+                .ForMember(d => d.PokemonName,
+                    o => o.MapFrom(s => s.Pokemons.pokeName))
+                .ForMember(d => d.PokemonImagelink,
+                    o => o.MapFrom(s => s.Pokemons.ImageLink
                 .Select(i => i.imgLink)
                 .FirstOrDefault()));
             CreateMap<PostEvolutionChartDTO, EvolutionChart>()

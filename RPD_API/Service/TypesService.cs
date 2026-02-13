@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -12,8 +13,8 @@ namespace RPD_API.Service
 {
     public class TypesService : BaseService, ITypesService
     {
-        public TypesService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public TypesService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache, ICacheService cached)
+        : base(uow, mapper, cache, cached)
         {
         }
 
@@ -95,16 +96,16 @@ namespace RPD_API.Service
             return await _uow.SaveAsync() > 0 ? types.Count : throw new BadRequestException("something worng with abilities list");
         }
 
-        public async Task<bool> UpdateTypes(Guid typeID, PostTypesDTO model)
+        public async Task<bool> UpdateTypes(Guid typeID, PutTypesDTO model)
         {
             var type = await _uow.Types.GetByIdAsync(typeID);
             if (type == null)
                 throw new NotFoundException($"Types with id {typeID} not found");
 
-            if (model.typesName != "")
-                type.typesName = model.typesName;
+            _mapper.Map(model, type);
 
-            await _uow.Types.UpdateAsync(type);
+            //await _uow.Types.UpdateAsync(type);
+
             return await _uow.SaveAsync() > 0;
         }
     }

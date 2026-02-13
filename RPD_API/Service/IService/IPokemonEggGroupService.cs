@@ -5,8 +5,9 @@ namespace RPD_API.Service.IService
 {
     public interface IPokemonEggGroupService : IBaseRepository
     {
-         Task AddPokemonEggGroup(Guid egID, Guid pokeID);
-         Task UpdatePokemonEggGroup(Guid pokeID, ICollection<PutPokemonEggGroupDTO> model);
-        // Task<bool> DeletePokemonEggGroup(Guid egID, Guid pokeID);
+        Task PokemonEggGroupAddOn(Guid pokeID, Guid egID);
+        Task<bool> PostPokemonEggGroup(Guid pokeID, Guid egID);
+        Task<bool> UpdatePokemonEggGroup(Guid pokeID, ICollection<PutPokemonEggGroupDTO> model);
+        Task<bool> DeletePokemonEggGroup(Guid egID, Guid pokeID);
     }
 }

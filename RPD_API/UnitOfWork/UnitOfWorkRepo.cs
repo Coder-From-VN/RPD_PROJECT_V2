@@ -9,12 +9,10 @@ namespace RPD_API.UnitOfWork
     public class UnitOfWorkRepo : IUnitOfWorkRepo
     {
         private readonly rpdDbContext _context;
-        private readonly IMapper _mapper;
 
-        public UnitOfWorkRepo(rpdDbContext context, IMapper mapper)
+        public UnitOfWorkRepo(rpdDbContext context)
         {
             _context = context;
-            _mapper = mapper;
         }
 
         private IGrowthRateRepo? _growthRates;

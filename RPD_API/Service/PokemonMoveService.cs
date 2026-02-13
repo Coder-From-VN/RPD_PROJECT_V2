@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -12,11 +13,11 @@ namespace RPD_API.Service
 {
     public class PokemonMoveService : BaseService, IPokemonMoveService
     {
-        public PokemonMoveService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public PokemonMoveService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache, ICacheService cached)
+        : base(uow, mapper, cache,cached)
         {
         }
-
+        //this maybe any good idela
         public async Task<int> AddPokemonMove(PostPokemonMoveListDTO model)
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(model.pokeID);
@@ -43,7 +44,6 @@ namespace RPD_API.Service
                 .Select(x => x.moveID)
                 .ToHashSet();
 
-            // 🔧 FIX: only add missing ones
             var newPokemonMoves = model.moves
                 .Where(m => !existingMoveIds.Contains(m.moveID))
                 .Select(m => new PokemonMove

@@ -29,6 +29,7 @@ namespace RPD_API.Controllers
             var result = await _egSer.GetEggGroupById(egID);
             return result == null ? NotFound() : Ok(result);
         }
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostEggGroup(PostEggGroupDTO model)
@@ -40,6 +41,7 @@ namespace RPD_API.Controllers
             return Ok(result);
 
         }
+
         [Authorize(Roles = "Admin")]
         [HttpPut("{egID}")]
         public async Task<IActionResult> PutEggGroup(Guid egID, [FromBody] PutEggGroupDTO model)
@@ -54,6 +56,7 @@ namespace RPD_API.Controllers
             return await _egSer.DeleteEggGroup(egID) ? NoContent() : NotFound();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadEggGroup(IFormFile file)

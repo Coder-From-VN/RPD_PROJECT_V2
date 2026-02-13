@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -10,33 +11,21 @@ namespace RPD_API.Service
 {
     public class PokemonGameVersionService : BaseService, IPokemonGameVersionService
     {
-        public PokemonGameVersionService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public PokemonGameVersionService(
+            IUnitOfWorkRepo uow, 
+            IMapper mapper, 
+            IDistributedCache cache,
+            ICacheService cached
+            )
+        : base(uow, mapper, cache,cached)
         {
         }
-
-        public async Task AddPokemonGameVersion(PostPokemonGameVersionDTO model, Guid pokeID)
+        //call in PokemonApplication
+        public async Task PokemonGameVersionAddOn(Guid pokeID, PostPokemonGameVersionDTO model)
         {
-            var gameVersionCheck = await _uow.GameVersions.GetByIdAsync(model.gvID);
-            var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (gameVersionCheck == null)
-                throw new NotFoundException($"Can't find GameVersions id {model.gvID}");
-            if (pokeIdCheck == null)
-                throw new NotFoundException($"Can't find Pokemons id {pokeID}");
+            var newPokemonGameVersion = _mapper.Map<PokemonGameVersion>(model);
 
-            var exists = await _uow.PokemonGameVersions.GetLinkAsync(pokeID, model.gvID);
-            if (exists != null)
-                throw new BadRequestException("GameVersion Alredy Add To this Pokemon");
-
-            PokemonGameVersion newPokemonGameVersion = new PokemonGameVersion
-            {
-                gvID = model.gvID,
-                GameVersion = gameVersionCheck,
-                pokeID = pokeID,
-                Pokemons = pokeIdCheck,
-                pgvDexNumber = model.pgvDexNumber,
-                pgvEntries = model.pgvEntries
-            };
+            newPokemonGameVersion.pokeID = pokeID;
 
             await _uow.PokemonGameVersions.AddAsync(newPokemonGameVersion);
         }
@@ -48,30 +37,61 @@ namespace RPD_API.Service
                 throw new NotFoundException("GameVersion Not Add To Pokemon Yet");
 
             await _uow.PokemonGameVersions.RemoveAsync(entry);
-            return await _uow.SaveAsync() > 0;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+            }
+
+            return saved;
         }
 
-        public async Task<bool> UpdatePokemonAbilities(Guid pokeID, ICollection<PutPokemonGameVersionDTO> model)
+        public async Task<bool> UpdatePokemonGameVersion(Guid pokeID, ICollection<PutPokemonGameVersionDTO> model)
         {
-            var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
+            var pokemon = await _uow.Pokemons.GetPokemonWithGameVersionAsync(pokeID);
             if (pokemon == null)
                 throw new NotFoundException($"Can't find Pokemons id {pokeID}");
 
-            var existingLinks = pokemon.PokemonGameVersion.ToList();
-            foreach (var link in existingLinks)
-                await _uow.PokemonGameVersions.RemoveAsync(link);
+            await _uow.PokemonGameVersions.RemoveRange(pokemon.PokemonGameVersion);
 
-            foreach (var version in pokemon.PokemonGameVersion)
+            var newLinks = _mapper.Map<List<PokemonGameVersion>>(model);
+
+            foreach (var link in newLinks)
             {
-                var dto = model.FirstOrDefault(m => m.gvID == version.gvID);
-                if (dto != null)
-                {
-                    version.pgvDexNumber = dto.pgvDexNumber;
-                    version.pgvEntries = dto.pgvEntries;
-                }
+                link.pokeID = pokeID;
             }
 
-            return await _uow.SaveAsync() > 0;
+            await _uow.PokemonGameVersions.AddRangeAsync(newLinks);
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+            }
+
+            return saved;
+        }
+
+        public async Task<bool> PostPokemonGameVersion(Guid pokeID, PostPokemonGameVersionDTO model)
+        {
+            if (!await _uow.Pokemons.ExistsByPokemonByIdAsync(pokeID))
+                throw new BadRequestException($"Pokemon Id {pokeID} Not Exist");
+
+            if (!await _uow.GameVersions.ExistsByIdAsync(model.gvID))
+                throw new BadRequestException($"GameVersions Id {model.gvID} Not Exist");
+
+            var newPokemonGameVersion = _mapper.Map<PokemonGameVersion>(model);
+            newPokemonGameVersion.pokeID = pokeID;
+
+            await _uow.PokemonGameVersions.AddAsync(newPokemonGameVersion);
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+            }
+
+            return saved;
         }
     }
 }

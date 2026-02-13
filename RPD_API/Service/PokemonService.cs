@@ -1,5 +1,7 @@
 ﻿using AutoMapper;
+using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -7,18 +9,24 @@ using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 using Serilog;
+using StackExchange.Redis;
+using System.Globalization;
 using System.Text.Json;
 
 namespace RPD_API.Service
 {
     public class PokemonService : BaseService, IPokemonService
     {
-        public PokemonService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public PokemonService(
+            IUnitOfWorkRepo uow, 
+            IMapper mapper, 
+            IDistributedCache cache, 
+            ICacheService cached)
+        : base(uow, mapper, cache, cached)
         {
         }
 
-        public async Task<PokemonDetailDTO?> GetPokemonsById(Guid pokeID)
+        public async Task<PokemonDetailDTO> GetPokemonsById(Guid pokeID)
         {
             var cacheKey = $"Pokemons:pokeid:{pokeID}";
 
@@ -63,18 +71,22 @@ namespace RPD_API.Service
 
             await _uow.Pokemons.RemoveAsync(Pokemon);
 
-            return await _uow.SaveAsync() > 0;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+                await _cached.RemoveByPrefixAsync($"Pokemons:all:page:");
+            }
+
+            return saved;
         }
 
         public async Task<PokemonsDTO?> PostPokemons(PostPokemonDTO model)
         {
-            if (await _uow.Pokemons.ExistsByNationalNumberAsync(model.pokeNationalNumber))
-                throw new BadRequestException($"Pokemons with NationalNumber {model.pokeNationalNumber} Exits");
-
             var newPokemons = _mapper.Map<Pokemons>(model);
             await _uow.Pokemons.AddAsync(newPokemons);
 
-            return await _uow.SaveAsync() > 0 ? _mapper.Map<PokemonsDTO?>(newPokemons) : throw new BadRequestException("Something wrong when add new Pokemon");
+            return _mapper.Map<PokemonsDTO?>(newPokemons);
         }
 
         public async Task<bool> PutPokemons(Guid pokeId, PutPokemonDTO model)
@@ -86,13 +98,19 @@ namespace RPD_API.Service
             _mapper.Map(model, pokemons);
 
             await _uow.Pokemons.UpdateAsync(pokemons);
-            return await _uow.SaveAsync() > 0;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeId}");
+                await _cached.RemoveByPrefixAsync($"Pokemons:all:page:");
+            }
+
+            return saved;
         }
 
         public async Task<PagedResult<PokemonsDTO>> GetAllPokemons(QueryParams query)
         {
-            var cacheKey = $"Pokemons:all:page:{query.PageNumber}";
-
+            var cacheKey = $"Pokemons:all:page:{query.PageNumber}:size:{query.PageSize}";
             try
             {
                 var cached = await _cache.GetStringAsync(cacheKey);
@@ -124,5 +142,69 @@ namespace RPD_API.Service
             return result;
         }
 
+        public async Task<int> ImportPokemonsAsync(IFormFile file)
+        {
+            if (file == null || file.Length == 0)
+                throw new BadRequestException("File is empty");
+
+            using var stream = new StreamReader(file.OpenReadStream());
+            using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
+
+            var pokemonDtos = csv.GetRecords<PostPokemonDTO>().ToList();
+
+            var normalizedDtos = pokemonDtos
+                .Where(x => !string.IsNullOrWhiteSpace(x.pokeName))
+                .Select(x => new PostPokemonDTO
+                {
+                    pokeName = x.pokeName,
+                    growthRateID = x.growthRateID,
+                    pokeBaseExp = x.pokeBaseExp,
+                    pokeBaseFriendship = x.pokeBaseFriendship,
+                    pokeCatchRate = x.pokeCatchRate,
+                    pokeDescription = x.pokeDescription,
+                    pokeEggCycles = x.pokeEggCycles,
+                    pokeFemaleRate = x.pokeFemaleRate,
+                    pokeHeight = x.pokeHeight,
+                    pokeMaleRate = x.pokeMaleRate,
+                    pokeNationalNumber = x.pokeNationalNumber,
+                    pokeSpecies = x.pokeSpecies,
+                    pokeState = x.pokeState,
+                    pokeWidth = x.pokeWidth,
+                })
+                .GroupBy(x => x.pokeNationalNumber)
+                .Select(g => g.First())
+                .ToList();
+
+            var nationalNumber = normalizedDtos
+                .Select(x => x.pokeNationalNumber)
+                .ToList();
+
+            var existingNationalNumber = await _uow.Pokemons
+                .GetExistingpokeNationalNumberAsync(nationalNumber);
+
+            var newDtos = normalizedDtos
+                .Where(x => !existingNationalNumber.Contains(x.pokeNationalNumber))
+                .ToList();
+
+            var pokemons = _mapper.Map<List<Pokemons>>(newDtos);
+
+            if (!pokemons.Any())
+                return 0;
+
+            await _uow.Pokemons.AddRangeAsync(pokemons);
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cached.RemoveByPrefixAsync($"Pokemons:all:page:");
+            }
+            else
+            {
+                throw new BadRequestException("something worng with abilities list");
+            }
+
+            return pokemons.Count;
+
+        }
     }
 }

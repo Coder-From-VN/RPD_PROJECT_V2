@@ -1,13 +1,16 @@
-﻿using RPD_API.DTO;
-using RPD_API.Models;
+﻿using RPD_API.Models;
+using System.Linq.Expressions;
 
 namespace RPD_API.Repo.IRepo
 {
     public interface IPokemonAbilitiesRepo : IBaseRepository
     {
-        public Task AddAsync(PokemonAbilities model);
-        public Task<PokemonAbilities?> GetLinkAsync(Guid pokeID, Guid abID);
-        public Task UpdateAsync(PokemonAbilities model);
-        public Task RemoveAsync(PokemonAbilities model);
+        Task AddAsync(PokemonAbilities model);
+        Task<PokemonAbilities?> GetLinkAsync(Guid pokeID, Guid abID);
+        Task UpdateAsync(PokemonAbilities model);
+        Task RemoveAsync(PokemonAbilities model);
+        
+        Task RemoveRange(IEnumerable<PokemonAbilities> entities);
+        Task AddRangeAsync(List<PokemonAbilities> abilities);
     }
 }

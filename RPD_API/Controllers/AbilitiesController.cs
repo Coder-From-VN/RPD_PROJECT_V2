@@ -31,8 +31,8 @@ namespace RPD_API.Controllers
             return result == null ? NotFound() : Ok(result);
         }
 
-        [HttpPost]
         [Authorize(Roles = "Admin")]
+        [HttpPost]
         public async Task<IActionResult> PostAbilities(PostAbilitiesDTO model)
         {
 
@@ -58,6 +58,7 @@ namespace RPD_API.Controllers
             return await _abSer.DeleteAbilities(abID) ? NoContent() : NotFound();
         }
 
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadAbilities(IFormFile file)

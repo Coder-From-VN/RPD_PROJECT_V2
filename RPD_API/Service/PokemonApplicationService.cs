@@ -1,12 +1,10 @@
 ﻿using AutoMapper;
-using CsvHelper;
+using Microsoft.EntityFrameworkCore;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
-using RPD_API.Models;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
-using System.Globalization;
-using System.Text.Json;
 
 namespace RPD_API.Service
 {
@@ -15,7 +13,6 @@ namespace RPD_API.Service
         private readonly IPokemonService _pokemonService;
         private readonly IPokemonEggGroupService _eggGroupService;
         private readonly IPokemonGameVersionService _gameVersionService;
-        private readonly IPokemonMoveService _moveService;
         private readonly IPokemonTypeService _typeService;
         private readonly IPokemonStatsService _statsService;
         private readonly IPokemonAbilitiesService _abilitiesService;
@@ -27,18 +24,18 @@ namespace RPD_API.Service
         public PokemonApplicationService(IPokemonService pokemonService,
         IPokemonEggGroupService eggGroupService,
         IPokemonGameVersionService gameVersionService,
-        IPokemonMoveService moveService,
         IPokemonTypeService typeService,
         IPokemonStatsService statsService,
         IPokemonAbilitiesService abilitiesService,
         IImageLinkService imageService,
         IEffortValuesService evService,
-        IUnitOfWorkRepo uow, IMapper mapper)
+        IUnitOfWorkRepo uow, 
+        IMapper mapper,
+        ICacheService cached)
         {
             _pokemonService = pokemonService;
             _eggGroupService = eggGroupService;
             _gameVersionService = gameVersionService;
-            _moveService = moveService;
             _typeService = typeService;
             _statsService = statsService;
             _abilitiesService = abilitiesService;
@@ -51,63 +48,55 @@ namespace RPD_API.Service
 
         public async Task<PokemonDetailDTO> PostFullPokemons(PostFullPokemonsDTO model)
         {
-            if (await _uow.Pokemons.ExistsByNationalNumberAsync(model.pokeNationalNumber))
-                throw new BadRequestException("Pokemon alredy exits");
 
-            using var tx = await _uow.BeginTransactionAsync();
+            var newPokemonDTO = await _pokemonService.PostPokemons(_mapper.Map<PostPokemonDTO>(model));
+
+            Guid newPokemonID = newPokemonDTO.pokeID;
+            //Add PokemonEggGroup
+            foreach (var pg in model.PokemonEggGroup)
+            {
+                await _eggGroupService.PokemonEggGroupAddOn(newPokemonID, pg.egID);
+            }
+            //Add PokemonGameVersion
+            foreach (var gv in model.PokemonGameVersion)
+            {
+                await _gameVersionService.PokemonGameVersionAddOn(newPokemonID, gv);
+            }
+            //Add PokemonTypes
+            foreach (var t in model.PokemonType)
+            {
+                await _typeService.PokemonTypeAddOn( newPokemonID, t);
+            }
+            //Add PokemonStats
+            foreach (var pst in model.PokemonStats)
+            {
+                await _statsService.PokemonStatsAddOn(newPokemonID, pst);
+            }
+            //Add PokemonAbilities
+            foreach (var ab in model.PokemonAbilities)
+            {
+                await _abilitiesService.PokemonAbilitiesAddOn(newPokemonID, ab);
+            }
+            //Add ImageLink
+            foreach (var img in model.ImageLink)
+            {
+                await _imageService.AddImageLink(img, newPokemonID);
+            }
+            //Add EffortValues
+            foreach (var ev in model.EffortValues)
+            {
+                await _evService.AddEffortValues(ev, newPokemonID);
+            }
 
             try
             {
-                var newPokemonDTO = await _pokemonService.PostPokemons(_mapper.Map<PostPokemonDTO>(model));
-
-                Guid newPokemonID = newPokemonDTO.pokeID;
-                //Add PokemonEggGroup
-                foreach (var pg in model.PokemonEggGroup)
-                {
-                    await _eggGroupService.AddPokemonEggGroup(pg.egID, newPokemonID);
-                }
-                //Add PokemonGameVersion
-                foreach (var gv in model.PokemonGameVersion)
-                {
-                    await _gameVersionService.AddPokemonGameVersion(gv, newPokemonID);
-                }
-                //Add PokemonTypes
-                foreach (var t in model.PokemonType)
-                {
-                    await _typeService.AddPokemonType(t.typesID, newPokemonID);
-                }
-                //Add PokemonStats
-                foreach (var pst in model.PokemonStats)
-                {
-                    await _statsService.AddPokemonStats(pst, newPokemonID);
-                }
-                //Add PokemonAbilities
-                foreach (var ab in model.PokemonAbilities)
-                {
-                    await _abilitiesService.AddPokemonAbilities(ab, newPokemonID);
-                }
-                //Add ImageLink
-                foreach (var img in model.ImageLink)
-                {
-                    await _imageService.AddImageLink(img, newPokemonID);
-                }
-                //Add EffortValues
-                foreach (var ev in model.EffortValues)
-                {
-                    await _evService.AddEffortValues(ev, newPokemonID);
-                }
-
-                await _uow.SaveAsync();
-                await tx.CommitAsync();
+                await _uow.SaveAsync(); 
                 return await _pokemonService.GetPokemonsById(newPokemonID);
             }
-            catch (Exception ex)
+            catch (DbUpdateException)
             {
-                await tx.RollbackAsync();
-                throw new BadRequestException($"Add full pokemon failed: {ex}");
+                throw new BadRequestException("Pokemon đã tồn tại hoặc dữ liệu không hợp lệ");
             }
-
-
         }
 
         public async Task<bool> PutPokemons(Guid pokeId, PutFullPokemonsDTO model)

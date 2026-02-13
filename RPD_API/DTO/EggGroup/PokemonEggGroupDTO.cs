@@ -5,6 +5,6 @@ namespace RPD_API.DTO
     public class PokemonEggGroupDTO
     {
         public Guid egID { get; set; }
-        public EggGroupDTO EggGroup { get; set; }
+        public string egName { get; set; }
     }
 }

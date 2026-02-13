@@ -10,5 +10,7 @@ namespace RPD_API.Service.IService
         Task<PokemonsDTO?> PostPokemons(PostPokemonDTO model);
         Task<bool> PutPokemons(Guid pokeId, PutPokemonDTO model);
         Task<bool> DeletePokemons(Guid pokeID);
+
+        Task<int> ImportPokemonsAsync(IFormFile file);
     }
 }

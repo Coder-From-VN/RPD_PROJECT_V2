@@ -1,6 +1,5 @@
-﻿using AutoMapper;
+﻿
 using Microsoft.EntityFrameworkCore;
-using RPD_API.DTO;
 using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Repo.IRepo;
@@ -82,5 +81,12 @@ namespace RPD_API.Repo
                 .Select(gv => gv.gvName)
                 .ToListAsync();
         }
+
+        public async Task<bool> ExistsByIdAsync(Guid gvID)
+        {
+            return await _context.GameVersion!
+                .AnyAsync(gv => gv.gvID == gvID);
+        }
+
     }
 }

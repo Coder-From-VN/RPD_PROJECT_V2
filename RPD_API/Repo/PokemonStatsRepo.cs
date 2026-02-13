@@ -34,5 +34,16 @@ namespace RPD_API.Repo
             _context.PokemonStats!.Update(model);
             return Task.CompletedTask;
         }
+
+        public Task RemoveRange(IEnumerable<PokemonStats> entities)
+        {
+            _context.PokemonStats.RemoveRange(entities);
+            return Task.CompletedTask;
+        }
+
+        public async Task AddRangeAsync(List<PokemonStats> pokeGVs)
+        {
+            await _context.PokemonStats.AddRangeAsync(pokeGVs);
+        }
     }
 }

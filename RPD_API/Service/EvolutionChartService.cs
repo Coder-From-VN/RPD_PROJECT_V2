@@ -2,6 +2,7 @@
 using CsvHelper;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -13,8 +14,8 @@ namespace RPD_API.Service
 {
     public class EvolutionChartService : BaseService, IEvolutionChartService
     {
-        public EvolutionChartService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public EvolutionChartService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache, ICacheService cached)
+        : base(uow, mapper, cache,cached)
         {
         }
 

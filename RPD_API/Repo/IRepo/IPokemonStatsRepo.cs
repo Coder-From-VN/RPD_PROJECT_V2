@@ -9,5 +9,8 @@ namespace RPD_API.Repo.IRepo
         public Task<PokemonStats?> GetLinkAsync(Guid pokeID, Guid stID);
         public Task UpdateAsync(PokemonStats model);
         public Task RemoveAsync(PokemonStats model);
+
+        Task AddRangeAsync(List<PokemonStats> pokeStates);
+        Task RemoveRange(IEnumerable<PokemonStats> entities);
     }
 }

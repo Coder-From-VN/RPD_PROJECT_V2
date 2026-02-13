@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using RPD_API.Caching;
 using RPD_API.Extensions;
 using RPD_API.Models;
 using RPD_API.Repo;
@@ -11,6 +12,7 @@ using RPD_API.Repo.IRepo;
 using RPD_API.Service;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using StackExchange.Redis;
 using System.Security.Claims;
 using System.Text;
 
@@ -28,6 +30,7 @@ builder.Services.AddServices();
 builder.Services.AddScoped<IUnitOfWorkRepo, UnitOfWorkRepo>();
 builder.Services.AddScoped<ITrainersService, TrainersService>();
 builder.Services.AddScoped<IRefreshTokenRepo, RefreshTokenRepo>();
+builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
 builder.Services.AddEndpointsApiExplorer();
 
@@ -76,6 +79,11 @@ builder.Services.AddDbContext<rpdDbContext>(op =>
 builder.Services.AddStackExchangeRedisCache(options =>
 {
     options.Configuration = builder.Configuration["Redis:ConnectionString"];
+});
+builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
+{
+    var configuration = builder.Configuration["Redis:ConnectionString"];
+    return ConnectionMultiplexer.Connect(configuration);
 });
 
 FirebaseApp.Create(new AppOptions

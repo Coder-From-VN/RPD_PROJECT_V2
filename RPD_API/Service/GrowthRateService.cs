@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
+using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
@@ -14,8 +15,12 @@ namespace RPD_API.Service
 {
     public class GrowthRateService : BaseService, IGrowthRateService
     {
-        public GrowthRateService(IUnitOfWorkRepo uow, IMapper mapper, IDistributedCache cache)
-        : base(uow, mapper, cache)
+        public GrowthRateService(
+            IUnitOfWorkRepo uow, 
+            IMapper mapper, 
+            IDistributedCache cache, 
+            ICacheService cached)
+        : base(uow, mapper, cache, cached)
         {
         }
 

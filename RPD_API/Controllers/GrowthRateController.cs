@@ -51,6 +51,7 @@ namespace RPD_API.Controllers
         {
             return await _grSer.DeleteGrowthRate(growthRateID) ? NoContent() : NotFound();
         }
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadGrowthRate(IFormFile file)
