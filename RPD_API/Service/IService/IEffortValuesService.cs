@@ -4,8 +4,9 @@ namespace RPD_API.Service.IService
 {
     public interface IEffortValuesService : IBaseService
     {
-        Task AddEffortValues(PostPokemonsEffortValuesDTO model, Guid pokeID);
-        Task UpdateEffortValues(Guid pokeID, ICollection<PutEffortValuesDTO> model);
-        //Task<bool> DeleteEffortValues(Guid evID);
+        Task EffortValuesAddOn(Guid pokeID, PostPokemonsEffortValuesDTO model);
+        Task<bool> PostEffortValues(Guid pokeID,PostPokemonsEffortValuesDTO model);
+        Task<bool> UpdateEffortValues(Guid pokeID, ICollection<PutEffortValuesDTO> model);
+        Task<bool> DeleteEffortValues(Guid pokeID, Guid evID);
     }
 }

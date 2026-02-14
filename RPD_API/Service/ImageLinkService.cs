@@ -17,7 +17,7 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task AddImageLink(PostImageLinkDTO model, Guid pokeID)
+        public async Task ImageLinkAddOn(Guid pokeID, PostImageLinkDTO model)
         {
             var imageLink = _mapper.Map<ImageLink>(model);
             imageLink.pokeID = pokeID;
@@ -25,32 +25,67 @@ namespace RPD_API.Service
             await _uow.ImageLinks.AddAsync(imageLink);
         }
 
-        //public async Task<bool> DeleteImageLink(Guid imgID)
-        //{
-        //    var imageLink = await _uow.ImageLinks.GetByIdAsync(imgID);
-        //    if (imageLink == null)
-        //        throw new NotFoundException($"Image with id {imgID} Not Found");
-
-        //    await _uow.ImageLinks.RemoveAsync(imageLink);
-        //    return await _uow.SaveAsync() > 0;
-        //}
-
-        public async Task UpdateImageLink(Guid pokeID, ICollection<PutImageLinkDTO> model)
+        public async Task<bool> DeleteImageLink(Guid pokeID, Guid imgID)
         {
-            var pokeIdCheck = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (pokeIdCheck == null)
-                throw new NotFoundException($"Pokemon with id {pokeID} Not Found");
+            var image = await _uow.ImageLinks.GetByIdAsync(imgID);
 
-            foreach (var dto in model)
+            if (image == null || image.pokeID != pokeID)
+                throw new NotFoundException("Image not found for this Pokemon");
+
+            await _uow.ImageLinks.RemoveAsync(image);
+
+            var saved = await _uow.SaveAsync() > 0;
+
+            if (saved)
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+
+            return saved;
+        }
+
+        public async Task<bool> PostImageLink(Guid pokeID, PostImageLinkDTO model)
+        {
+            if (!await _uow.Pokemons.ExistsByPokemonByIdAsync(pokeID))
+                throw new NotFoundException($"Pokemon with id {pokeID} not found");
+
+            var image = new ImageLink
             {
-                var image = pokeIdCheck.ImageLink
-                    .FirstOrDefault(i => i.imgID == dto.imgID);
+                imgLink = model.imgLink.Trim(),
+                pokeID = pokeID
+            };
 
-                if (image != null && !string.IsNullOrWhiteSpace(dto.imgLink))
+            await _uow.ImageLinks.AddAsync(image);
+
+            var saved = await _uow.SaveAsync() > 0;
+
+            if (saved)
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+
+            return saved;
+        }
+
+        public async Task<bool> UpdateImageLink(Guid pokeID, ICollection<PutImageLinkDTO> model)
+        {
+            var pokemon = await _uow.Pokemons.GetPokemonWithImagesAsync(pokeID);
+
+            if (pokemon == null)
+                throw new NotFoundException($"Pokemon with id {pokeID} not found");
+
+            var imageLookup = model.ToDictionary(m => m.imgID);
+
+            foreach (var image in pokemon.ImageLink)
+            {
+                if (imageLookup.TryGetValue(image.imgID, out var dto))
                 {
-                    image.imgLink = dto.imgLink;
+                    image.imgLink = dto.imgLink.Trim();
                 }
             }
+
+            var saved = await _uow.SaveAsync() > 0;
+
+            if (saved)
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+
+            return saved;
         }
     }
 }

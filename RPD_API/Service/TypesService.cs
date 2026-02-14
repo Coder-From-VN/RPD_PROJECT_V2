@@ -104,7 +104,7 @@ namespace RPD_API.Service
 
             _mapper.Map(model, type);
 
-            //await _uow.Types.UpdateAsync(type);
+            await _uow.Types.UpdateAsync(type);
 
             return await _uow.SaveAsync() > 0;
         }

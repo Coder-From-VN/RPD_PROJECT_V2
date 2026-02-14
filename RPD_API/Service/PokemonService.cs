@@ -9,7 +9,6 @@ using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 using Serilog;
-using StackExchange.Redis;
 using System.Globalization;
 using System.Text.Json;
 
@@ -88,8 +87,8 @@ namespace RPD_API.Service
 
             return _mapper.Map<PokemonsDTO?>(newPokemons);
         }
-
-        public async Task<bool> PutPokemons(Guid pokeId, PutPokemonDTO model)
+        //check at pokeaplication
+        public async Task PutPokemons(Guid pokeId, PutPokemonDTO model)
         {
             var pokemons = await _uow.Pokemons.GetByIdAsync(pokeId);
             if (pokemons == null)
@@ -98,14 +97,6 @@ namespace RPD_API.Service
             _mapper.Map(model, pokemons);
 
             await _uow.Pokemons.UpdateAsync(pokemons);
-            var saved = await _uow.SaveAsync() > 0;
-            if (saved)
-            {
-                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeId}");
-                await _cached.RemoveByPrefixAsync($"Pokemons:all:page:");
-            }
-
-            return saved;
         }
 
         public async Task<PagedResult<PokemonsDTO>> GetAllPokemons(QueryParams query)
@@ -141,7 +132,7 @@ namespace RPD_API.Service
             }
             return result;
         }
-
+        //call at pokeapplication
         public async Task<int> ImportPokemonsAsync(IFormFile file)
         {
             if (file == null || file.Length == 0)
@@ -154,42 +145,25 @@ namespace RPD_API.Service
 
             var normalizedDtos = pokemonDtos
                 .Where(x => !string.IsNullOrWhiteSpace(x.pokeName))
-                .Select(x => new PostPokemonDTO
-                {
-                    pokeName = x.pokeName,
-                    growthRateID = x.growthRateID,
-                    pokeBaseExp = x.pokeBaseExp,
-                    pokeBaseFriendship = x.pokeBaseFriendship,
-                    pokeCatchRate = x.pokeCatchRate,
-                    pokeDescription = x.pokeDescription,
-                    pokeEggCycles = x.pokeEggCycles,
-                    pokeFemaleRate = x.pokeFemaleRate,
-                    pokeHeight = x.pokeHeight,
-                    pokeMaleRate = x.pokeMaleRate,
-                    pokeNationalNumber = x.pokeNationalNumber,
-                    pokeSpecies = x.pokeSpecies,
-                    pokeState = x.pokeState,
-                    pokeWidth = x.pokeWidth,
-                })
                 .GroupBy(x => x.pokeNationalNumber)
                 .Select(g => g.First())
                 .ToList();
 
-            var nationalNumber = normalizedDtos
+            var nationalNumbers = normalizedDtos
                 .Select(x => x.pokeNationalNumber)
                 .ToList();
 
-            var existingNationalNumber = await _uow.Pokemons
-                .GetExistingpokeNationalNumberAsync(nationalNumber);
+            var existingNationalNumbers = await _uow.Pokemons
+                .GetExistingpokeNationalNumberAsync(nationalNumbers);
 
             var newDtos = normalizedDtos
-                .Where(x => !existingNationalNumber.Contains(x.pokeNationalNumber))
+                .Where(x => !existingNationalNumbers.Contains(x.pokeNationalNumber))
                 .ToList();
 
-            var pokemons = _mapper.Map<List<Pokemons>>(newDtos);
-
-            if (!pokemons.Any())
+            if (!newDtos.Any())
                 return 0;
+
+            var pokemons = _mapper.Map<List<Pokemons>>(newDtos);
 
             await _uow.Pokemons.AddRangeAsync(pokemons);
 

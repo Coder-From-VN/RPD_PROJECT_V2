@@ -1,5 +1,4 @@
 ﻿
-
 namespace RPD_API.DTO
 {
     public class MoveDTO

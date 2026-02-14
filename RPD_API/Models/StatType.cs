@@ -10,5 +10,7 @@ namespace RPD_API.Models
         public Guid stID { get; set; }
         public string stName { get; set; }
         public ICollection<PokemonStats> PokemonStats { get; set; }
+
+        //public ICollection<EffortValues> EffortValues { get; set; }
     }
 }

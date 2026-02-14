@@ -91,5 +91,11 @@ namespace RPD_API.Repo
                 .Where(m => ids.Contains(m.moveID))
                 .ToListAsync();
         }
+
+        public async Task<bool> ExistsByIdAsync(Guid moveID)
+        {
+            return await _context.Move!
+               .AnyAsync(move => move.moveID == moveID);
+        }
     }
 }

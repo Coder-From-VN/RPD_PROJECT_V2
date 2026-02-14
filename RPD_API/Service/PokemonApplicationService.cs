@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.Caching;
 using RPD_API.DTO;
 using RPD_API.Middleware.Exceptions;
@@ -20,6 +21,8 @@ namespace RPD_API.Service
         private readonly IEffortValuesService _evService;
         private readonly IUnitOfWorkRepo _uow;
         protected readonly IMapper _mapper;
+        protected readonly IDistributedCache _cache;
+        protected readonly ICacheService _cached;
 
         public PokemonApplicationService(IPokemonService pokemonService,
         IPokemonEggGroupService eggGroupService,
@@ -31,7 +34,8 @@ namespace RPD_API.Service
         IEffortValuesService evService,
         IUnitOfWorkRepo uow, 
         IMapper mapper,
-        ICacheService cached)
+        ICacheService cached,
+        IDistributedCache cache)
         {
             _pokemonService = pokemonService;
             _eggGroupService = eggGroupService;
@@ -43,8 +47,9 @@ namespace RPD_API.Service
             _evService = evService;
             _uow = uow;
             _mapper = mapper;
+            _cache = cache;
+            _cached = cached;
         }
-
 
         public async Task<PokemonDetailDTO> PostFullPokemons(PostFullPokemonsDTO model)
         {
@@ -80,26 +85,29 @@ namespace RPD_API.Service
             //Add ImageLink
             foreach (var img in model.ImageLink)
             {
-                await _imageService.AddImageLink(img, newPokemonID);
+                await _imageService.ImageLinkAddOn(newPokemonID, img);
             }
             //Add EffortValues
             foreach (var ev in model.EffortValues)
             {
-                await _evService.AddEffortValues(ev, newPokemonID);
+                await _evService.EffortValuesAddOn(newPokemonID, ev);
             }
 
-            try
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
             {
-                await _uow.SaveAsync(); 
-                return await _pokemonService.GetPokemonsById(newPokemonID);
+                await _cached.RemoveByPrefixAsync($"Pokemons:all:page:");
             }
-            catch (DbUpdateException)
+            else
             {
                 throw new BadRequestException("Pokemon đã tồn tại hoặc dữ liệu không hợp lệ");
             }
+
+            return await _pokemonService.GetPokemonsById(newPokemonID);
+
         }
 
-        public async Task<bool> PutPokemons(Guid pokeId, PutFullPokemonsDTO model)
+        public async Task<bool> PutFullPokemons(Guid pokeId, PutFullPokemonsDTO model)
         {
             var pokemon = await _uow.Pokemons.GetByIdAsync(pokeId);
             if (pokemon == null)
@@ -121,10 +129,15 @@ namespace RPD_API.Service
                     _mapper.Map<PutPokemonDTO>(model)
                 );
 
-                await _uow.SaveAsync(); 
-                await tx.CommitAsync();
+                var saved = await _uow.SaveAsync() > 0;
+                if (saved)
+                {
+                    await tx.CommitAsync();
+                    await _cache.RemoveAsync($"Pokemons:pokeid:{pokeId}");
+                    await _cached.RemoveByPrefixAsync($"Pokemons:all:page:");
+                }
 
-                return true;
+                return saved;
             }
             catch
             {
@@ -133,14 +146,5 @@ namespace RPD_API.Service
             }
         }
 
-        public async Task<bool> DeleteFullPokemons(Guid pokeID)
-        {
-            var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (pokemon == null)
-                return false;
-
-            await _uow.Pokemons.RemoveAsync(pokemon);
-            return await _uow.SaveAsync() > 0;
-        }
     }
 }

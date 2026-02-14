@@ -51,7 +51,7 @@ namespace RPD_API.Controllers
         {
             return await _moveSer.DeleteMove(moveID) ? NoContent() : NotFound();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadMove(IFormFile file)

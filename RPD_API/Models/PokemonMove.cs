@@ -1,6 +1,4 @@
-﻿using System.ComponentModel.DataAnnotations;
-
-namespace RPD_API.Models
+﻿namespace RPD_API.Models
 {
     public class PokemonMove
     {

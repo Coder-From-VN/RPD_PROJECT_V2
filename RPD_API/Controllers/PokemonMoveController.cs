@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using RPD_API.DTO;
+using RPD_API.DTO.Move;
 using RPD_API.Service.IService;
 
 namespace RPD_API.Controllers
@@ -18,9 +19,9 @@ namespace RPD_API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
-        public async Task<IActionResult> PostPokemonMove(PostPokemonMoveListDTO model)
+        public async Task<IActionResult> PostPokemonMove(Guid pokeId, List<PostPokemonMoveListItem> model)
         {
-            var result = await _pmSer.AddPokemonMove(model);
+            var result = await _pmSer.AddPokemonMove(pokeId,model);
             if (result == null)
                 return Conflict("Move already exists.");
 
@@ -40,12 +41,12 @@ namespace RPD_API.Controllers
         {
             return await _pmSer.DeletePokemonMove(pokeID, moveID) ? NoContent() : NotFound();
         }
-
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
-        public async Task<IActionResult> UploadPokemonMove(IFormFile file)
+        public async Task<IActionResult> UploadPokemonMove(Guid pokeID, IFormFile file)
         {
-            var count = await _pmSer.ImportPokemonMoveAsync(file);
+            var count = await _pmSer.ImportPokemonMoveAsync(pokeID,file);
             return Ok(new { imported = count });
         }
     }

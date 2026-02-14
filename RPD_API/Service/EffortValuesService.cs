@@ -16,7 +16,8 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task AddEffortValues(PostPokemonsEffortValuesDTO model, Guid pokeID)
+        //call at pokemonaplication
+        public async Task EffortValuesAddOn(Guid pokeID, PostPokemonsEffortValuesDTO model)
         {
 
             EffortValues newEffortValues = new EffortValues
@@ -29,32 +30,73 @@ namespace RPD_API.Service
             await _uow.EffortValues.AddAsync(newEffortValues);
         }
 
-        //public async Task<bool> DeleteEffortValues(Guid evID)
-        //{
-        //    var effortValues = await _uow.EffortValues.GetByIdAsync(evID);
-        //    if (effortValues == null)
-        //        throw new NotFoundException("Effort Values not found");
-
-        //    await _uow.EffortValues.RemoveAsync(effortValues);
-
-        //    return await _uow.SaveAsync() > 0;
-        //}
-
-        public async Task UpdateEffortValues(Guid pokeID, ICollection<PutEffortValuesDTO> model)
+        public async Task<bool> DeleteEffortValues(Guid pokeID, Guid evID)
         {
-            var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
-            if (pokemon == null)
-                throw new NotFoundException($"Pokemons with id {pokeID} not found");
+            var effortValues = await _uow.EffortValues.GetByIdAsync(evID);
 
-            var evLookup = model.ToDictionary(m => m.evStatName);
+            if (effortValues == null || effortValues.pokeID != pokeID)
+                throw new NotFoundException("Effort Values not found for this Pokemon");
+
+            await _uow.EffortValues.RemoveAsync(effortValues);
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+            }
+
+            return saved;
+        }
+
+        public async Task<bool> UpdateEffortValues(Guid pokeID, ICollection<PutEffortValuesDTO> model)
+        {
+            var pokemon = await _uow.Pokemons.GetPokemonWithEVAsync(pokeID);
+
+            if (pokemon == null)
+                throw new NotFoundException($"Pokemon with id {pokeID} not found");
+
+            var evLookup = model.ToDictionary(
+                m => m.evStatName.Trim().ToLower(),
+                m => m.eValues
+            );
 
             foreach (var ev in pokemon.EffortValues)
             {
-                if (evLookup.TryGetValue(ev.evStatName, out var dto))
+                var key = ev.evStatName.Trim().ToLower();
+
+                if (evLookup.TryGetValue(key, out var newValue))
                 {
-                    ev.eValues = dto.eValues;
+                    ev.eValues = newValue;
                 }
             }
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+            }
+
+            return saved;
+        }
+
+        public async Task<bool> PostEffortValues(Guid pokeID, PostPokemonsEffortValuesDTO model)
+        {
+
+            if (!await _uow.Pokemons.ExistsByPokemonByIdAsync(pokeID))
+                throw new BadRequestException($"Pokemon Id {pokeID} Not Exist");
+
+            var newEV= _mapper.Map<EffortValues>(model);
+            newEV.pokeID = pokeID;
+
+            await _uow.EffortValues.AddAsync(newEV);
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+            }
+
+            return saved;
         }
     }
 }

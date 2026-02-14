@@ -16,5 +16,6 @@ namespace RPD_API.Repo.IRepo
 
         Task<List<string>> GetExistingNamesAsync(List<string> names);
         Task<bool> ExistsByNameAsync(string moveName);
+        Task<bool> ExistsByIdAsync(Guid moveID);
     }
 }

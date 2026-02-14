@@ -106,38 +106,57 @@ namespace RPD_API.Repo
         public async Task<Pokemons?> GetPokemonWithAbilitiesAsync(Guid pokeID)
         {
             return await _context.Pokemons
-                .Include(p => p.PokemonAbilities)
+                .Include(p => p.PokemonAbilities).ThenInclude(a => a.Abilities)
                 .FirstOrDefaultAsync(p => p.pokeID == pokeID);
         }
         //get with EggGroup
         public async Task<Pokemons?> GetPokemonWithEggGroupsAsync(Guid pokeID)
         {
             return await _context.Pokemons
-                .Include(p => p.PokemonEggGroup)
+                .Include(p => p.PokemonEggGroup).ThenInclude(e => e.EggGroup)
                 .FirstOrDefaultAsync(p => p.pokeID == pokeID);
         }
         //get with Gameversion
         public async Task<Pokemons?> GetPokemonWithGameVersionAsync(Guid pokeID)
         {
             return await _context.Pokemons
-                .Include(p => p.PokemonGameVersion)
+                .Include(p => p.PokemonGameVersion).ThenInclude(gv => gv.GameVersion)
                 .FirstOrDefaultAsync(p => p.pokeID == pokeID);
         }
         //get with Stats
         public async Task<Pokemons?> GetPokemonWithStatsAsync(Guid pokeID)
         {
             return await _context.Pokemons
-                .Include(p => p.PokemonStats)
+                .Include(p => p.PokemonStats).ThenInclude(s => s.StatType)
                 .FirstOrDefaultAsync(p => p.pokeID == pokeID);
         }
-
         //get with Stats
         public async Task<Pokemons?> GetPokemonWithTypesAsync(Guid pokeID)
         {
             return await _context.Pokemons
-                .Include(p => p.PokemonType)
+                .Include(p => p.PokemonType).ThenInclude(t => t.Types)
                 .FirstOrDefaultAsync(p => p.pokeID == pokeID);
         }
-
+        //get with EV
+        public async Task<Pokemons?> GetPokemonWithEVAsync(Guid pokeID)
+        {
+            return await _context.Pokemons
+                .Include(p => p.EffortValues)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+        }
+        //get with Images
+        public async Task<Pokemons?> GetPokemonWithImagesAsync(Guid pokeID)
+        {
+            return await _context.Pokemons
+                .Include(p => p.ImageLink)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+        }
+        //get with Moves
+        public async Task<Pokemons?> GetPokemonWithMovesAsync(Guid pokeID)
+        {
+            return await _context.Pokemons
+                .Include(p => p.PokemonMove).ThenInclude(pt => pt.Move).ThenInclude(t => t.Types)
+                .FirstOrDefaultAsync(p => p.pokeID == pokeID);
+        }
     }
 }

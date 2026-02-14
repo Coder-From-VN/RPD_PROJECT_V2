@@ -21,7 +21,7 @@ namespace RPD_API.Service
         {
         }
 
-        public async Task<MoveDTO?> AddMove(PostMoveDTO model)
+        public async Task<MoveDTO> AddMove(PostMoveDTO model)
         {
             if (await _uow.Moves.ExistsByNameAsync(model.moveName))
                 throw new BadRequestException("Move already exists");
@@ -40,7 +40,7 @@ namespace RPD_API.Service
                 throw new BadRequestException("Move ADD Fail");
             }
 
-            return _mapper.Map<MoveDTO?>(newMove);
+            return _mapper.Map<MoveDTO>(newMove);
         }
 
         public async Task<bool> DeleteMove(Guid moveID)
@@ -123,10 +123,6 @@ namespace RPD_API.Service
 
             var normalizedDtos = mDtos
                 .Where(x => !string.IsNullOrWhiteSpace(x.moveName))
-                .Select(x =>{
-                        x.moveName = x.moveName.Trim();
-                        return x;
-                        })
                 .GroupBy(x => x.moveName.ToLower())
                 .Select(g => g.First())
                 .ToList();

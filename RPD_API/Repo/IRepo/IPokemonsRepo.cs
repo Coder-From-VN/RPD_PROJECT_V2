@@ -26,5 +26,13 @@ namespace RPD_API.Repo.IRepo
         Task<Pokemons?> GetPokemonWithStatsAsync(Guid pokeID);
         //pokemonTypes
         Task<Pokemons?> GetPokemonWithTypesAsync(Guid pokeID);
+        //EV
+        Task<Pokemons?> GetPokemonWithEVAsync(Guid pokeID);
+        //IMG
+        Task<Pokemons?> GetPokemonWithImagesAsync(Guid pokeID);
+        //Move
+        Task<Pokemons?> GetPokemonWithMovesAsync(Guid pokeID);
+        //EVO
+
     }
 }

@@ -3,6 +3,7 @@ using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.Caching;
 using RPD_API.DTO;
+using RPD_API.DTO.Move;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Service.IService;
@@ -17,17 +18,17 @@ namespace RPD_API.Service
         : base(uow, mapper, cache,cached)
         {
         }
-        //this maybe any good idela
-        public async Task<int> AddPokemonMove(PostPokemonMoveListDTO model)
+        
+        public async Task<int> AddPokemonMove(Guid pokeID, List<PostPokemonMoveListItem> model)
         {
-            var pokemon = await _uow.Pokemons.GetByIdAsync(model.pokeID);
+            var pokemon = await _uow.Pokemons.GetPokemonWithMovesAsync(pokeID);
             if (pokemon == null)
-                throw new NotFoundException($"Can't find Pokemon id {model.pokeID}");
+                throw new NotFoundException($"Can't find Pokemon id {pokeID}");
 
-            if (model.moves == null || !model.moves.Any())
+            if (model == null || !model.Any())
                 return 0;
 
-            var moveIds = model.moves
+            var moveIds = model
                 .Select(m => m.moveID)
                 .Distinct()
                 .ToList();
@@ -37,32 +38,34 @@ namespace RPD_API.Service
             if (existingMoves.Count != moveIds.Count)
                 throw new NotFoundException("One or more Moves do not exist");
 
-            var existingLinks = await _uow.PokemonMoves
-                .GetExistingMovesForPokemonAsync(model.pokeID, moveIds);
-
-            var existingMoveIds = existingLinks
+            var existingSet = pokemon.PokemonMove
                 .Select(x => x.moveID)
                 .ToHashSet();
 
-            var newPokemonMoves = model.moves
-                .Where(m => !existingMoveIds.Contains(m.moveID))
-                .Select(m => new PokemonMove
-                {
-                    pokeID = model.pokeID,
-                    moveID = m.moveID,
-                    pmLearnMethod = m.pmLearnMethod,
-                    pmLearnLevel = m.pmLearnLevel
-                })
+            var newDtos = model
+                .Where(x => !existingSet.Contains(x.moveID))
                 .ToList();
 
-            if (!newPokemonMoves.Any())
+            if (!newDtos.Any())
                 return 0;
 
-            await _uow.PokemonMoves.AddRangeAsync(newPokemonMoves);
+            var newLinks = _mapper.Map<List<PokemonMove>>(newDtos);
 
-            await _uow.SaveAsync();
+            // Assign foreign key manually
+            foreach (var link in newLinks)
+            {
+                link.pokeID = pokeID;
+            }
 
-            return newPokemonMoves.Count;
+            await _uow.PokemonMoves.AddRangeAsync(newLinks);
+
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+            }
+
+            return newLinks.Count;
         }
 
         public async Task<bool> DeletePokemonMove(Guid pokeID, Guid moveID)
@@ -72,87 +75,105 @@ namespace RPD_API.Service
                 throw new NotFoundException($"Pokemon id {pokeID} does not exist");
 
             await _uow.PokemonMoves.RemoveAsync(entry);
-            return await _uow.SaveAsync() > 0;
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+            }
+
+            return saved;
         }
 
-        public async Task<int> ImportPokemonMoveAsync(IFormFile file)
+        public async Task<int> ImportPokemonMoveAsync(Guid pokeID,IFormFile file)
         {
             if (file == null || file.Length == 0)
                 throw new BadRequestException("File is empty");
 
+            var pokemon = await _uow.Pokemons.GetPokemonWithMovesAsync(pokeID);
+            if (pokemon == null)
+                throw new NotFoundException($"Can't find Pokemon id {pokeID}");
+
             using var stream = new StreamReader(file.OpenReadStream());
             using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
 
-            List<PostPokemonMoveDTO> moveDtos;
+            List<PostPokemonMoveListItem> moveDtos;
             try
             {
-                moveDtos = csv.GetRecords<PostPokemonMoveDTO>().ToList();
+                moveDtos = csv.GetRecords<PostPokemonMoveListItem>().ToList();
             }
             catch (Exception ex)
             {
-                throw new BadRequestException($"Invalid CSV format: {ex}");
+                throw new BadRequestException($"Invalid CSV format: {ex.Message}");
             }
 
-            // 🔴 [ADD] Basic validation + normalize
             var normalizedDtos = moveDtos
                 .Where(x =>
-                    x.pokeID != Guid.Empty &&
                     x.moveID != Guid.Empty &&
                     !string.IsNullOrWhiteSpace(x.pmLearnMethod) &&
-                    x.pmLearnLevel > 0
-                    )
-                .Select(x => new PostPokemonMoveDTO
-                {
-                    pokeID = x.pokeID,
-                    pmLearnLevel = x.pmLearnLevel,
-                    moveID = x.moveID,
-                    pmLearnMethod = x.pmLearnMethod,
-                })
-                .GroupBy(x => new { x.pokeID, x.moveID })
+                    x.pmLearnLevel >= 0
+                )
+                .GroupBy(x => x.moveID)
                 .Select(g => g.First())
                 .ToList();
 
             if (!normalizedDtos.Any())
                 return 0;
 
-            // 🔴 [ADD] Check existing evolutions in DB
-            var existingPairs = await _uow.PokemonMoves
-                .GetExistingPairsAsync(
-                    normalizedDtos.Select(x => x.pokeID).ToList(),
-                    normalizedDtos.Select(x => x.moveID).ToList()
-                );
+            var moveIds = normalizedDtos.Select(x => x.moveID).ToList();
+            var existingMoves = await _uow.Moves.GetByIdsAsync(moveIds);
+
+            if (existingMoves.Count != moveIds.Count)
+                throw new NotFoundException("One or more Moves do not exist");
+
+            // Check already linked moves
+            var existingSet = pokemon.PokemonMove
+                .Select(x => x.moveID)
+                .ToHashSet();
 
             var newDtos = normalizedDtos
-                .Where(x => !existingPairs.Any(e =>
-                    e.pokeID == x.pokeID &&
-                    e.moveID == x.moveID))
+                .Where(x => !existingSet.Contains(x.moveID))
                 .ToList();
 
             if (!newDtos.Any())
                 return 0;
 
+            // Map
             var pokemonMoves = _mapper.Map<List<PokemonMove>>(newDtos);
+
+            // Assign FK
+            foreach (var move in pokemonMoves)
+            {
+                move.pokeID = pokeID;
+            }
 
             await _uow.PokemonMoves.AddRangeAsync(pokemonMoves);
 
-            return await _uow.SaveAsync() > 0
-                ? pokemonMoves.Count
-                : throw new BadRequestException("Something went wrong with EvolutionChart import");
+            var saved = await _uow.SaveAsync() > 0;
+
+            if (!saved)
+                throw new BadRequestException("Something went wrong with MOVE import");
+
+            await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+
+            return pokemonMoves.Count;
         }
 
         public async Task<bool> UpdatePokemonMove(Guid pokeID, Guid moveID, PutPokemonMoveDTO model)
         {
             var pokemonMove = await _uow.PokemonMoves.GetLinkAsync(pokeID, moveID); 
             if (pokemonMove == null)
-                throw new NotFoundException(
-                    $"Move {moveID} is not learned by Pokemon {pokeID}"
-                ); 
+                throw new NotFoundException($"Move {moveID} is not learned by Pokemon {pokeID}");
 
-            pokemonMove.pmLearnMethod = model.pmLearnMethod; 
-            pokemonMove.pmLearnLevel = model.pmLearnLevel;  
+            _mapper.Map(model, pokemonMove);
 
-            await _uow.PokemonMoves.UpdateAsync(pokemonMove); 
-            return await _uow.SaveAsync() > 0;
+            //await _uow.PokemonMoves.UpdateAsync(pokemonMove); 
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+            }
+
+            return saved;
         }
     }
 }

@@ -8,8 +8,10 @@ using RPD_API.Models;
 using RPD_API.Pagination;
 using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
+using Serilog;
 using System.Globalization;
 using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace RPD_API.Service
 {
@@ -43,9 +45,9 @@ namespace RPD_API.Service
             using var stream = new StreamReader(file.OpenReadStream());
             using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
 
-            var abilityDtos = csv.GetRecords<PostGrowthRateDTO>().ToList();
+            var growthRateDtos = csv.GetRecords<PostGrowthRateDTO>().ToList();
 
-            var normalizedDtos = abilityDtos
+            var normalizedDtos = growthRateDtos
                 .Where(x => !string.IsNullOrWhiteSpace(x.grName))
                 .Select(x => new PostGrowthRateDTO
                 {
@@ -90,7 +92,7 @@ namespace RPD_API.Service
 
         public async Task<PagedResult<GrowthRateDTO>> GetAllGrowthRate(QueryParams queryParams)
         {
-            var cacheKey = $"GrowthRate:all:page:{queryParams.PageNumber}";
+            var cacheKey = $"GrowthRate:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}";
             try
             {
                 var cached = await _cache.GetStringAsync(cacheKey);
@@ -102,7 +104,7 @@ namespace RPD_API.Service
             }
             catch (Exception ex)
             {
-                // Optional: log cache read failure
+                Log.Error($"cache read Fail {ex}");
 
             }
             var result = await GetPagedAsync<GrowthRate, GrowthRateDTO>(
@@ -120,7 +122,7 @@ namespace RPD_API.Service
             }
             catch (Exception ex)
             {
-                // Optional: log cache write failure
+                Log.Error($"cache write Fail {ex}");
             }
             return result;
         }
@@ -139,10 +141,7 @@ namespace RPD_API.Service
             if (growthRate == null)
                 throw new NotFoundException($"GrowthRates with id {growthRateID} not found");
 
-            if (!string.IsNullOrWhiteSpace(model.grName))
-                growthRate.grName = model.grName;
-            if (model.grTotalExp != 0)
-                growthRate.grTotalExp = model.grTotalExp;
+            _mapper.Map(model, growthRate);
 
             await _uow.GrowthRates.UpdateAsync(growthRate);
 
