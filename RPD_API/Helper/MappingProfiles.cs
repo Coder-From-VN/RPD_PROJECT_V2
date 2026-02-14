@@ -48,7 +48,19 @@ namespace RPD_API.Helper
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
             //POKEMON MOVE
             CreateMap<PokemonMove, PokemonMoveDTO>()
-                .ForMember(dest => dest.Move,opt => opt.MapFrom(src => src.Move)); ;
+                .ForMember(dest => dest.moveID, opt => opt.MapFrom(src => src.moveID))
+                .ForMember(dest => dest.moveName,opt => opt.MapFrom(src => src.Move.moveName))
+                .ForMember(dest => dest.typesID,opt => opt.MapFrom(src => src.Move.typesID))
+                .ForMember(dest => dest.typesName,opt => opt.MapFrom(src => src.Move.Types.typesName))
+                .ForMember(dest => dest.moveDamageClass,opt => opt.MapFrom(src => src.Move.moveDamageClass))
+                .ForMember(dest => dest.movePower,opt => opt.MapFrom(src => src.Move.movePower))
+                .ForMember(dest => dest.moveAccuracy,opt => opt.MapFrom(src => src.Move.moveAccuracy))
+                .ForMember(dest => dest.movePP,opt => opt.MapFrom(src => src.Move.movePP))
+                .ForMember(dest => dest.movePriority,opt => opt.MapFrom(src => src.Move.movePriority))
+                .ForMember(dest => dest.moveDescription,opt => opt.MapFrom(src => src.Move.moveDescription))
+                .ForMember(dest => dest.pmLearnMethod,opt => opt.MapFrom(src => src.pmLearnMethod))
+                .ForMember(dest => dest.pmLearnLevel,opt => opt.MapFrom(src => src.pmLearnLevel));
+
             CreateMap<PostPokemonMoveDTO, PokemonMove>();
             CreateMap<PutPokemonMoveDTO, PokemonMove>()
                 .ForAllMembers(opt =>opt.Condition((src, dest, srcMember) => srcMember != null));
@@ -74,7 +86,10 @@ namespace RPD_API.Helper
             CreateMap<PutTypesDTO, Types>()
                 .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
             // PokemonType
-            CreateMap<PokemonType, PokemonTypeDTO>();
+            CreateMap<PokemonType, PokemonTypeDTO>()
+                .ForMember(dest => dest.typesID,opt => opt.MapFrom(src => src.typesID))
+                .ForMember(dest => dest.typesName,opt => opt.MapFrom(src => src.Types.typesName))
+                .ForMember(dest => dest.MainOrSubType,opt => opt.MapFrom(src => src.MainOrSubType));
             CreateMap<PostPokemonTypeDTO, PokemonType>();
             CreateMap<PutPokemonTypeDTO, PokemonType>();
 
