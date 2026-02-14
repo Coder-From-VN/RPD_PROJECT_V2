@@ -32,12 +32,19 @@ namespace RPD_API.Controllers
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{pokeID}/{prePokeID}")]
-        public async Task<IActionResult> DeleteEggGroup([FromRoute] Guid pokeID, [FromRoute] Guid prePokeID)
+        public async Task<IActionResult> DeleteEvolutionChart([FromRoute] Guid pokeID, [FromRoute] Guid prePokeID)
         {
             return await _evoSer.DeleteEvolutionChart(pokeID, prePokeID) ? NoContent() : NotFound();
 
         }
-
+        [Authorize(Roles = "Admin")]
+        [HttpPut("{pokeID}/{prePokeID}")]
+        public async Task<IActionResult> UpdateEvolutionChart(Guid pokeID, Guid prePokeID, PutEvolutionChartDTO model)
+        {
+            await _evoSer.UpdateEvolutionChart(pokeID, prePokeID, model);
+            return NoContent();
+        }
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadEvolutionChart(IFormFile file)

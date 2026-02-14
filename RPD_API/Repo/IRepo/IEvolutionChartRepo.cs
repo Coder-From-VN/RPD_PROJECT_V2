@@ -11,7 +11,7 @@ namespace RPD_API.Repo.IRepo
         Task<EvolutionChart?> GetByIdAsync(Guid evoID);
         Task UpdateAsync(EvolutionChart model);
         Task RemoveAsync(EvolutionChart model);
-
+        Task RemoveRangeAsync(Guid pokeID);
         Task<List<EvolutionChart>> GetExistingPairsAsync(List<Guid> pokeIds, List<Guid> prePokeIds);
         Task<EvolutionChart?> FindAsync(Guid pokeID, Guid prePokeID);
     }

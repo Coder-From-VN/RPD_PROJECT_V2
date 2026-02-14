@@ -4,8 +4,9 @@ namespace RPD_API.Service.IService
 {
     public interface IEvolutionChartService : IBaseService
     {
-        public Task<bool> PostEvolutionChart(PostEvolutionChartDTO model);
-        public Task<bool> DeleteEvolutionChart(Guid pokeID, Guid prePokeID);
+        Task<bool> PostEvolutionChart(PostEvolutionChartDTO model);
+        Task<bool> DeleteEvolutionChart(Guid pokeID, Guid prePokeID);
+        Task<bool> UpdateEvolutionChart(Guid pokeID, Guid prePokeID,PutEvolutionChartDTO model);
         Task<int> ImportEvolutionChartAsync(IFormFile file);
     }
 }

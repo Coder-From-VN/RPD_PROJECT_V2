@@ -60,5 +60,17 @@ namespace RPD_API.Repo
                 .ToListAsync();
         }
 
+        public async Task RemoveRangeAsync(Guid pokemonId)
+        {
+            var links = await _context.EvolutionChart
+            .Where(e => e.pokeID == pokemonId
+                     || e.prePokeID == pokemonId)
+            .ToListAsync();
+
+            if (links.Any())
+            {
+                _context.EvolutionChart.RemoveRange(links);
+            }
+        }
     }
 }

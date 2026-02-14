@@ -3,6 +3,7 @@ using CsvHelper;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.Caching;
 using RPD_API.DTO;
+using RPD_API.DTO.Pokemon;
 using RPD_API.Middleware.Exceptions;
 using RPD_API.Models;
 using RPD_API.Pagination;
@@ -64,6 +65,7 @@ namespace RPD_API.Service
 
         public async Task<bool> DeletePokemons(Guid pokeID)
         {
+            await _uow.EvolutionCharts.RemoveRangeAsync(pokeID);
             var Pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
             if (Pokemon == null)
                 throw new NotFoundException($"Pokemons with id {pokeID} not found");
@@ -132,6 +134,7 @@ namespace RPD_API.Service
             }
             return result;
         }
+
         //call at pokeapplication
         public async Task<int> ImportPokemonsAsync(IFormFile file)
         {
@@ -141,44 +144,186 @@ namespace RPD_API.Service
             using var stream = new StreamReader(file.OpenReadStream());
             using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
 
-            var pokemonDtos = csv.GetRecords<PostPokemonDTO>().ToList();
-
-            var normalizedDtos = pokemonDtos
-                .Where(x => !string.IsNullOrWhiteSpace(x.pokeName))
-                .GroupBy(x => x.pokeNationalNumber)
-                .Select(g => g.First())
-                .ToList();
-
-            var nationalNumbers = normalizedDtos
-                .Select(x => x.pokeNationalNumber)
-                .ToList();
-
-            var existingNationalNumbers = await _uow.Pokemons
-                .GetExistingpokeNationalNumberAsync(nationalNumbers);
-
-            var newDtos = normalizedDtos
-                .Where(x => !existingNationalNumbers.Contains(x.pokeNationalNumber))
-                .ToList();
-
-            if (!newDtos.Any())
+            var records = csv.GetRecords<PokemonMegaCsvDTO>().ToList();
+            if (!records.Any())
                 return 0;
 
-            var pokemons = _mapper.Map<List<Pokemons>>(newDtos);
+            var nationalNumbers = records.Select(r => r.pokeNationalNumber).ToList();
+            var existing = await _uow.Pokemons
+                .GetExistingpokeNationalNumberAsync(nationalNumbers);
+
+            var existingSet = existing.ToHashSet();
+
+            var newRecords = records
+                .Where(r => !existingSet.Contains(r.pokeNationalNumber))
+                .ToList();
+
+            if (!newRecords.Any())
+                return 0;
+
+            var pokemons = newRecords.Select(r =>
+            {
+                var entity = _mapper.Map<Pokemons>(r);
+
+                entity.ImageLink = ParseImages(r.ImageLinks);
+                entity.EffortValues = ParseEffort(r.EffortValues);
+                entity.PokemonStats = ParseStats(r.PokemonStats);
+                entity.PokemonAbilities = ParseAbilities(r.PokemonAbilities);
+                entity.PokemonGameVersion = ParseGameVersions(r.PokemonGameVersion);
+                entity.PokemonEggGroup = ParseEggGroups(r.PokemonEggGroup);
+                entity.PokemonType = ParseTypes(r.PokemonType);
+
+                return entity;
+            }).ToList();
 
             await _uow.Pokemons.AddRangeAsync(pokemons);
-
             var saved = await _uow.SaveAsync() > 0;
             if (saved)
             {
                 await _cached.RemoveByPrefixAsync($"Pokemons:all:page:");
             }
-            else
-            {
-                throw new BadRequestException("something worng with abilities list");
-            }
 
             return pokemons.Count;
 
+        }
+
+
+        private ICollection<ImageLink> ParseImages(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return new List<ImageLink>();
+
+            return input.Split('|')
+                .Select(x => new ImageLink
+                {
+                    imgLink = x.Trim()
+                })
+                .ToList();
+        }
+
+        private ICollection<EffortValues> ParseEffort(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return new List<EffortValues>();
+
+            return input.Split('|')
+                .Select(x =>
+                {
+                    var parts = x.Split(':');
+                    if (parts.Length != 2) return null;
+
+                    return new EffortValues
+                    {
+                        evStatName = parts[0],
+                        eValues = int.TryParse(parts[1], out var val) ? val : 0
+                    };
+                })
+                .Where(x => x != null)
+                .ToList();
+        }
+
+        private ICollection<PokemonStats> ParseStats(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return new List<PokemonStats>();
+
+            return input.Split('|')
+                .Select(x =>
+                {
+                    var parts = x.Split(':');
+                    if (parts.Length != 4) return null;
+
+                    return new PokemonStats
+                    {
+                        stID = Guid.TryParse(parts[0], out var id) ? id : Guid.Empty,
+                        Basevalue = int.TryParse(parts[1], out var baseVal) ? baseVal : 0,
+                        minValue = int.TryParse(parts[2], out var min) ? min : 0,
+                        MaxValue = int.TryParse(parts[3], out var max) ? max : 0
+                    };
+                })
+                .Where(x => x != null && x.stID != Guid.Empty)
+                .ToList();
+        }
+
+        private ICollection<PokemonAbilities> ParseAbilities(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return new List<PokemonAbilities>();
+
+            return input.Split('|')
+                .Select(x =>
+                {
+                    var parts = x.Split(':');
+                    if (parts.Length != 2) return null;
+
+                    return new PokemonAbilities
+                    {
+                        abID = Guid.TryParse(parts[0], out var id) ? id : Guid.Empty,
+                        paHiddenCheck = bool.TryParse(parts[1], out var hidden) && hidden
+                    };
+                })
+                .Where(x => x != null && x.abID != Guid.Empty)
+                .ToList();
+        }
+
+        private ICollection<PokemonGameVersion> ParseGameVersions(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return new List<PokemonGameVersion>();
+
+            return input.Split('|')
+                .Select(x =>
+                {
+                    var parts = x.Split(':');
+                    if (parts.Length < 3) return null;
+
+                    return new PokemonGameVersion
+                    {
+                        gvID = Guid.TryParse(parts[0], out var id) ? id : Guid.Empty,
+                        pgvDexNumber = int.TryParse(parts[1], out var dex) ? dex : 0,
+                        pgvEntries = parts[2]
+                    };
+                })
+                .Where(x => x != null && x.gvID != Guid.Empty)
+                .ToList();
+        }
+
+        private ICollection<PokemonEggGroup> ParseEggGroups(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return new List<PokemonEggGroup>();
+
+            return input.Split('|')
+                .Select(x =>
+                {
+                    return new PokemonEggGroup
+                    {
+                        egID = Guid.TryParse(x, out var id) ? id : Guid.Empty
+                    };
+                })
+                .Where(x => x.egID != Guid.Empty)
+                .ToList();
+        }
+
+        private ICollection<PokemonType> ParseTypes(string input)
+        {
+            if (string.IsNullOrWhiteSpace(input))
+                return new List<PokemonType>();
+
+            return input.Split('|')
+                .Select(x =>
+                {
+                    var parts = x.Split(':');
+                    if (parts.Length != 2) return null;
+
+                    return new PokemonType
+                    {
+                        typesID = Guid.TryParse(parts[0], out var id) ? id : Guid.Empty,
+                        MainOrSubType = int.TryParse(parts[1], out var type) ? type : 0
+                    };
+                })
+                .Where(x => x != null && x.typesID != Guid.Empty)
+                .ToList();
         }
     }
 }

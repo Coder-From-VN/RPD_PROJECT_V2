@@ -1,6 +1,5 @@
 ﻿using AutoMapper;
 using CsvHelper;
-using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.Caching;
 using RPD_API.DTO;
@@ -43,53 +42,28 @@ namespace RPD_API.Service
             using var stream = new StreamReader(file.OpenReadStream());
             using var csv = new CsvReader(stream, CultureInfo.InvariantCulture);
 
-            var evoDtos = csv.GetRecords<PostEvolutionChartDTO>().ToList();
+            var dtos = csv.GetRecords<PostEvolutionChartDTO>()
+                          .Where(x =>
+                              x.pokeID != Guid.Empty &&
+                              x.prePokeID != Guid.Empty &&
+                              x.pokeID != x.prePokeID)
+                          .GroupBy(x => new { x.pokeID, x.prePokeID })
+                          .Select(g => g.First())
+                          .ToList();
 
-            // 🔴 [ADD] Basic validation + normalize
-            var normalizedDtos = evoDtos
-                .Where(x =>
-                    x.pokeID != Guid.Empty &&
-                    x.prePokeID != Guid.Empty &&
-                    x.pokeID != x.prePokeID &&
-                    !string.IsNullOrWhiteSpace(x.evoCondition))
-                .Select(x => new PostEvolutionChartDTO
-                {
-                    pokeID = x.pokeID,
-                    prePokeID = x.prePokeID,
-                    evoCondition = x.evoCondition.Trim()
-                })
-                // 🔴 [ADD] Remove duplicate rows inside CSV
-                .GroupBy(x => new { x.pokeID, x.prePokeID })
-                .Select(g => g.First())
-                .ToList();
-
-            if (!normalizedDtos.Any())
+            if (!dtos.Any())
                 return 0;
 
-            // 🔴 [ADD] Check existing evolutions in DB
-            var existingPairs = await _uow.EvolutionCharts
-                .GetExistingPairsAsync(
-                    normalizedDtos.Select(x => x.pokeID).ToList(),
-                    normalizedDtos.Select(x => x.prePokeID).ToList()
-                );
+            var entities = _mapper.Map<List<EvolutionChart>>(dtos);
 
-            var newDtos = normalizedDtos
-                .Where(x => !existingPairs.Any(e =>
-                    e.pokeID == x.pokeID &&
-                    e.prePokeID == x.prePokeID))
-                .ToList();
+            await _uow.EvolutionCharts.AddRangeAsync(entities);
 
-            if (!newDtos.Any())
-                return 0;
+            await _uow.SaveAsync();
 
-            var evolutions = _mapper.Map<List<EvolutionChart>>(newDtos);
-
-            await _uow.EvolutionCharts.AddRangeAsync(evolutions);
-
-            return await _uow.SaveAsync() > 0
-                ? evolutions.Count
-                : throw new BadRequestException("Something went wrong with EvolutionChart import");
+            return entities.Count;
         }
+
+
 
         public async Task<bool> DeleteEvolutionChart(Guid pokeID, Guid prePokeID)
         {
@@ -100,6 +74,25 @@ namespace RPD_API.Service
             await _uow.EvolutionCharts.RemoveAsync(entry);
 
             return await _uow.SaveAsync() > 0;
+        }
+
+        public async Task<bool> UpdateEvolutionChart(Guid pokeID, Guid prePokeID, PutEvolutionChartDTO model)
+        {
+            var pokemonEC = await _uow.EvolutionCharts.FindAsync(pokeID, prePokeID);
+            if (pokemonEC == null)
+                throw new NotFoundException("Charts Not Found");
+
+            _mapper.Map(model, pokemonEC);
+
+            //await _uow.PokemonMoves.UpdateAsync(pokemonMove); 
+            var saved = await _uow.SaveAsync() > 0;
+            if (saved)
+            {
+                await _cache.RemoveAsync($"Pokemons:pokeid:{pokeID}");
+                await _cache.RemoveAsync($"Pokemons:pokeid:{prePokeID}");
+            }
+
+            return saved;
         }
     }
 }

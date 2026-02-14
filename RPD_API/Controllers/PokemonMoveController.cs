@@ -34,7 +34,6 @@ namespace RPD_API.Controllers
             await _pmSer.UpdatePokemonMove(pokeID, moveID, model);
             return NoContent();
         }
-
         [Authorize(Roles = "Admin")]
         [HttpDelete("{pokeID}/{moveID}")]
         public async Task<IActionResult> DeletePokemonMove([FromRoute] Guid pokeID, [FromRoute] Guid moveID)

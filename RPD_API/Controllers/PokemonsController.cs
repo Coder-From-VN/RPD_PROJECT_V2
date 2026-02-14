@@ -55,13 +55,13 @@ namespace RPD_API.Controllers
         {
             return await _pokemonService.DeletePokemons(pokeID) ? NoContent() : NotFound();
         }
-
-        //[HttpPost("upload")]
-        //[Consumes("multipart/form-data")]
-        //public async Task<IActionResult> UploadPokemons(IFormFile pokemonFile,List<IFormFile> addOnFileList)
-        //{
-        //    var count = await _pokeFullService.ImportFullPokemonsAsync(pokemonFile, addOnFileList);
-        //    return Ok(new { imported = count });
-        //}
+        //[Authorize(Roles = "Admin")]
+        [HttpPost("upload")]
+        [Consumes("multipart/form-data")]
+        public async Task<IActionResult> UploadPokemons(IFormFile pokemonFile)
+        {
+            var count = await _pokemonService.ImportPokemonsAsync(pokemonFile);
+            return Ok(new { imported = count });
+        }
     }
 }

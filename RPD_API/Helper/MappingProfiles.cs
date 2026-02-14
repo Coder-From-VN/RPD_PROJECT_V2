@@ -1,6 +1,7 @@
 ﻿using AutoMapper;
 using RPD_API.DTO;
 using RPD_API.DTO.Move;
+using RPD_API.DTO.Pokemon;
 using RPD_API.DTO.Types;
 using RPD_API.Models;
 
@@ -98,23 +99,26 @@ namespace RPD_API.Helper
                 .ForAllMembers(opt =>opt.Condition((src, dest, srcMember) => srcMember != null));
 
             //pokemon
+            CreateMap<PokemonMegaCsvDTO, Pokemons>()
+            .ForMember(dest => dest.pokeID, opt => opt.Ignore())
+            .ForMember(dest => dest.GrowthRate, opt => opt.Ignore())
+            .ForMember(dest => dest.ImageLink, opt => opt.Ignore())
+            .ForMember(dest => dest.EffortValues, opt => opt.Ignore())
+            .ForMember(dest => dest.PokemonStats, opt => opt.Ignore())
+            .ForMember(dest => dest.PokemonAbilities, opt => opt.Ignore())
+            .ForMember(dest => dest.PokemonGameVersion, opt => opt.Ignore())
+            .ForMember(dest => dest.PokemonEggGroup, opt => opt.Ignore())
+            .ForMember(dest => dest.PokemonType, opt => opt.Ignore())
+            .ForMember(dest => dest.PokemonMove, opt => opt.Ignore())
+            .ForMember(dest => dest.EvolutionChart, opt => opt.Ignore())
+            .ForMember(dest => dest.PreEvolutionChart, opt => opt.Ignore());
             CreateMap<Pokemons, PokemonsDTO>()
-            .ForMember(
-                dest => dest.ImageLink,
-                opt => opt.MapFrom(src =>
-                    src.ImageLink != null
-                        ? src.ImageLink.Select(i => i.imgLink)
-                        : new List<string>()
-                )
-            )
-            .ForMember(
-                dest => dest.TypeName,
-                opt => opt.MapFrom(src =>
-                    src.PokemonType != null
-                        ? src.PokemonType.Select(t => t.Types.typesName)
-                        : new List<string>()
-                )
-            );
+                .ForMember(dest => dest.ImageLink,opt => opt
+                    .MapFrom(src =>src.ImageLink != null ? 
+                    src.ImageLink.Select(i => i.imgLink): new List<string>()))
+                .ForMember(dest => dest.TypeName,opt => opt
+                    .MapFrom(src =>src.PokemonType != null
+                        ? src.PokemonType.Select(t => t.Types.typesName): new List<string>()));
 
             CreateMap<Pokemons, PokemonDetailDTO>()
                 .ForMember( dest => dest.grName,opt => opt
@@ -129,9 +133,7 @@ namespace RPD_API.Helper
             CreateMap<PostFullPokemonsDTO, PostPokemonDTO>();
             CreateMap<PutFullPokemonsDTO, Pokemons>();
             CreateMap<PutPokemonDTO, Pokemons>()
-                .ForAllMembers(opt =>
-                    opt.Condition((src, dest, srcMember) => srcMember != null)
-                );
+                .ForAllMembers(opt => opt.Condition((src, dest, srcMember) => srcMember != null));
             CreateMap<PutFullPokemonsDTO, PutPokemonDTO>().ReverseMap();
 
             //Evolution
