@@ -62,7 +62,7 @@ namespace RPD_API.Service
 
         public async Task<PagedResult<MoveDTO>> GetAllMove(QueryParams queryParams)
         {
-            var cacheKey = $"Moves:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}";
+            var cacheKey = $"Moves:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}:search:{queryParams.Search}";
 
             try
             {

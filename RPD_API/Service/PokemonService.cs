@@ -103,7 +103,7 @@ namespace RPD_API.Service
 
         public async Task<PagedResult<PokemonsDTO>> GetAllPokemons(QueryParams query)
         {
-            var cacheKey = $"Pokemons:all:page:{query.PageNumber}:size:{query.PageSize}";
+            var cacheKey = $"Pokemons:all:page:{query.PageNumber}:size:{query.PageSize}:search:{query.Search}";
             try
             {
                 var cached = await _cache.GetStringAsync(cacheKey);
