@@ -11,6 +11,7 @@ using RPD_API.UnitOfWork;
 using Serilog;
 using System.Globalization;
 using System.Text.Json;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory;
 
 namespace RPD_API.Service
 {
@@ -60,9 +61,13 @@ namespace RPD_API.Service
             return saved;
         }
 
-        public async Task<PagedResult<MoveDTO>> GetAllMove(QueryParams queryParams)
+        public async Task<PagedResult<MoveDTO>> GetAllMove(QueryParams query)
         {
-            var cacheKey = $"Moves:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}:search:{queryParams.Search}";
+            var cacheKey = $"Moves:all:PageNumber:{query.PageNumber}" +
+                            $":PageSize:{query.PageSize}" +
+                            $":Search:{query.Search}" +
+                            $":SortBy:{query.SortBy}" +
+                            $":SortOrder:{query.SortOrder}";
 
             try
             {
@@ -79,7 +84,7 @@ namespace RPD_API.Service
             }
 
             var result = await GetPagedAsync<Move, MoveDTO>(
-                queryParams,
+                query,
                 _uow.Moves.GetAllAsync
             );
 

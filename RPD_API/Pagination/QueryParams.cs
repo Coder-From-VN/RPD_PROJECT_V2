@@ -17,7 +17,7 @@ namespace RPD_API.Pagination
         public string? Search { get; set; }
 
         // Sorting
-        public string? SortBy { get; set; } = "abName";
+        public string? SortBy { get; set; } = "Name";
         public string? SortOrder { get; set; } = "asc";
     }
 }
