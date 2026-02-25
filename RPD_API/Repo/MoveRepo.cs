@@ -41,6 +41,10 @@ namespace RPD_API.Repo
                     ? query.OrderByDescending(a => a.moveName)
                     : query.OrderBy(a => a.moveName),
 
+                "movePower" => queryParams.SortOrder == "desc"
+                    ? query.OrderByDescending(a => a.movePower)
+                    : query.OrderBy(a => a.movePower),
+
                 _ => query.OrderBy(a => a.moveName)
             };
 

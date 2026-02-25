@@ -53,6 +53,10 @@ namespace RPD_API.Repo
                     ? query.OrderByDescending(poke => poke.pokeName)
                     : query.OrderBy(poke => poke.pokeName),
 
+                "pokeState" => queryParams.SortOrder == "desc"
+                    ? query.OrderByDescending(poke => poke.pokeState)
+                    : query.OrderBy(poke => poke.pokeState),
+
                 _ => query.OrderBy(poke => poke.pokeNationalNumber)
             };
 
