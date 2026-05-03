@@ -1,0 +1,159 @@
+﻿@using RPD_WEB.Models
+@typeparam TItem
+
+<div class="crud-container">
+
+    <h2 class="title">⚡ @Title</h2>
+
+    <div class="toolbar">
+        <input placeholder="Search..." @bind="SearchText" />
+        <button @onclick="OnSearch">🔍</button>
+
+        <button @onclick="OnCreate">➕ Create</button>
+
+        <InputFile OnChange="HandleFile" />
+    </div>
+
+    @if (Editing != null)
+    {
+        <div class="form-box">
+            @FormTemplate(Editing)
+
+            <div class="form-actions">
+                <button @onclick="Save">💾 Save</button>
+                <button @onclick="Cancel">❌ Cancel</button>
+            </div>
+        </div>
+    }
+
+    @if (Data == null)
+    {
+        <p>Loading...</p>
+    }
+    else
+    {
+        <table class="crud-table">
+            <thead>
+                @HeaderTemplate
+            </thead>
+
+            <tbody>
+                @foreach (var item in Data.Items)
+                {
+                    <tr>
+                        @RowTemplate(item)
+
+                        <td class="actions">
+                            <button @onclick="() => Edit(item)">✏️</button>
+                            <button @onclick="() => Delete(item)">🗑️</button>
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+
+        <div class="pagination">
+            <button @onclick="Prev" disabled="@(Page == 1)">⬅ Prev</button>
+
+            <span>Page @Page / @(Data?.TotalPages ?? 1)</span>
+
+            <button @onclick="Next" disabled="@(Data != null && Page >= Data.TotalPages)">Next ➡</button>
+        </div>
+    }
+
+</div>
+
+@code {
+    [Parameter] public string Title { get; set; }
+
+    [Parameter] public Func<int, string, Task<PagedResult<TItem>>> LoadFunc { get; set; }
+    [Parameter] public Func<TItem, Task> CreateFunc { get; set; }
+    [Parameter] public Func<TItem, Task> UpdateFunc { get; set; }
+    [Parameter] public Func<TItem, Task> DeleteFunc { get; set; }
+
+    // IMPORT FILE (NEW)
+    [Parameter] public EventCallback<InputFileChangeEventArgs> OnImport { get; set; }
+
+    [Parameter] public RenderFragment<TItem> RowTemplate { get; set; }
+    [Parameter] public RenderFragment HeaderTemplate { get; set; }
+    [Parameter] public RenderFragment<TItem> FormTemplate { get; set; }
+
+    PagedResult<TItem> Data;
+    TItem Editing;
+
+    int Page = 1;
+    string SearchText = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    async Task Load()
+    {
+        Data = await LoadFunc(Page, SearchText);
+    }
+
+    void OnCreate()
+    {
+        Editing = Activator.CreateInstance<TItem>();
+    }
+
+    void Edit(TItem item)
+    {
+        // clone để tránh modify trực tiếp list
+        Editing = item;
+    }
+
+    async Task Save()
+    {
+        if (Editing == null) return;
+
+        if (CreateFunc != null)
+            await CreateFunc(Editing);
+        else if (UpdateFunc != null)
+            await UpdateFunc(Editing);
+
+        Editing = default;
+        await Load();
+    }
+
+    void Cancel()
+    {
+        Editing = default;
+    }
+
+    async Task Delete(TItem item)
+    {
+        await DeleteFunc(item);
+        await Load();
+    }
+
+    async Task OnSearch()
+    {
+        Page = 1;
+        await Load();
+    }
+
+    async Task Prev()
+    {
+        if (Page > 1)
+            Page--;
+
+        await Load();
+    }
+
+    async Task Next()
+    {
+        Page++;
+        await Load();
+    }
+
+    async Task HandleFile(InputFileChangeEventArgs e)
+    {
+        if (OnImport.HasDelegate)
+            await OnImport.InvokeAsync(e);
+
+        await Load();
+    }
+}

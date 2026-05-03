@@ -1,0 +1,40 @@
+﻿@page "/abilities"
+@using RPD_WEB.Models
+@inject ApiService Api
+
+<CrudTable TItem="Ability"
+           Title="Abilities"
+           LoadFunc="Api.GetAbilities"
+           CreateFunc="Api.CreateAbility"
+           UpdateFunc="Api.UpdateAbility"
+           DeleteFunc="DeleteAbility">
+
+    <HeaderTemplate>
+        <tr>
+            <th>Name</th>
+            <th>Description</th>
+            <th>Effect</th>
+            <th></th>
+        </tr>
+    </HeaderTemplate>
+
+    <RowTemplate Context="a">
+        <td>@a.AbName</td>
+        <td>@a.AbDescription</td>
+        <td>@a.AbEffect</td>
+    </RowTemplate>
+
+    <FormTemplate Context="a">
+        <input @bind="a.AbName" placeholder="Name" />
+        <input @bind="a.AbDescription" placeholder="Description" />
+        <input @bind="a.AbEffect" placeholder="Effect" />
+    </FormTemplate>
+
+</CrudTable>
+
+@code {
+    async Task DeleteAbility(Ability a)
+    {
+        await Api.DeleteAbility(a.AbID);
+    }
+}

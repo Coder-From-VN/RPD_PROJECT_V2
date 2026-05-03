@@ -1,0 +1,67 @@
+﻿@page "/login"
+@using RPD_WEB.Services
+@layout AuthLayout
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h3>🔴 Pokemon Admin</h3>
+
+<img src="https://raw.githubusercontent.com/PokeAPI/sprites/master/sprites/pokemon/25.png" />
+
+<div class="form">
+    <input placeholder="Username" @bind="username" />
+    <input placeholder="Password" type="password" @bind="password" />
+
+    <button @onclick="HandleLogin">Login</button>
+</div>
+
+<p class="error">@error</p>
+
+<style>
+    .form {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+        margin-top: 15px;
+    }
+
+    input {
+        padding: 8px;
+        border-radius: 6px;
+        border: 1px solid #ccc;
+    }
+
+    button {
+        padding: 10px;
+        border: none;
+        border-radius: 6px;
+        background: #ff3b3b;
+        color: white;
+        cursor: pointer;
+    }
+
+        button:hover {
+            background: #e22;
+        }
+
+    .error {
+        color: red;
+        margin-top: 10px;
+    }
+</style>
+
+@code {
+    string username;
+    string password;
+    string error;
+
+    async Task HandleLogin()
+    {
+        var ok = await Auth.Login(username, password);
+
+        if (ok)
+            Nav.NavigateTo("/pokemons");
+        else
+            error = "Login failed";
+    }
+}

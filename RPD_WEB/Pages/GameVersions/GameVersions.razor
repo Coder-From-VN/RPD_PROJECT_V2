@@ -1,0 +1,37 @@
+﻿@page "/gameversions"
+@using RPD_WEB.Models
+@inject ApiService Api
+
+<CrudTable TItem="GameVersion"
+           Title="🎮 Game Versions"
+           LoadFunc="Api.GetGameVersions"
+           CreateFunc="Api.CreateGameVersion"
+           UpdateFunc="Api.UpdateGameVersion"
+           DeleteFunc="DeleteGV">
+
+    <HeaderTemplate>
+        <tr>
+            <th>Name</th>
+            <th>Gen</th>
+            <th></th>
+        </tr>
+    </HeaderTemplate>
+
+    <RowTemplate Context="a">
+        <td>🎮 @a.GvName</td>
+        <td>Gen @a.GvGen</td>
+    </RowTemplate>
+
+    <FormTemplate Context="a">
+        <input @bind="a.GvName" placeholder="Name" />
+        <input type="number" @bind="a.GvGen" placeholder="Gen" />
+    </FormTemplate>
+
+</CrudTable>
+
+@code {
+    async Task DeleteGV(GameVersion a)
+    {
+        await Api.DeleteGameVersion(a.GvID);
+    }
+}

@@ -1,0 +1,40 @@
+﻿@inherits LayoutComponentBase
+
+<div class="login-bg">
+    <div class="overlay"></div>
+
+    <div class="login-card">
+        @Body
+    </div>
+</div>
+
+<style>
+    .login-bg {
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        position: relative;
+        background-image: url('https://images.alphacoders.com/581/581224.jpg');
+        background-size: cover;
+        background-position: center;
+    }
+
+    /* lớp tối nhẹ cho dễ nhìn */
+    .overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0,0,0,0.4);
+    }
+
+    /* card */
+    .login-card {
+        position: relative;
+        width: 320px;
+        padding: 25px;
+        background: rgba(255,255,255,0.95);
+        border-radius: 12px;
+        box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+        text-align: center;
+    }
+</style>

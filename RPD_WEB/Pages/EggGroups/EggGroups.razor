@@ -1,0 +1,34 @@
+﻿@page "/egggroups"
+@using RPD_WEB.Models
+@inject ApiService Api
+
+<CrudTable TItem="EggGroup"
+           Title="Egg Groups"
+           LoadFunc="Api.GetEggGroups"
+           CreateFunc="Api.CreateEggGroup"
+           UpdateFunc="Api.UpdateEggGroup"
+           DeleteFunc="DeleteEgg">
+
+    <HeaderTemplate>
+        <tr>
+            <th>Name</th>
+            <th></th>
+        </tr>
+    </HeaderTemplate>
+
+    <RowTemplate Context="a">
+        <td>🥚 @a.EgName</td>
+    </RowTemplate>
+
+    <FormTemplate Context="a">
+        <input @bind="a.EgName" placeholder="Name" />
+    </FormTemplate>
+
+</CrudTable>
+
+@code {
+    async Task DeleteEgg(EggGroup a)
+    {
+        await Api.DeleteEggGroup(a.EgID);
+    }
+}

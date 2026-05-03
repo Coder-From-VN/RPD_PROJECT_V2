@@ -1,0 +1,37 @@
+﻿@page "/growthrates"
+@using RPD_WEB.Models
+@inject ApiService Api
+
+<CrudTable TItem="GrowthRate"
+           Title="📈 Growth Rates"
+           LoadFunc="Api.GetGrowthRates"
+           CreateFunc="Api.CreateGrowthRate"
+           UpdateFunc="Api.UpdateGrowthRate"
+           DeleteFunc="DeleteGR">
+
+    <HeaderTemplate>
+        <tr>
+            <th>Name</th>
+            <th>Total Exp</th>
+            <th></th>
+        </tr>
+    </HeaderTemplate>
+
+    <RowTemplate Context="a">
+        <td>📈 @a.GrName</td>
+        <td>@a.GrTotalExp</td>
+    </RowTemplate>
+
+    <FormTemplate Context="a">
+        <input @bind="a.GrName" placeholder="Name" />
+        <input type="number" @bind="a.GrTotalExp" placeholder="Total Exp" />
+    </FormTemplate>
+
+</CrudTable>
+
+@code {
+    async Task DeleteGR(GrowthRate a)
+    {
+        await Api.DeleteGrowthRate(a.GrowthRateID);
+    }
+}

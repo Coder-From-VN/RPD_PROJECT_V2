@@ -33,7 +33,7 @@ namespace RPD_API.Controllers
             return result == null ? NotFound() : Ok(result);
         }
         
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostPokemons([FromBody] PostFullPokemonsDTO model)
         {
@@ -43,19 +43,19 @@ namespace RPD_API.Controllers
 
             return Ok(result);
         }
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPut("{pokeID}")]
         public async Task<IActionResult> PutPokemons(Guid pokeID, [FromBody] PutFullPokemonsDTO model)
         {
             return await _pokeFullService.PutFullPokemons(pokeID, model) ? NoContent() : NotFound();
         }
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpDelete("{pokeID}")]
         public async Task<IActionResult> DeletePokemons([FromRoute] Guid pokeID)
         {
             return await _pokemonService.DeletePokemons(pokeID) ? NoContent() : NotFound();
         }
-        //[Authorize(Roles = "Admin")]
+        [Authorize(Roles = "Admin")]
         [HttpPost("upload")]
         [Consumes("multipart/form-data")]
         public async Task<IActionResult> UploadPokemons(IFormFile pokemonFile)

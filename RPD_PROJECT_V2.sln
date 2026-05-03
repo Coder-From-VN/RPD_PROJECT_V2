@@ -7,6 +7,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPD_API", "RPD_API\RPD_API.
 EndProject
 Project("{E53339B2-1760-4266-BCC7-CA923CBCF16C}") = "docker-compose", "docker-compose.dcproj", "{81DDED9D-158B-E303-5F62-77A2896D2A5A}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "RPD_WEB", "RPD_WEB\RPD_WEB.csproj", "{FE9A7150-95C3-A30B-D908-C89A2B194F65}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -21,8 +23,15 @@ Global
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{81DDED9D-158B-E303-5F62-77A2896D2A5A}.Release|Any CPU.Build.0 = Release|Any CPU
+		{FE9A7150-95C3-A30B-D908-C89A2B194F65}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FE9A7150-95C3-A30B-D908-C89A2B194F65}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FE9A7150-95C3-A30B-D908-C89A2B194F65}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FE9A7150-95C3-A30B-D908-C89A2B194F65}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {FCA847D9-7616-461B-9D6C-26A20A761367}
 	EndGlobalSection
 EndGlobal

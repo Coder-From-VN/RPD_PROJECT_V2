@@ -1,0 +1,97 @@
+﻿@page "/stattype"
+@using RPD_WEB.Models
+@inject ApiService Api
+
+<h3>📊 Stat Types</h3>
+
+<button @onclick="ShowCreate">+ Create</button>
+
+@if (editing != null)
+{
+    <div class="form-box">
+        <input @bind="editing.StName" placeholder="Name" />
+
+        <button @onclick="Save">Save</button>
+        <button @onclick="Cancel">Cancel</button>
+    </div>
+}
+
+@if (data == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var s in data)
+            {
+                <tr>
+                    <td>📊 @s.StName</td>
+                    <td>
+                        <button @onclick="() => Edit(s)">Edit</button>
+                        <button @onclick="() => Delete(s.StID)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<StatType> data;
+    StatType editing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    async Task Load()
+    {
+        data = await Api.GetStatTypes();
+    }
+
+    void ShowCreate()
+    {
+        editing = new StatType();
+    }
+
+    void Edit(StatType s)
+    {
+        editing = new StatType
+        {
+            StID = s.StID,
+            StName = s.StName
+        };
+    }
+
+    async Task Save()
+    {
+        if (editing.StID == null)
+            await Api.CreateStatType(editing);
+        else
+            await Api.UpdateStatType(editing);
+
+        editing = null;
+        await Load();
+    }
+
+    void Cancel()
+    {
+        editing = null;
+    }
+
+    async Task Delete(Guid id)
+    {
+        await Api.DeleteStatType(id);
+        await Load();
+    }
+}

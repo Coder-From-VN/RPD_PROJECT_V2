@@ -1,0 +1,110 @@
+﻿@page "/types"
+@using RPD_WEB.Models
+@inject ApiService Api
+
+<h3>⚡ Types</h3>
+
+<button @onclick="ShowCreate">+ Create</button>
+
+<InputFile OnChange="HandleFile" />
+
+@if (editing != null)
+{
+    <div class="form-box">
+        <input @bind="editing.TypesName" placeholder="Type name" />
+
+        <button @onclick="Save">Save</button>
+        <button @onclick="Cancel">Cancel</button>
+    </div>
+}
+
+@if (data == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Name</th>
+                <th>Pokemons</th>
+                <th>Moves</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var t in data)
+            {
+                <tr>
+                    <td>⚡ @t.TypesName</td>
+                    <td>
+                        <button @onclick="() => Edit(t)">Edit</button>
+                        <button @onclick="() => Delete(t.TypesID)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+@code {
+    List<RPD_WEB.Models.Types> data = new();
+    RPD_WEB.Models.Types editing;
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    async Task Load()
+    {
+        data =  await Api.GetTypes();
+    }
+
+    void ShowCreate()
+    {
+        editing = new RPD_WEB.Models.Types();
+    }
+
+    void Edit(RPD_WEB.Models.Types t)
+    {
+        editing = new RPD_WEB.Models.Types
+        {
+            TypesID = t.TypesID,
+            TypesName = t.TypesName
+        };
+    }
+
+    async Task Save()
+    {
+        if (editing.TypesID == Guid.Empty)
+            await Api.CreateType(editing);
+        else
+            await Api.UpdateType(editing);
+
+        editing = null;
+        await Load();
+    }
+
+    void Cancel()
+    {
+        editing = null;
+    }
+
+    async Task Delete(Guid id)
+    {
+        await Api.DeleteType(id);
+        await Load();
+    }
+
+    async Task HandleFile(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var stream = file.OpenReadStream();
+
+        await Api.UploadTypeFile(stream, file.Name);
+        await Load();
+    }
+}

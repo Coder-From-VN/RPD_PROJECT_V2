@@ -1,0 +1,195 @@
+﻿@page "/pokemons"
+@using RPD_WEB.Models
+@using RPD_WEB.Services
+@inject ApiService Api
+@inject AuthService Auth
+@inject NavigationManager Nav
+
+<h2>⚡ Pokémon Manager</h2>
+
+<input placeholder="Search..." @bind="search" />
+<button @onclick="Load">Search</button>
+
+<button @onclick="CreateNew">+ Create</button>
+
+<InputFile OnChange="HandleFile" />
+
+<hr />
+
+@if (data == null)
+{
+    <p>Loading...</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>No</th>
+                <th>Name</th>
+                <th>ID</th>
+                <th></th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var p in data.Items)
+            {
+                <tr>
+                    <td>@p.pokeNationalNumber</td>
+                    <td>@p.pokeName</td>
+                    <td>@p.pokeID</td>
+                    <td>
+                        <button @onclick="() => Edit(p.pokeID)">Edit</button>
+                        <button @onclick="() => Delete(p.pokeID)">Delete</button>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+
+    <button @onclick="Prev" disabled="@(page <= 1)">Prev</button>
+    <span>@(page) / @(data?.TotalPages ?? 1)</span>
+    <button @onclick="Next" disabled="@(page >= data.TotalPages)">Next</button>
+}
+
+@if (editing != null)
+{
+    <div class="card p-3 mt-3">
+        <h4>Pokemon Form</h4>
+
+        <input placeholder="Name" @bind="editing.pokeName" />
+        <input placeholder="Number" type="number" @bind="editing.pokeNationalNumber" />
+        <input placeholder="Species" @bind="editing.pokeSpecies" />
+        <input placeholder="Description" @bind="editing.pokeDescription" />
+
+        <br /><br />
+
+        <button @onclick="Save">Save</button>
+        <button @onclick="Cancel">Cancel</button>
+    </div>
+}
+
+@code {
+    PagedResult<PokemonListDto> data;
+
+    PokemonForm? editing;
+
+    int page = 1;
+    string search = "";
+
+    protected override async Task OnInitializedAsync()
+    {
+        await Load();
+    }
+
+    async Task Load()
+    {
+        data = await Api.GetPokemons(page, search);
+    }
+
+    void CreateNew()
+    {
+        editing = new PokemonForm
+        {
+            pokeID = Guid.Empty
+        };
+    }
+
+    void Cancel()
+    {
+        editing = null;
+    }
+
+    async Task Save()
+    {
+        if (editing == null) return;
+
+        if (editing.pokeID == Guid.Empty)
+            await Api.CreatePokemon(editing.ToCreateDto());
+        else
+            await Api.UpdatePokemon(editing.pokeID, editing.ToUpdateDto());
+
+        editing = null;
+        await Load();
+    }
+
+    async Task Edit(Guid id)
+    {
+        var p = await Api.GetPokemonById(id);
+        if (p == null) return;
+
+        editing = new PokemonForm
+        {
+            pokeID = p.pokeID,
+            pokeName = p.pokeName,
+            pokeNationalNumber = p.pokeNationalNumber,
+            pokeSpecies = p.pokeSpecies,
+            pokeDescription = p.pokeDescription
+        };
+    }
+
+    async Task Delete(Guid id)
+    {
+        await Api.DeletePokemon(id);
+        await Load();
+    }
+
+    async Task Prev()
+    {
+        if (page > 1)
+        {
+            page--;
+            await Load();
+        }
+    }
+
+    async Task Next()
+    {
+        if (data != null && page < data.TotalPages)
+        {
+            page++;
+            await Load();
+        }
+    }
+
+    async Task HandleFile(InputFileChangeEventArgs e)
+    {
+        var file = e.File;
+        var stream = file.OpenReadStream();
+
+        await Api.UploadPokemon(stream, file.Name);
+        await Load();
+    }
+
+    class PokemonForm
+    {
+        public Guid pokeID { get; set; }
+        public int pokeNationalNumber { get; set; }
+        public string? pokeName { get; set; }
+        public string? pokeDescription { get; set; }
+        public string? pokeSpecies { get; set; }
+
+        public PostFullPokemonsDTO ToCreateDto()
+        {
+            return new PostFullPokemonsDTO
+            {
+                pokeNationalNumber = pokeNationalNumber,
+                pokeName = pokeName,
+                pokeDescription = pokeDescription,
+                pokeSpecies = pokeSpecies
+            };
+        }
+
+        public PutFullPokemonsDTO ToUpdateDto()
+        {
+            return new PutFullPokemonsDTO
+            {
+                pokeNationalNumber = pokeNationalNumber,
+                pokeName = pokeName,
+                pokeDescription = pokeDescription,
+                pokeSpecies = pokeSpecies
+            };
+        }
+    }
+}

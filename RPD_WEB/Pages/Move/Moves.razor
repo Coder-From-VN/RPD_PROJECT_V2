@@ -1,0 +1,53 @@
+﻿@page "/moves"
+@using RPD_WEB.Models
+@inject ApiService Api
+
+<CrudTable TItem="Move"
+           Title="⚔️ Moves"
+           LoadFunc="Api.GetMoves"
+           CreateFunc="Api.CreateMove"
+           UpdateFunc="Api.UpdateMove"
+           DeleteFunc="DeleteMove">
+
+    <HeaderTemplate>
+        <tr>
+            <th>Name</th>
+            <th>Class</th>
+            <th>Power</th>
+            <th>Acc</th>
+            <th>PP</th>
+            <th>Priority</th>
+            <th>Type</th>
+            <th></th>
+        </tr>
+    </HeaderTemplate>
+
+    <RowTemplate Context="m">
+        <td>⚔️ @m.MoveName</td>
+        <td>@m.MoveDamageClass</td>
+        <td>@m.MovePower</td>
+        <td>@m.MoveAccuracy</td>
+        <td>@m.MovePP</td>
+        <td>@m.MovePriority</td>
+        <td>🔥 @m.TypesName</td>
+    </RowTemplate>
+
+    <FormTemplate Context="m">
+        <input @bind="m.MoveName" placeholder="Name" />
+        <input @bind="m.MoveDamageClass" placeholder="Class" />
+        <input type="number" @bind="m.MovePower" placeholder="Power" />
+        <input type="number" @bind="m.MoveAccuracy" placeholder="Accuracy" />
+        <input type="number" @bind="m.MovePP" placeholder="PP" />
+        <input type="number" @bind="m.MovePriority" placeholder="Priority" />
+        <input @bind="m.MoveDescription" placeholder="Description" />
+        <input @bind="m.TypesID" placeholder="TypeID" />
+    </FormTemplate>
+
+</CrudTable>
+
+@code {
+    async Task DeleteMove(Move m)
+    {
+        await Api.DeleteMove(m.MoveID);
+    }
+}
