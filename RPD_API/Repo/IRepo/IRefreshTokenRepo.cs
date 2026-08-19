@@ -2,7 +2,7 @@
 
 namespace RPD_API.Repo.IRepo
 {
-    public interface IRefreshTokenRepo
+    public interface IRefreshTokenRepo : IBaseRepository
     {
         Task AddAsync(RefreshToken token);
         Task<RefreshToken?> GetValidAsync(string token);

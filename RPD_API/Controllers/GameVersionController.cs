@@ -28,17 +28,13 @@ namespace RPD_API.Controllers
         [HttpGet("{gvID:guid}")]
         public async Task<IActionResult> GetGameVersionById(Guid gvID)
         {
-            var gameVersion = await _gvSer.GetGameVersionById(gvID);
-            return gameVersion == null ? NotFound() : Ok(gameVersion);
+            return Ok(await _gvSer.GetGameVersionById(gvID));
         }
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostGameVersion(PostGameVersionDTO model)
         {
-            var result = await _gvSer.AddGameVersion(model);
-            if (result == null)
-                return Conflict("Ability already exists.");
-            return Ok(result);
+            return Ok(await _gvSer.AddGameVersion(model));
         }
         [Authorize(Roles = "Admin")]
         [HttpPut("{gvID}")]

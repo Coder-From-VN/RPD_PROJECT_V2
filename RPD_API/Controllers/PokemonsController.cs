@@ -29,19 +29,14 @@ namespace RPD_API.Controllers
         [HttpGet("{pokeID}")]
         public async Task<IActionResult> GetPokemonById(Guid pokeID)
         {
-            var result = await _pokemonService.GetPokemonsById(pokeID);
-            return result == null ? NotFound() : Ok(result);
+            return Ok(await _pokemonService.GetPokemonsById(pokeID));
         }
-        
+
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostPokemons([FromBody] PostFullPokemonsDTO model)
         {
-            var result = await _pokeFullService.PostFullPokemons(model);
-            if (result == null)
-                return Conflict("Pokemon already exists.");
-
-            return Ok(result);
+            return Ok(await _pokeFullService.PostFullPokemons(model));
         }
         [Authorize(Roles = "Admin")]
         [HttpPut("{pokeID}")]

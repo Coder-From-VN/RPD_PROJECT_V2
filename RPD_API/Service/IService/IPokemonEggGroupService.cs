@@ -1,9 +1,8 @@
 ﻿using RPD_API.DTO;
-using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Service.IService
 {
-    public interface IPokemonEggGroupService : IBaseRepository
+    public interface IPokemonEggGroupService : IBaseService
     {
         Task PokemonEggGroupAddOn(Guid pokeID, Guid egID);
         Task<bool> PostPokemonEggGroup(Guid pokeID, Guid egID);

@@ -21,10 +21,7 @@ namespace RPD_API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostPokemonMove(Guid pokeId, List<PostPokemonMoveListItem> model)
         {
-            var result = await _pmSer.AddPokemonMove(pokeId,model);
-            if (result == null)
-                return Conflict("Move already exists.");
-
+            var result = await _pmSer.AddPokemonMove(pokeId, model);
             return Ok($"ADD {result} move to Pokemon");
         }
         [Authorize(Roles = "Admin")]

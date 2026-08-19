@@ -42,7 +42,7 @@ namespace RPD_API.Service
             }
             else
             {
-                throw new BadRequestException("Ability Post Fail");
+                throw new BadRequestException("Failed to create ability");
             }
 
             return _mapper.Map<AbilitiesDTO?>(newAbilities);
@@ -88,7 +88,7 @@ namespace RPD_API.Service
             }
             else
             {
-                throw new BadRequestException("something worng with abilities list");
+                throw new BadRequestException("Something went wrong importing the abilities list");
             }
 
             return abilities.Count;
@@ -106,38 +106,12 @@ namespace RPD_API.Service
         public async Task<PagedResult<AbilitiesDTO>> GetAllAbilities(QueryParams queryParams)
         {
             var cacheKey = $"abilities:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}";
-            try
-            {
-                var cached = await _cache.GetStringAsync(cacheKey);
 
-                if (!string.IsNullOrEmpty(cached))
-                {
-                    return JsonSerializer.Deserialize<PagedResult<AbilitiesDTO>>(cached)!;
-                }
-            }
-            catch(Exception ex)
-            {
-                Log.Error($"cache read Fail {ex}");
-            }
-            
-
-            var result = await GetPagedAsync<Abilities, AbilitiesDTO>(
-                queryParams,
-                _uow.Abilities.GetAllAsync
+            return await GetOrSetCacheAsync(
+                cacheKey,
+                () => GetPagedAsync<Abilities, AbilitiesDTO>(queryParams, _uow.Abilities.GetAllAsync),
+                TimeSpan.FromMinutes(3)
             );
-
-            try
-            {
-                await _cache.SetStringAsync(cacheKey,JsonSerializer.Serialize(result), 
-                    new DistributedCacheEntryOptions {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-                    });
-            }
-            catch(Exception ex)
-            {
-                Log.Error($"Cache write Fail {ex}");
-            }
-            return result;
         }
 
         public async Task<bool> PutAbilities(Guid abID, PutAbilitiesDTO model)

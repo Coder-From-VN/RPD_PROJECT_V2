@@ -1,9 +1,8 @@
 ﻿using RPD_API.DTO;
-using RPD_API.Repo.IRepo;
 
 namespace RPD_API.Service.IService
 {
-    public interface IPokemonAbilitiesService : IBaseRepository
+    public interface IPokemonAbilitiesService : IBaseService
     {
         Task PokemonAbilitiesAddOn(Guid pokeID, PostPokemonAbilitiesDTO model);
         Task<bool> AddPokemonAbilities(Guid pokeID,PostPokemonAbilitiesDTO model);

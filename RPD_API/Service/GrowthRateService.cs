@@ -93,38 +93,12 @@ namespace RPD_API.Service
         public async Task<PagedResult<GrowthRateDTO>> GetAllGrowthRate(QueryParams queryParams)
         {
             var cacheKey = $"GrowthRate:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}";
-            try
-            {
-                var cached = await _cache.GetStringAsync(cacheKey);
 
-                if (!string.IsNullOrEmpty(cached))
-                {
-                    return JsonSerializer.Deserialize<PagedResult<GrowthRateDTO>>(cached)!;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"cache read Fail {ex}");
-
-            }
-            var result = await GetPagedAsync<GrowthRate, GrowthRateDTO>(
-                queryParams,
-                _uow.GrowthRates.GetAllAsync
+            return await GetOrSetCacheAsync(
+                cacheKey,
+                () => GetPagedAsync<GrowthRate, GrowthRateDTO>(queryParams, _uow.GrowthRates.GetAllAsync),
+                TimeSpan.FromMinutes(3)
             );
-
-            try
-            {
-                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(result),
-                    new DistributedCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-                    });
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"cache write Fail {ex}");
-            }
-            return result;
         }
 
         public async Task<GrowthRateDTO> GetGrowthRateById(Guid growthRateID)

@@ -3,6 +3,8 @@ using Microsoft.Extensions.Caching.Distributed;
 using RPD_API.Caching;
 using RPD_API.Pagination;
 using RPD_API.UnitOfWork;
+using Serilog;
+using System.Text.Json;
 
 namespace RPD_API.Service
 {
@@ -37,6 +39,41 @@ namespace RPD_API.Service
                 TotalCount = paged.TotalCount,
                 Items = _mapper.Map<List<TDto>>(paged.Items)
             };
+        }
+
+        protected async Task<T> GetOrSetCacheAsync<T>(
+            string cacheKey,
+            Func<Task<T>> factory,
+            TimeSpan expiration)
+        {
+            try
+            {
+                var cached = await _cache.GetStringAsync(cacheKey);
+                if (!string.IsNullOrEmpty(cached))
+                {
+                    return JsonSerializer.Deserialize<T>(cached)!;
+                }
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Cache read failed for key {cacheKey}: {ex}");
+            }
+
+            var result = await factory();
+
+            try
+            {
+                await _cache.SetStringAsync(
+                    cacheKey,
+                    JsonSerializer.Serialize(result),
+                    new DistributedCacheEntryOptions { AbsoluteExpirationRelativeToNow = expiration });
+            }
+            catch (Exception ex)
+            {
+                Log.Error($"Cache write failed for key {cacheKey}: {ex}");
+            }
+
+            return result;
         }
     }
 }

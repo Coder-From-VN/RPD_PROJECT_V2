@@ -30,37 +30,19 @@ namespace RPD_API.Service
         {
             var cacheKey = $"Pokemons:pokeid:{pokeID}";
 
-            try
-            {
-                var cached = await _cache.GetStringAsync(cacheKey);
-
-                if (cached != null)
+            return await GetOrSetCacheAsync(
+                cacheKey,
+                async () =>
                 {
-                    return JsonSerializer.Deserialize<PokemonDetailDTO>(cached)!;
-                }
-            }
-            catch (Exception ex) { Log.Error($"cache read Fail {ex}"); }
+                    var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
 
-            var pokemon = await _uow.Pokemons.GetByIdAsync(pokeID);
+                    if (pokemon == null)
+                        throw new NotFoundException($"Pokemons with id {pokeID} not found");
 
-            if (pokemon == null)
-                throw new NotFoundException($"Pokemons with id {pokeID} not found");
-
-            var result = _mapper.Map<PokemonDetailDTO>(pokemon);
-
-            try
-            {
-                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(result),
-                    new DistributedCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-                    });
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"cache write Fail {ex}");
-            }
-            return result;
+                    return _mapper.Map<PokemonDetailDTO>(pokemon);
+                },
+                TimeSpan.FromMinutes(3)
+            );
         }
 
         public async Task<bool> DeletePokemons(Guid pokeID)
@@ -108,35 +90,12 @@ namespace RPD_API.Service
                             $":Search:{query.Search}" +
                             $":SortBy:{query.SortBy}" +
                             $":SortOrder:{query.SortOrder}";
-            try
-            {
-                var cached = await _cache.GetStringAsync(cacheKey);
 
-                if (cached != null)
-                {
-                    return JsonSerializer.Deserialize<PagedResult<PokemonsDTO>>(cached)!;
-                }
-            }
-            catch (Exception ex) { Log.Error($"cache read Fail {ex}"); }
-
-            var result = await GetPagedAsync<Pokemons, PokemonsDTO>(
-                query,
-                _uow.Pokemons.GetAllAsync
+            return await GetOrSetCacheAsync(
+                cacheKey,
+                () => GetPagedAsync<Pokemons, PokemonsDTO>(query, _uow.Pokemons.GetAllAsync),
+                TimeSpan.FromMinutes(3)
             );
-
-            try
-            {
-                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(result),
-                    new DistributedCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-                    });
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"cache write Fail {ex}");
-            }
-            return result;
         }
 
         //call at pokeapplication

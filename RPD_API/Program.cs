@@ -7,10 +7,6 @@ using Microsoft.OpenApi.Models;
 using RPD_API.Caching;
 using RPD_API.Extensions;
 using RPD_API.Models;
-using RPD_API.Repo;
-using RPD_API.Repo.IRepo;
-using RPD_API.Service;
-using RPD_API.Service.IService;
 using RPD_API.UnitOfWork;
 using StackExchange.Redis;
 using System.Security.Claims;
@@ -24,12 +20,9 @@ builder.Services.AddControllers();
 //Add autoMapper
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
 
-builder.Services.AddRepositories();
 builder.Services.AddServices();
 
 builder.Services.AddScoped<IUnitOfWorkRepo, UnitOfWorkRepo>();
-builder.Services.AddScoped<ITrainersService, TrainersService>();
-builder.Services.AddScoped<IRefreshTokenRepo, RefreshTokenRepo>();
 builder.Services.AddScoped<ICacheService, RedisCacheService>();
 
 builder.Services.AddEndpointsApiExplorer();
@@ -86,9 +79,14 @@ builder.Services.AddSingleton<IConnectionMultiplexer>(sp =>
     return ConnectionMultiplexer.Connect(configuration);
 });
 
+var firebaseCredentialPath = Path.Combine(
+    AppContext.BaseDirectory,
+    builder.Configuration["Firebase:CredentialPath"] ?? "firebase/rpd-fbsv-firebase.json"
+);
+
 FirebaseApp.Create(new AppOptions
 {
-    Credential = GoogleCredential.FromFile("firebase/rpd-fbsv-firebase.json")
+    Credential = GoogleCredential.FromFile(firebaseCredentialPath)
 });
 
 builder.Services
@@ -112,19 +110,19 @@ builder.Services
 
 builder.Services.AddAuthorization();
 
+var allowedOrigins = builder.Configuration
+    .GetSection("Cors:AllowedOrigins")
+    .Get<string[]>() ?? Array.Empty<string>();
+
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowFrontend",
         policy =>
         {
             policy
-                .WithOrigins("http://localhost:7185")
-                .WithOrigins("http://localhost:7293")
+                .WithOrigins(allowedOrigins)
                 .AllowAnyMethod()
-                .AllowAnyHeader()
-                .AllowAnyOrigin()
-                .AllowAnyHeader()
-                .AllowAnyMethod(); ;
+                .AllowAnyHeader();
         });
 });
 

@@ -23,11 +23,9 @@ namespace RPD_API.Controllers
         [HttpPost]
         public async Task<IActionResult> PostEvolutionChart(PostEvolutionChartDTO model)
         {
-            var result = await _evoSer.PostEvolutionChart(model);
-            if (result == null)
-                return Conflict("Move already exists.");
-
-            return Ok(result);
+            return await _evoSer.PostEvolutionChart(model)
+                ? Ok()
+                : BadRequest("Failed to create evolution chart entry.");
         }
 
         [Authorize(Roles = "Admin")]

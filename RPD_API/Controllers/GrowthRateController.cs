@@ -26,18 +26,13 @@ namespace RPD_API.Controllers
         [HttpGet("{growthRateID}")]
         public async Task<IActionResult> GetGrowthRateById(Guid growthRateID)
         {
-            var result = await _grSer.GetGrowthRateById(growthRateID);
-            return result == null ? NotFound() : Ok(result);
+            return Ok(await _grSer.GetGrowthRateById(growthRateID));
         }
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostGrowthRate(PostGrowthRateDTO model)
         {
-            var result = await _grSer.AddGrowthRate(model);
-            if (result == null)
-                return Conflict("Ability already exists.");
-
-            return Ok(result);
+            return Ok(await _grSer.AddGrowthRate(model));
         }
         [Authorize(Roles = "Admin")]
         [HttpPut("{growthRateID}")]

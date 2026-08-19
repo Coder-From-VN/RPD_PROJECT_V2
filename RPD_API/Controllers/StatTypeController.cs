@@ -27,18 +27,13 @@ namespace RPD_API.Controllers
         [HttpGet("{statTypeID}")]
         public async Task<IActionResult> GetStatTypeById(Guid statTypeID)
         {
-            var result = await _stSer.GetStatTypeById(statTypeID);
-            return result == null ? NotFound() : Ok(result);
+            return Ok(await _stSer.GetStatTypeById(statTypeID));
         }
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostStatType(PostStatTypeDTO model)
         {
-            var result = await _stSer.AddStatType(model);
-            if (result == null)
-                return Conflict("Ability already exists.");
-
-            return Ok(result);
+            return Ok(await _stSer.AddStatType(model));
         }
         [Authorize(Roles = "Admin")]
         [HttpPut("{statTypeID}")]

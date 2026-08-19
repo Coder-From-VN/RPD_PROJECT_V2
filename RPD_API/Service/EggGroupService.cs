@@ -100,40 +100,14 @@ namespace RPD_API.Service
         }
 
         public async Task<PagedResult<EggGroupDTO>> GetAllEggGroup(QueryParams queryParams)
-        { 
+        {
             var cacheKey = $"EggGroup:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}";
-            try
-            {
-                var cached = await _cache.GetStringAsync(cacheKey);
 
-                if (!string.IsNullOrEmpty(cached))
-                {
-                    return JsonSerializer.Deserialize<PagedResult<EggGroupDTO>>(cached)!;
-                }
-            }
-            catch(Exception ex)
-            {
-                Log.Error($"cache Save Fail {ex}");
-            }
-
-            var result = await GetPagedAsync<EggGroup, EggGroupDTO>(
-                queryParams,
-                _uow.EggGroups.GetAllAsync
+            return await GetOrSetCacheAsync(
+                cacheKey,
+                () => GetPagedAsync<EggGroup, EggGroupDTO>(queryParams, _uow.EggGroups.GetAllAsync),
+                TimeSpan.FromMinutes(3)
             );
-
-            try
-            {
-                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(result),
-                    new DistributedCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-                    });
-            }
-            catch(Exception ex)
-            {
-                Log.Error($"cache write Fail {ex}");
-            }
-            return result;
         }
 
         public async Task<EggGroupDTO> GetEggGroupById(Guid egID)

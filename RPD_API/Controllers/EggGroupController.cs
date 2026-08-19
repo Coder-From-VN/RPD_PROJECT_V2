@@ -26,20 +26,14 @@ namespace RPD_API.Controllers
         [HttpGet("{egID:guid}")]
         public async Task<IActionResult> GetEggGroupById(Guid egID)
         {
-            var result = await _egSer.GetEggGroupById(egID);
-            return result == null ? NotFound() : Ok(result);
+            return Ok(await _egSer.GetEggGroupById(egID));
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostEggGroup(PostEggGroupDTO model)
         {
-
-            var result = await _egSer.AddEggGroup(model);
-            if (result == null)
-                return Conflict("Ability already exists.");
-            return Ok(result);
-
+            return Ok(await _egSer.AddEggGroup(model));
         }
 
         [Authorize(Roles = "Admin")]

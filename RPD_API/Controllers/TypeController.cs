@@ -26,20 +26,13 @@ namespace RPD_API.Controllers
         [HttpGet("{typesID}")]
         public async Task<IActionResult> GetTypesById(Guid typesID)
         {
-            var types = await _typesSer.GetTypesById(typesID);
-            return types == null ? NotFound() : Ok(types);
+            return Ok(await _typesSer.GetTypesById(typesID));
         }
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostTypes(PostTypesDTO model)
         {
-
-            var newTypes = await _typesSer.AddTypes(model);
-            if (newTypes == null)
-                return Conflict("Ability already exists.");
-
-            return Ok(newTypes);
-
+            return Ok(await _typesSer.AddTypes(model));
         }
         [Authorize(Roles = "Admin")]
         [HttpPut("{typesID}")]

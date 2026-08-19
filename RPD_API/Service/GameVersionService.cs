@@ -66,37 +66,12 @@ namespace RPD_API.Service
         public async Task<PagedResult<GameVersionDTO>> GetAllGameVersion(QueryParams queryParams)
         {
             var cacheKey = $"GameVersions:all:page:{queryParams.PageNumber}:size:{queryParams.PageSize}";
-            try
-            {
-                var cached = await _cache.GetStringAsync(cacheKey);
 
-                if (!string.IsNullOrEmpty(cached))
-                {
-                    return JsonSerializer.Deserialize<PagedResult<GameVersionDTO>>(cached)!;
-                }
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"cache conect Fail {ex}");
-
-            }
-            var result = await GetPagedAsync<GameVersion, GameVersionDTO>(
-                queryParams,
-                _uow.GameVersions.GetAllAsync
+            return await GetOrSetCacheAsync(
+                cacheKey,
+                () => GetPagedAsync<GameVersion, GameVersionDTO>(queryParams, _uow.GameVersions.GetAllAsync),
+                TimeSpan.FromMinutes(3)
             );
-            try
-            {
-                await _cache.SetStringAsync(cacheKey, JsonSerializer.Serialize(result),
-                    new DistributedCacheEntryOptions
-                    {
-                        AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(3)
-                    });
-            }
-            catch (Exception ex)
-            {
-                Log.Error($"cache write Fail {ex}");
-            }
-            return result;
         }
 
         public async Task<GameVersionDTO> GetGameVersionById(Guid gvID)

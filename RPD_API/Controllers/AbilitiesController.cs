@@ -27,21 +27,14 @@ namespace RPD_API.Controllers
         [HttpGet("{abID:guid}")]
         public async Task<IActionResult> GetAbilities(Guid abID)
         {
-            var result = await _abSer.GetAbilitiesById(abID);
-            return result == null ? NotFound() : Ok(result);
+            return Ok(await _abSer.GetAbilitiesById(abID));
         }
 
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostAbilities(PostAbilitiesDTO model)
         {
-
-            var result = await _abSer.PostAbilities(model);
-            if (result == null)
-                return Conflict("Ability already exists.");
-
-            return Ok(result);
-
+            return Ok(await _abSer.PostAbilities(model));
         }
 
         [Authorize(Roles = "Admin")]

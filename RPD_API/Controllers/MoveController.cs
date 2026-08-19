@@ -26,18 +26,13 @@ namespace RPD_API.Controllers
         [HttpGet("{moveID}")]
         public async Task<IActionResult> GetMoveById(Guid moveID)
         {
-            var result = await _moveSer.GetMoveById(moveID);
-            return result == null ? NotFound() : Ok(result);
+            return Ok(await _moveSer.GetMoveById(moveID));
         }
         [Authorize(Roles = "Admin")]
         [HttpPost]
         public async Task<IActionResult> PostImageLink(PostMoveDTO model)
         {
-            var result = await _moveSer.AddMove(model);
-            if (result == null)
-                return Conflict("Move already exists.");
-
-            return Ok(result);
+            return Ok(await _moveSer.AddMove(model));
         }
         [Authorize(Roles = "Admin")]
         [HttpPut("{moveID}")]
