@@ -53,8 +53,40 @@ maintainability, testability, and scalability.
     -   Unit of Work
     -   Service & Application Service Layers
 -   **Pagination & filtering**
--   **Caching** : Redis + Docker
+-   **Caching** : Redis (local, via Docker) — runs fully offline
 -   **File Upload Input** (.cvs)
+------------------------------------------------------------------------
+
+## ⚙️ Configuration & Setup
+
+The API runs **entirely offline** — no cloud database or cache is required.
+
+**Prerequisites**
+-   SQL Server (local instance or Express/LocalDB)
+-   Redis, running locally (see below)
+-   A Firebase service account key placed at `RPD_API/firebase/rpd-fbsv-firebase.json` (gitignored, not included in the repo)
+
+**Secrets**
+`RPD_API/appsettings.json` ships with empty placeholders for anything sensitive and is gitignored. For local development, set the real values with [.NET User Secrets](https://learn.microsoft.com/aspnet/core/security/app-secrets) instead of editing that file:
+
+```bash
+cd RPD_API
+dotnet user-secrets set "ConnectionStrings:RPD_API_DB_CS" "<your SQL Server connection string>"
+dotnet user-secrets set "Jwt:Key" "<a random 32+ character secret>"
+dotnet user-secrets set "AdminAuth:Username" "<admin username>"
+dotnet user-secrets set "AdminAuth:Password" "<admin password>"
+```
+
+**Redis**
+`Redis:ConnectionString` defaults to `localhost:6379`. Start a local instance with:
+
+```bash
+docker compose up redis
+```
+
+**Running via Docker Compose**
+`docker compose up` builds and runs the API container, mounts your local User Secrets automatically, and points Redis at the `redis` service (`redis:6379`) — no extra configuration needed.
+
 ------------------------------------------------------------------------
 
 ## 🏗 Architecture Overview
